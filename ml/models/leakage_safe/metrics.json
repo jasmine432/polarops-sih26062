@@ -1,0 +1,75 @@
+{
+    "project": "Integrated Polar Expedition Logistics and Asset Management System",
+    "ml_task": "Inventory Demand Prediction",
+    "target": "future_7day_requirement",
+    "forecast_horizon_days": 7,
+    "feature_count": 23,
+    "training_data": "Synthetic operational inventory prototype data",
+    "weather_data": "NCPOR weather datasets used as environmental/context features",
+    "model_selection_metric": "Validation RMSE",
+    "selected_model": "Gradient Boosting",
+    "model_version": "inventory_demand_gb_v1",
+    "baseline": {
+        "model": "Category-Mean Baseline",
+        "validation": {
+            "mae": 15.559805,
+            "rmse": 26.758675,
+            "r2": 0.662224
+        },
+        "test": {
+            "mae": 15.625133,
+            "rmse": 26.695018,
+            "r2": 0.662865
+        }
+    },
+    "models": {
+        "Linear Regression": {
+            "validation": {
+                "mae": 3.794059,
+                "rmse": 6.878604,
+                "r2": 0.97768
+            },
+            "test": {
+                "mae": 3.584303,
+                "rmse": 6.600523,
+                "r2": 0.979389
+            }
+        },
+        "Random Forest": {
+            "validation": {
+                "mae": 3.634679,
+                "rmse": 6.914264,
+                "r2": 0.977448
+            },
+            "test": {
+                "mae": 3.686394,
+                "rmse": 7.063593,
+                "r2": 0.976396
+            }
+        },
+        "Gradient Boosting": {
+            "validation": {
+                "mae": 3.647051,
+                "rmse": 6.657239,
+                "r2": 0.979093
+            },
+            "test": {
+                "mae": 3.670498,
+                "rmse": 6.780681,
+                "r2": 0.978248
+            }
+        }
+    },
+    "leakage_excluded": [
+        "consumed_quantity",
+        "closing_stock",
+        "expedition_id"
+    ],
+    "notes": [
+        "Operational inventory data are synthetic/prototype data.",
+        "NCPOR weather data are used as environmental/context features.",
+        "The test set was not used for model selection.",
+        "Model selection was performed using validation RMSE.",
+        "R2 is a goodness-of-fit metric and is not prediction accuracy."
+    ]
+}

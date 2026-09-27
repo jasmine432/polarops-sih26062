@@ -1,0 +1,12 @@
+POLAR EXPEDITION INVENTORY ML MODEL
+============================================================
+
+Best model: Gradient Boosting
+Target: future_7day_requirement
+Model selection metric: Validation RMSE
+Training data type: Synthetic operational prototype data
+Weather data source: NCPOR weather datasets
+Forecast horizon: 7 days
+expedition_id used as feature: NO
+consumed_quantity used as feature: NO
+closing_stock used as feature: NO

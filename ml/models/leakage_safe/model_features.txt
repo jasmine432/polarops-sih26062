@@ -1,0 +1,37 @@
+LEAKAGE-SAFE INVENTORY DEMAND MODEL
+============================================================
+
+Target:
+future_7day_requirement
+
+Model features:
+----------------------------------------
+01. item_id
+02. item_name
+03. item_category
+04. station
+05. personnel_count
+06. expedition_duration
+07. opening_stock
+08. minimum_stock
+09. lead_time
+10. previous_expedition_consumption
+11. inventory_usage_history
+12. consumption_lag_1
+13. consumption_lag_7
+14. consumption_avg_7
+15. consumption_avg_14
+16. temperature_mean
+17. temperature_min
+18. temperature_max
+19. pressure_mean
+20. pressure_min
+21. pressure_max
+22. wind_speed_mean
+23. wind_speed_max
+
+Excluded leakage-prone / identifier fields:
+----------------------------------------
+consumed_quantity
+closing_stock
+expedition_id

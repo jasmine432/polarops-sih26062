@@ -1,0 +1,71 @@
+# Environment variables and secrets
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+.venv313/
+venv/
+ENV/
+
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE & OS
+.vscode/
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+ml/data/raw/highspeedwinrecorder-data-2015-19.zip
+ml/data/raw/highspeedwinrecorder-data-2015-19/
+
+# NCPOR downloaded datasets
+data/*.csv
+data/*.txt
+data/*.zip
+
+# NCPOR raw data
+ml/data/raw/
+
+ml/data/*.zip
+
+# Large ML models
+ml/models/weather/random_forest_weather.joblib
+ml/models/leakage_safe/random_forest.joblib

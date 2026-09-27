@@ -1,0 +1,29 @@
+{
+    "model": "category_mean_baseline",
+    "description": "Non-ML baseline using mean historical 7-day requirement for each item category.",
+    "target": "future_7day_requirement",
+    "training_rows": 16470,
+    "validation_rows": 3540,
+    "test_rows": 3540,
+    "validation": {
+        "mae": 15.559805,
+        "rmse": 26.758675,
+        "r2": 0.662224
+    },
+    "test": {
+        "mae": 15.625133,
+        "rmse": 26.695018,
+        "r2": 0.662865
+    },
+    "category_means": {
+        "Communication": 9.437851,
+        "Electrical": 23.027462,
+        "Food": 55.470664,
+        "Fuel": 125.625228,
+        "Maintenance": 20.290164,
+        "Medical": 13.221097,
+        "Safety": 12.045046,
+        "Scientific": 12.259478
+    },
+    "global_mean": 39.161998
+}

@@ -1,0 +1,460 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    /* PolarOps Glacier / Teal Color System */
+    --deep-tidal: #2C6A74;
+    --turquoise: #447F98;
+    --slate-blue: #629BB5;
+    --driftwood-teal: #5DA9B0;
+    --ocean-haze: #AEE3E0;
+    --glacier: #B9D9E1;
+    --foam-whisper: #D0EFEF;
+    --ice-blue: #D6EBF3;
+    --platinum: #DADEE7;
+    --dark-text: #173B46;
+    --secondary-text: #466A75;
+
+    --bg-main: #D6EBF3;
+    --bg-secondary: #E5F3F8;
+    --bg-card: #FFFFFF;
+    --bg-card-elevated: #FFFFFF;
+    --text-primary: #173B46;
+    --text-secondary: #466A75;
+    --border-color: #B9D9E1;
+
+    --navy-950: #173B46;
+    --navy-900: #2C6A74;
+    --navy-800: #447F98;
+    --blue-600: #2C6A74;
+    --blue-400: #5DA9B0;
+    --blue-100: #D6EBF3;
+    --blue-50: #EAF5F9;
+
+    --color-success: #18A96B;
+    --color-warning: #F2B84B;
+    --color-danger: #EF4444;
+
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+
+  .dark {
+    --bg-main: #050708;
+    --bg-secondary: #080C0E;
+    --bg-sidebar: #070B0D;
+    --bg-card: #0D1316;
+    --bg-card-elevated: #11191D;
+    --bg-table-header: #101619;
+    --text-primary: #F5F7F8;
+    --text-secondary: #A7B2B8;
+    --text-muted: #6F7C82;
+    --border-color: #263238;
+    --subtle-border: #1B2529;
+
+    --primary-yellow: #FFD21C;
+    --secondary-yellow: #FFC928;
+    --primary-blue: #169FE5;
+    --bright-blue: #28B6FF;
+    --critical-red: #FF3038;
+    --success-green: #16C784;
+    --info-blue: #249CFF;
+
+    --navy-950: #050708;
+    --navy-900: #070B0D;
+    --navy-800: #0D1316;
+    --blue-600: #169FE5;
+    --blue-400: #28B6FF;
+    --blue-100: #11191D;
+    --blue-50: #0A0E10;
+  }
+
+  * {
+    border-color: var(--border-color);
+  }
+
+  html {
+    color-scheme: light dark;
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+
+  .dark body {
+    background-color: #050708;
+    color: #F5F7F8;
+  }
+
+  /* Smooth transition for theme toggle across surfaces */
+  *, *::before, *::after {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-duration: 180ms;
+    transition-timing-function: ease-in-out;
+  }
+
+  /* Monospace figures and codes */
+  .tabular-code {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Consistent focus-visible ring across native controls */
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  button:focus-visible {
+    outline: 2px solid #FFD21C;
+    outline-offset: 1px;
+  }
+
+  .dark input,
+  .dark select,
+  .dark textarea {
+    background-color: #0A0E10;
+    color: #F5F7F8;
+    border-color: #263238;
+  }
+
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: #6F7C82;
+  }
+}
+
+/* PolarOps Dark Theme Adaptations for existing Tailwind slate utilities */
+.dark {
+  --slate-900: #F5F7F8;
+  --slate-800: #E1E7EA;
+  --slate-700: #CBD5DB;
+  --slate-600: #A7B2B8;
+  --slate-500: #6F7C82;
+  --slate-400: #6F7C82;
+  --slate-300: #263238;
+  --slate-200: #1B2529;
+  --slate-100: #11191D;
+  --slate-50: #0A0E10;
+}
+
+/* Dark mode overrides for common card and container classes */
+.dark .bg-white {
+  background-color: #0D1316 !important;
+}
+
+.dark .bg-slate-50,
+.dark [class*="bg-slate-50/"] {
+  background-color: #0A0E10 !important;
+}
+
+.dark .bg-slate-100,
+.dark [class*="bg-slate-100/"] {
+  background-color: #11191D !important;
+}
+
+.dark .border-slate-200,
+.dark .border-slate-300 {
+  border-color: #263238 !important;
+}
+
+.dark .border-slate-100 {
+  border-color: #1B2529 !important;
+}
+
+.dark .text-slate-900,
+.dark .text-slate-950 {
+  color: #F5F7F8 !important;
+}
+
+.dark .text-slate-800 {
+  color: #E1E7EA !important;
+}
+
+.dark .text-slate-700 {
+  color: #CBD5DB !important;
+}
+
+.dark .text-slate-600 {
+  color: #A7B2B8 !important;
+}
+
+.dark .text-slate-500 {
+  color: #6F7C82 !important;
+}
+
+.dark .text-slate-400 {
+  color: #6F7C82 !important;
+}
+
+/* Direct mapping for any legacy inline dark tokens across all pages */
+.dark [class*="dark:bg-[#2C6A74]"],
+.dark [class*="dark:bg-[#1F4A57]"],
+.dark [class*="dark:bg-[#173B46]"],
+.dark [class*="dark:bg-[#0B2744]"],
+.dark [class*="dark:bg-[#102F4D]"] {
+  background-color: #0D1316 !important;
+}
+
+.dark [class*="dark:border-[#3E808C]"],
+.dark [class*="dark:border-[#1F545D]"],
+.dark [class*="dark:border-[#234968]"] {
+  border-color: #263238 !important;
+}
+
+.dark [class*="dark:text-[#D0EFEF]"] {
+  color: #A7B2B8 !important;
+}
+
+.dark [class*="dark:text-[#AEE3E0]"] {
+  color: #F5F7F8 !important;
+}
+
+/* Table rows in dark mode */
+.dark tr.hover\:bg-slate-50:hover,
+.dark tr.hover\:bg-slate-50\/80:hover,
+.dark tr.hover\:bg-slate-50\/90:hover,
+.dark .hover\:bg-slate-50:hover,
+.dark tr.hover\:bg-slate-100:hover,
+.dark .hover\:bg-slate-100:hover {
+  background-color: #11191D !important;
+}
+
+/* Subtle operational grid background texture (3-6% opacity) */
+.dark .polar-grid-texture {
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(245, 247, 248, 0.04) 1px, transparent 0),
+    linear-gradient(to right, rgba(38, 50, 56, 0.15) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(38, 50, 56, 0.15) 1px, transparent 1px);
+  background-size: 32px 32px, 64px 64px, 64px 64px;
+}
+
+/* Semantic Badge and Card Dark fills */
+.dark .bg-blue-50,
+.dark .bg-sky-50 {
+  background-color: #0B253D !important;
+}
+
+.dark .border-blue-200,
+.dark .border-sky-200 {
+  border-color: rgba(40, 182, 255, 0.3) !important;
+}
+
+.dark .text-blue-900,
+.dark .text-sky-900,
+.dark .text-blue-800,
+.dark .text-sky-800 {
+  color: #28B6FF !important;
+}
+
+.dark .bg-amber-50 {
+  background-color: #332608 !important;
+}
+
+.dark .border-amber-200 {
+  border-color: rgba(255, 210, 28, 0.35) !important;
+}
+
+.dark .text-amber-900,
+.dark .text-amber-800 {
+  color: #FFD21C !important;
+}
+
+.dark .bg-rose-50 {
+  background-color: #381115 !important;
+}
+
+.dark .border-rose-200 {
+  border-color: rgba(255, 48, 56, 0.35) !important;
+}
+
+.dark .text-rose-950,
+.dark .text-rose-900,
+.dark .text-rose-800 {
+  color: #FF3038 !important;
+}
+
+.dark .bg-emerald-50 {
+  background-color: #0E3827 !important;
+}
+
+.dark .border-emerald-200 {
+  border-color: rgba(22, 199, 132, 0.35) !important;
+}
+
+.dark .text-emerald-900,
+.dark .text-emerald-800,
+.dark .text-emerald-700 {
+  color: #16C784 !important;
+}
+
+/* Operational Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #050708;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #263238;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #37474F;
+}
+
+/* Custom interactive table density */
+.dense-table th {
+  padding-top: 0.375rem !important;
+  padding-bottom: 0.375rem !important;
+}
+
+.dense-table td {
+  padding-top: 0.375rem !important;
+  padding-bottom: 0.375rem !important;
+}
+
+/* Operational Print Layout for Compliance & Treaty Audits */
+@media print {
+  aside,
+  header,
+  nav,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+  }
+
+  main {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  table {
+    page-break-inside: auto;
+    border-collapse: collapse !important;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+}
+
+/* ========================================================= */
+/* POLAROPS OPERATIONAL GIS BASEMAP & LEAFLET THEME OVERRIDES */
+/* ========================================================= */
+
+/* PolarOps Operational Dark GIS Basemap Filter for standard OpenStreetMap tiles */
+.polar-dark-map .leaflet-tile-pane {
+  filter: brightness(0.62) invert(1) contrast(3) hue-rotate(200deg) saturate(0.35) brightness(0.75);
+}
+
+.leaflet-container {
+  background-color: #070B0D !important;
+  font-family: var(--font-sans) !important;
+}
+
+/* Leaflet Zoom & Layer Controls */
+.dark .leaflet-bar {
+  border-color: #263238 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .leaflet-bar a {
+  background-color: #0D1316 !important;
+  border-color: #263238 !important;
+  color: #F5F7F8 !important;
+}
+
+.dark .leaflet-bar a:hover {
+  background-color: #11191D !important;
+  color: #FFD21C !important;
+}
+
+/* Dark theme styling for Leaflet Popups */
+.dark .leaflet-popup-content-wrapper,
+.dark .leaflet-popup-tip {
+  background: #0D1316 !important;
+  color: #F5F7F8 !important;
+  border: 1px solid #263238 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7) !important;
+  border-radius: 8px !important;
+}
+
+.dark .leaflet-popup-content {
+  color: #F5F7F8 !important;
+  margin: 8px 12px !important;
+  line-height: 1.4 !important;
+}
+
+.dark .leaflet-popup-close-button {
+  color: #A7B2B8 !important;
+  padding: 4px 4px 0 0 !important;
+}
+
+.dark .leaflet-popup-close-button:hover {
+  color: #FFD21C !important;
+}
+
+/* Tooltip dark styles */
+.dark .leaflet-tooltip {
+  background-color: #070B0D !important;
+  color: #F5F7F8 !important;
+  border: 1px solid #263238 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6) !important;
+  border-radius: 6px !important;
+  padding: 4px 8px !important;
+}
+
+.dark .leaflet-tooltip-left:before {
+  border-left-color: #263238 !important;
+}
+.dark .leaflet-tooltip-right:before {
+  border-right-color: #263238 !important;
+}
+.dark .leaflet-tooltip-top:before {
+  border-top-color: #263238 !important;
+}
+.dark .leaflet-tooltip-bottom:before {
+  border-bottom-color: #263238 !important;
+}
+
