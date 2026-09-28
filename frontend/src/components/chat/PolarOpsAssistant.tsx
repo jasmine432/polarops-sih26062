@@ -337,12 +337,12 @@ Click a suggested question below or ask me anything about the application.`,
       {/* ========================================================= */}
       {/* 1. FLOATING LAUNCH TRIGGER BUTTON (Bottom-Right)          */}
       {/* ========================================================= */}
-      <div className="fixed bottom-3 right-3 sm:bottom-6 sm:right-6 z-40 select-none">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 select-none pointer-events-none">
         {!isOpen && (
           <button
             type="button"
             onClick={() => setIsOpen(true)}
-            className="flex items-center gap-2 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-full bg-[#02457A] dark:bg-[#FFD21C] text-white dark:text-[#050708] font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-150 border border-slate-200 dark:border-[#FFD21C]/60 cursor-pointer group"
+            className="pointer-events-auto flex items-center gap-2 px-3 py-2.5 sm:px-3.5 sm:py-2.5 rounded-full bg-[#02457A] dark:bg-[#FFD21C] text-white dark:text-[#050708] font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-150 border border-slate-200 dark:border-[#FFD21C]/60 cursor-pointer group"
             aria-label="Open PolarOps Assistant"
             title="Open PolarOps Help Assistant"
           >
@@ -350,7 +350,8 @@ Click a suggested question below or ask me anything about the application.`,
               <Sparkles className="w-4 h-4 text-white dark:text-[#050708]" />
               <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-400 dark:bg-[#050708] border border-white dark:border-[#FFD21C]" />
             </div>
-            <span className="text-xs font-sans tracking-wide">PolarOps Assistant</span>
+            <span className="hidden sm:inline text-xs font-sans tracking-wide">PolarOps Assistant</span>
+            <span className="sm:hidden text-xs font-sans tracking-wide font-bold">AI</span>
           </button>
         )}
       </div>

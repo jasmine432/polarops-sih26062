@@ -64,7 +64,7 @@ export const AppShell: React.FC = () => {
         <Header />
 
         {/* Content Outlet */}
-        <main className="flex-1 p-3.5 sm:p-6 md:p-8 pb-20 sm:pb-8 max-w-[1680px] w-full mx-auto min-w-0">
+        <main className="flex-1 p-3.5 sm:p-6 md:p-8 pb-28 sm:pb-8 max-w-[1680px] w-full mx-auto min-w-0">
           <Outlet />
         </main>
 
