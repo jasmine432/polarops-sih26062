@@ -16,6 +16,20 @@ class Inventory(Base):
     minimum_stock = Column(Integer, default=0)
 
 
+class InventoryTransaction(Base):
+    __tablename__ = "inventory_transactions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    inventory_id = Column(Integer, nullable=False, index=True)
+    transaction_type = Column(String(50), nullable=False)
+    quantity = Column(Integer, nullable=False)
+    unit = Column(String(50), nullable=True)
+    balance_after = Column(Integer, nullable=False)
+    officer = Column(String(150), nullable=True)
+    reference_doc = Column(String(150), nullable=True)
+    timestamp = Column(String(150), nullable=True)
+
+
 class Cargo(Base):
     __tablename__ = "cargo"
 

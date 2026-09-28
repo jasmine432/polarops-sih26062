@@ -59,7 +59,7 @@ import { INITIAL_CARGO_DATA, CargoRecord } from '@/data/cargoData'
 import { INITIAL_INCIDENTS_DATA, IncidentRecord, IncidentSeverity } from '@/data/emergencyData'
 import { fetchInventoryList } from '@/services/inventoryService'
 import { fetchCargoList } from '@/services/cargoService'
-import { fetchExpeditionsList } from '@/services/expeditionService'
+import { fetchExpeditionsList, updateExpeditionStatus } from '@/services/expeditionService'
 import { fetchPersonnelList, type PersonnelRecord } from '@/services/personnelService'
 import { fetchStationsList, type StationApiResponse } from '@/services/stationsService'
 import { fetchVesselsList, type VesselApiResponse } from '@/services/vesselsService'
@@ -406,20 +406,29 @@ export const MissionControlPage: React.FC = () => {
   }
 
 
-  // Handle Expeditions Status Advance
-  const handleAdvanceExpedition = (id: string) => {
+  // Handle Expeditions Status Advance with PostgreSQL Persistence
+  const handleAdvanceExpedition = async (id: string) => {
+    const targetExp = expeditions.find((e) => e.id === id)
+    const currentProg = targetExp?.progress ?? 50
+    const nextProgress = Math.min(100, currentProg + 15)
+    const nextStatus = nextProgress >= 100 ? ('Concluded' as const) : (targetExp?.status || 'Active')
+
     setExpeditions((prev) =>
       prev.map((exp) => {
         if (exp.id === id) {
-          const currentProg = exp.progress ?? 50
-          const nextProgress = Math.min(100, currentProg + 15)
-          const nextStatus = nextProgress === 100 ? ('Concluded' as const) : exp.status
           return { ...exp, progress: nextProgress, status: nextStatus }
         }
         return exp
       })
     )
-    addAuditLog('Expeditions', `Progress verified and mission telemetry updated for ${id}`)
+    addAuditLog('Expeditions', `Progress verified and mission telemetry updated for ${id} (Status: ${nextStatus})`)
+
+    try {
+      await updateExpeditionStatus(id, nextStatus)
+      await loadMissionData()
+    } catch (err) {
+      console.warn('Could not persist expedition status to PostgreSQL:', err)
+    }
   }
 
   // If unauthorized user visits this route

@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 from ..database import engine
 from ..models import Expedition
-from ..schemas import ExpeditionCreate, ExpeditionResponse
+from ..schemas import ExpeditionCreate, ExpeditionResponse, ExpeditionStatusUpdate
 from ..auth import AuthenticatedUser, get_current_user, require_roles
 
 router = APIRouter(
@@ -229,5 +229,49 @@ def create_expedition(
             "expedition_id": new_exp.expedition_id,
             "name": new_exp.name,
         }
+    finally:
+        db.close()
+
+
+@router.patch("/{expedition_id}/status", response_model=ExpeditionResponse)
+@router.patch("/{expedition_id}", response_model=ExpeditionResponse)
+def update_expedition_status(
+    expedition_id: str,
+    payload: ExpeditionStatusUpdate,
+    _: Annotated[AuthenticatedUser, Depends(require_roles("ADMIN"))],
+) -> Any:
+    db = SessionLocal()
+    try:
+        clean_id = expedition_id.strip()
+        exp = db.query(Expedition).filter(
+            (Expedition.expedition_id.ilike(clean_id))
+            | (Expedition.expedition_id.ilike(clean_id.replace("-", "")))
+        ).first()
+
+        if not exp and clean_id.isdigit():
+            exp = db.query(Expedition).filter(Expedition.id == int(clean_id)).first()
+
+        if not exp:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Expedition '{expedition_id}' not found.",
+            )
+
+        if payload.status is not None:
+            valid_statuses = ["Planning", "Active", "Returning", "Concluded", "On Hold"]
+            if payload.status not in valid_statuses:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid status '{payload.status}'. Allowed: {', '.join(valid_statuses)}",
+                )
+            exp.status = payload.status
+
+        if payload.notes is not None:
+            exp.notes = payload.notes
+
+        db.commit()
+        db.refresh(exp)
+
+        return exp
     finally:
         db.close()

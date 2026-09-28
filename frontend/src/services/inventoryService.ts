@@ -183,3 +183,56 @@ export async function createInventoryItem(payload: InventoryApiPayload): Promise
 
   return response.json()
 }
+
+export interface LogInventoryTransactionPayload {
+  transactionType: 'Intake Delivery' | 'Consumption Drawdown' | 'Emergency Relocation' | 'Audit Verification'
+  quantity: number
+  officer?: string
+  referenceDoc?: string
+}
+
+export async function logInventoryTransaction(
+  inventoryId: string | number,
+  payload: LogInventoryTransactionPayload
+): Promise<{ success: boolean; message: string; inventory: InventoryApiResponse; transaction: any }> {
+  const token = getAccessToken()
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
+  let cleanId: string | number = inventoryId
+  if (typeof inventoryId === 'string' && inventoryId.toUpperCase().startsWith('INV-DB-')) {
+    const rawNum = inventoryId.toUpperCase().replace('INV-DB-', '').replace(/^0+/, '')
+    cleanId = rawNum ? parseInt(rawNum, 10) : 0
+  }
+
+  const response = await fetch(`${API_BASE_URL}/inventory/${cleanId}/transactions`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      transactionType: payload.transactionType,
+      quantity: payload.quantity,
+      officer: payload.officer,
+      referenceDoc: payload.referenceDoc,
+    }),
+  })
+
+  if (!response.ok) {
+    let errorDetail = `Failed to record transaction (${response.status})`
+    try {
+      const errJson = await response.json()
+      if (errJson.detail) {
+        errorDetail = errJson.detail
+      }
+    } catch {
+      const txt = await response.text()
+      if (txt) errorDetail = txt
+    }
+    throw new Error(errorDetail)
+  }
+
+  return response.json()
+}

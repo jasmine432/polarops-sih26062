@@ -26,6 +26,31 @@ class InventoryResponse(BaseModel):
         from_attributes = True
 
 
+class InventoryTransactionCreate(BaseModel):
+    transaction_type: str = Field(alias="transactionType", default="Consumption Drawdown")
+    quantity: int = Field(ge=1)
+    officer: str | None = "Logistics Officer"
+    reference_doc: str | None = Field(alias="referenceDoc", default=None)
+
+    class Config:
+        populate_by_name = True
+
+
+class InventoryTransactionResponse(BaseModel):
+    id: int
+    inventory_id: int
+    transaction_type: str
+    quantity: int
+    unit: str | None = None
+    balance_after: int
+    officer: str | None = None
+    reference_doc: str | None = None
+    timestamp: str | None = None
+
+    class Config:
+        from_attributes = True
+
+
 class CargoCreate(BaseModel):
     cargo_id: str = Field(min_length=1)
     description: str = Field(min_length=1)
@@ -108,6 +133,12 @@ class ExpeditionResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class ExpeditionStatusUpdate(BaseModel):
+    status: Literal["Planning", "Active", "Returning", "Concluded", "On Hold"]
+    notes: str | None = None
+    progress: int | None = None
 
 
 class PersonnelCreate(BaseModel):

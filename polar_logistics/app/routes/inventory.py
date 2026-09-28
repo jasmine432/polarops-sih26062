@@ -1,11 +1,17 @@
+from datetime import datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import sessionmaker
 
 from ..database import engine
-from ..models import Inventory
-from ..schemas import InventoryCreate, InventoryResponse
+from ..models import Inventory, InventoryTransaction, Base
+from ..schemas import (
+    InventoryCreate,
+    InventoryResponse,
+    InventoryTransactionCreate,
+    InventoryTransactionResponse,
+)
 from ..auth import AuthenticatedUser, get_current_user, require_roles
 
 router = APIRouter(
@@ -14,6 +20,7 @@ router = APIRouter(
 )
 
 SessionLocal = sessionmaker(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 INITIAL_SEED_INVENTORY = [
     {
@@ -145,5 +152,136 @@ def create_inventory(
             "id": new_item.id,
             "item_name": new_item.item_name,
         }
+    finally:
+        db.close()
+
+
+@router.post("/{inventory_id}/transactions", status_code=status.HTTP_201_CREATED)
+@router.post("/{inventory_id}/transactions/", status_code=status.HTTP_201_CREATED)
+@router.post("/{inventory_id}/transaction", status_code=status.HTTP_201_CREATED)
+def log_inventory_transaction(
+    inventory_id: str,
+    payload: InventoryTransactionCreate,
+    user: Annotated[AuthenticatedUser, Depends(require_roles("ADMIN", "PHC", "DOCTOR"))],
+) -> Any:
+    db = SessionLocal()
+    try:
+        clean_id = inventory_id.strip()
+        item = None
+        if clean_id.isdigit():
+            item = db.query(Inventory).filter(Inventory.id == int(clean_id)).first()
+        elif clean_id.upper().startswith("INV-DB-"):
+            num_part = clean_id.upper().replace("INV-DB-", "").lstrip("0")
+            if num_part.isdigit():
+                item = db.query(Inventory).filter(Inventory.id == int(num_part)).first()
+            elif num_part == "":
+                item = db.query(Inventory).filter(Inventory.id == 0).first()
+
+        if not item:
+            item = db.query(Inventory).filter(Inventory.item_name.ilike(clean_id)).first()
+
+        if not item:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Inventory item '{inventory_id}' not found.",
+            )
+
+        qty = payload.quantity
+        if qty <= 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Transaction quantity must be greater than zero.",
+            )
+
+        txn_type = payload.transaction_type.strip()
+        current_qty = item.quantity or 0
+
+        if txn_type == "Intake Delivery":
+            effective_qty = qty
+            new_balance = current_qty + qty
+        elif txn_type in ["Consumption Drawdown", "Emergency Relocation"]:
+            if current_qty < qty:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Insufficient inventory quantity ({current_qty} {item.unit or 'Units'} available). Operation would result in negative stock.",
+                )
+            effective_qty = -qty
+            new_balance = current_qty - qty
+        elif txn_type == "Audit Verification":
+            effective_qty = qty - current_qty
+            new_balance = qty
+        else:
+            effective_qty = -qty
+            if current_qty < qty:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Insufficient inventory quantity ({current_qty} {item.unit or 'Units'} available).",
+                )
+            new_balance = current_qty - qty
+
+        now_str = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+        ref_doc = payload.reference_doc.strip() if payload.reference_doc else f"TXN-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+        officer_name = payload.officer.strip() if payload.officer else user.name
+
+        # Update persistent inventory stock
+        item.quantity = new_balance
+
+        # Record persistent transaction
+        new_txn = InventoryTransaction(
+            inventory_id=item.id,
+            transaction_type=txn_type,
+            quantity=effective_qty,
+            unit=item.unit or "Units",
+            balance_after=new_balance,
+            officer=officer_name,
+            reference_doc=ref_doc,
+            timestamp=now_str,
+        )
+
+        db.add(new_txn)
+        db.commit()
+        db.refresh(item)
+        db.refresh(new_txn)
+
+        return {
+            "success": True,
+            "message": "Inventory transaction recorded successfully!",
+            "inventory": InventoryResponse.model_validate(item),
+            "transaction": InventoryTransactionResponse.model_validate(new_txn),
+        }
+    finally:
+        db.close()
+
+
+@router.get("/{inventory_id}/transactions", response_model=list[InventoryTransactionResponse])
+@router.get("/{inventory_id}/transactions/", response_model=list[InventoryTransactionResponse])
+def get_inventory_transactions(
+    inventory_id: str,
+    _: Annotated[AuthenticatedUser, Depends(get_current_user)],
+) -> Any:
+    db = SessionLocal()
+    try:
+        clean_id = inventory_id.strip()
+        item_id = None
+        if clean_id.isdigit():
+            item_id = int(clean_id)
+        elif clean_id.upper().startswith("INV-DB-"):
+            num_part = clean_id.upper().replace("INV-DB-", "").lstrip("0")
+            if num_part.isdigit():
+                item_id = int(num_part)
+
+        if item_id is None:
+            item = db.query(Inventory).filter(Inventory.item_name.ilike(clean_id)).first()
+            if item:
+                item_id = item.id
+
+        if item_id is None:
+            return []
+
+        txns = db.query(InventoryTransaction).filter(
+            InventoryTransaction.inventory_id == item_id
+        ).order_by(InventoryTransaction.id.desc()).all()
+
+        return [InventoryTransactionResponse.model_validate(t) for t in txns]
     finally:
         db.close()

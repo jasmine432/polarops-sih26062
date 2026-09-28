@@ -171,3 +171,38 @@ export async function createExpedition(payload: ExpeditionApiPayload): Promise<{
 
   return response.json()
 }
+
+export async function updateExpeditionStatus(
+  expeditionId: string | number,
+  status: string
+): Promise<ExpeditionApiResponse> {
+  const token = getAccessToken()
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
+  const response = await fetch(`${API_BASE_URL}/expeditions/${expeditionId}/status`, {
+    method: 'PATCH',
+    headers,
+    body: JSON.stringify({ status }),
+  })
+
+  if (!response.ok) {
+    let errorDetail = `Failed to update expedition status (${response.status})`
+    try {
+      const errJson = await response.json()
+      if (errJson.detail) {
+        errorDetail = errJson.detail
+      }
+    } catch {
+      const txt = await response.text()
+      if (txt) errorDetail = txt
+    }
+    throw new Error(errorDetail)
+  }
+
+  return response.json()
+}

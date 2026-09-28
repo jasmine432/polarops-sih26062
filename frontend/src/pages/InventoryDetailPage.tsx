@@ -48,7 +48,7 @@ import {
   InventoryForecastResult,
   requestInventoryForecast,
 } from '@/services/inventoryForecastService'
-import { fetchInventoryList } from '@/services/inventoryService'
+import { fetchInventoryList, logInventoryTransaction } from '@/services/inventoryService'
 
 export const InventoryDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -137,59 +137,40 @@ export const InventoryDetailPage: React.FC = () => {
     )
   }
 
-  // Handle manual transaction submission
-  const handleLogTransaction = (e: React.FormEvent) => {
+  const [txnError, setTxnError] = useState<string | null>(null)
+
+  // Handle manual transaction submission with PostgreSQL backend persistence
+  const handleLogTransaction = async (e: React.FormEvent) => {
     e.preventDefault()
     const numQty = parseFloat(txnQty)
     if (isNaN(numQty) || numQty <= 0) return
 
     setIsSubmittingTxn(true)
-    setTimeout(() => {
-      const nowStr = new Date().toISOString().replace('T', ' ').substring(0, 16) + ' UTC'
-      const effectiveQty = txnType === 'Intake Delivery' ? numQty : -numQty
-      const newStock = Math.max(0, item.currentStock + effectiveQty)
+    setTxnError(null)
 
-      // Recalculate status & days remaining
-      const newDays = item.averageDailyConsumption > 0 ? Math.round(newStock / item.averageDailyConsumption) : 999
-      const newStatus: InventoryStatus =
-        newStock <= item.minimumStock * 0.5 ? 'Critical' : newStock <= item.minimumStock ? 'Low Stock' : 'Normal'
-
-      const newTxn: InventoryTransaction = {
-        id: `TXN-${Math.floor(9500 + Math.random() * 100)}`,
-        timestamp: nowStr,
-        type: txnType,
-        quantity: effectiveQty,
-        unit: item.unit,
-        balanceAfter: newStock,
+    try {
+      await logInventoryTransaction(item.id, {
+        transactionType: txnType,
+        quantity: Math.round(numQty),
         officer: txnOfficer.trim() || 'Logistics Officer',
         referenceDoc: txnDoc.trim() || `MANUAL-LOG-${Date.now()}`,
-      }
-
-      const updatedItems = items.map((i) => {
-        if (i.id === item.id) {
-          return {
-            ...i,
-            currentStock: newStock,
-            daysRemaining: newDays,
-            status: newStatus,
-            lastUpdated: nowStr,
-            forecast: {
-              ...i.forecast,
-              currentStock: newStock,
-              additionalRequirement: Math.max(0, i.forecast.predictedRequirement - newStock),
-            },
-            recentTransactions: [newTxn, ...i.recentTransactions],
-          }
-        }
-        return i
       })
 
-      setItems(updatedItems)
-      setIsSubmittingTxn(false)
+      // Refetch live inventory from PostgreSQL database
+      const freshData = await fetchInventoryList()
+      if (freshData && freshData.length > 0) {
+        setItems(freshData)
+      }
+
       setIsTxnModalOpen(false)
       setTxnQty('')
       setTxnDoc('')
-    }, 400)
+    } catch (err) {
+      console.error('Failed to record transaction in database:', err)
+      setTxnError(err instanceof Error ? err.message : 'Failed to record transaction in database.')
+    } finally {
+      setIsSubmittingTxn(false)
+    }
   }
 
   const getStatusBadgeVariant = (status: InventoryStatus) => {
@@ -679,6 +660,11 @@ export const InventoryDetailPage: React.FC = () => {
         }
       >
         <form onSubmit={handleLogTransaction} className="space-y-4 text-xs">
+          {txnError && (
+            <div role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded text-rose-800 text-xs font-semibold">
+              {txnError}
+            </div>
+          )}
           <div>
             <label className="block text-[11px] font-bold text-slate-700 uppercase font-mono mb-1">
               Transaction Type
