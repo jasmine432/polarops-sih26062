@@ -49,14 +49,14 @@ export const AppShell: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#D6EBF3] dark:bg-[#050708] polar-grid-texture flex flex-col font-sans antialiased text-[#173B46] dark:text-[#F5F7F8] transition-colors duration-200">
+    <div className="min-h-screen bg-[#D6EBF3] dark:bg-[#050708] polar-grid-texture flex flex-col font-sans antialiased text-[#173B46] dark:text-[#F5F7F8] transition-colors duration-200 overflow-x-hidden min-w-0 max-w-full">
       {/* Fixed Left Sidebar */}
       <Sidebar />
 
       {/* Main Column */}
       <div
         className={cn(
-          'flex-1 flex flex-col transition-all duration-200 min-w-0',
+          'flex-1 flex flex-col transition-all duration-200 min-w-0 max-w-full overflow-x-hidden',
           sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'
         )}
       >
@@ -64,7 +64,7 @@ export const AppShell: React.FC = () => {
         <Header />
 
         {/* Content Outlet */}
-        <main className="flex-1 p-4 sm:p-6 md:p-8 max-w-[1680px] w-full mx-auto">
+        <main className="flex-1 p-3.5 sm:p-6 md:p-8 pb-20 sm:pb-8 max-w-[1680px] w-full mx-auto min-w-0">
           <Outlet />
         </main>
 

@@ -337,12 +337,12 @@ Click a suggested question below or ask me anything about the application.`,
       {/* ========================================================= */}
       {/* 1. FLOATING LAUNCH TRIGGER BUTTON (Bottom-Right)          */}
       {/* ========================================================= */}
-      <div className="fixed bottom-5 right-5 z-40 select-none">
+      <div className="fixed bottom-3 right-3 sm:bottom-6 sm:right-6 z-40 select-none">
         {!isOpen && (
           <button
             type="button"
             onClick={() => setIsOpen(true)}
-            className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-full bg-[#02457A] dark:bg-[#FFD21C] text-white dark:text-[#050708] font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-150 border border-slate-200 dark:border-[#FFD21C]/60 cursor-pointer group"
+            className="flex items-center gap-2 px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-full bg-[#02457A] dark:bg-[#FFD21C] text-white dark:text-[#050708] font-bold shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-150 border border-slate-200 dark:border-[#FFD21C]/60 cursor-pointer group"
             aria-label="Open PolarOps Assistant"
             title="Open PolarOps Help Assistant"
           >
@@ -363,8 +363,8 @@ Click a suggested question below or ask me anything about the application.`,
           className={cn(
             'fixed z-50 transition-all duration-200 flex flex-col shadow-2xl border bg-white dark:bg-[#070B0D] border-slate-200 dark:border-[#263238] overflow-hidden',
             isMaximized
-              ? 'inset-3 sm:inset-6 md:inset-10 rounded-xl'
-              : 'bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-32px)] sm:w-[420px] h-[580px] max-h-[calc(100vh-80px)] rounded-xl'
+              ? 'inset-2 sm:inset-6 md:inset-10 rounded-xl'
+              : 'bottom-3 right-3 sm:bottom-6 sm:right-6 w-[calc(100vw-24px)] sm:w-[420px] max-w-full h-[520px] sm:h-[580px] max-h-[calc(100dvh-24px)] rounded-xl'
           )}
           role="dialog"
           aria-labelledby="assistant-title"
