@@ -31,6 +31,8 @@ from ..schemas import (
     MissionReadinessResponse,
     MissionProgressResponse,
     MissionPhaseUpdateRequest,
+    WhatIfSimulationRequest,
+    WhatIfSimulationResponse,
 )
 from ..auth import AuthenticatedUser, get_current_user, require_roles
 from ..services.expedition_planner_service import (
@@ -66,6 +68,10 @@ from ..services.tracking_service import (
     get_expedition_mission_progress,
     update_expedition_mission_phase,
 )
+from ..services.simulation_service import (
+    simulate_mission,
+)
+
 from .stations import _seed_stations_if_empty
 from .vessels import _seed_vessels_if_empty
 
@@ -755,5 +761,39 @@ def update_expedition_mission_phase_endpoint(
             )
         except ValueError as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    finally:
+        db.close()
+
+
+# =========================================================================
+# PHASE 3.6 WHAT-IF MISSION SIMULATION ENDPOINT
+# =========================================================================
+
+@router.post("/{expedition_id}/simulation", response_model=WhatIfSimulationResponse)
+@router.post("/{expedition_id}/simulation/", response_model=WhatIfSimulationResponse)
+def run_what_if_simulation_endpoint(
+    expedition_id: str,
+    payload: WhatIfSimulationRequest,
+    _: Annotated[AuthenticatedUser, Depends(get_current_user)],
+) -> Any:
+    """
+    Execute a read-only what-if scenario simulation for an expedition.
+    Evaluates hypothetical changes to duration, cargo capacity, resupply delay,
+    and initial inventory stock reduction without mutating PostgreSQL data.
+    """
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        _seed_stations_if_empty(db)
+        _seed_vessels_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        return simulate_mission(
+            db,
+            exp,
+            duration_days_override=payload.duration_days_override,
+            cargo_capacity_override_kg=payload.cargo_capacity_override_kg,
+            delayed_resupply_days=payload.delayed_resupply_days,
+            initial_stock_reduction_pct=payload.initial_stock_reduction_pct,
+        )
     finally:
         db.close()

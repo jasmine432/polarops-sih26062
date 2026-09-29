@@ -638,3 +638,103 @@ export async function updateMissionPhase(
   }
   return response.json()
 }
+
+// =========================================================================
+// PHASE 3.6 WHAT-IF MISSION SIMULATION
+// =========================================================================
+
+export interface WhatIfSimulationRequest {
+  duration_days_override?: number | null
+  cargo_capacity_override_kg?: number | null
+  delayed_resupply_days?: number
+  initial_stock_reduction_pct?: number
+}
+
+export interface WhatIfInventoryItem {
+  inventory_id: number
+  item_name: string
+  category: string
+  location: string
+  unit: string
+  current_stock: number
+  simulated_stock: number
+  minimum_stock: number
+  shortage: boolean
+  stock_reduction_pct: number
+}
+
+export interface WhatIfDelayedResupplyItem {
+  resupply_item_id: number
+  item_name: string
+  status: string
+  resupply_quantity: number
+  original_eta?: string | null
+  simulated_delay_days: number
+}
+
+export interface WhatIfCurrentState {
+  duration_days: number
+  cargo_capacity_kg: number
+  planned_load_kg: number
+}
+
+export interface WhatIfSimulatedState {
+  duration_days: number
+  cargo_capacity_kg: number
+  planned_load_kg: number
+  capacity_utilization_pct: number
+  remaining_capacity_kg: number
+  over_capacity_kg: number
+  inventory_risk_count: number
+  delayed_resupply_count: number
+  readiness_status: 'READY' | 'NOT_READY'
+}
+
+export interface WhatIfSimulationResponse {
+  expedition_id: string
+  expedition_name: string
+  simulation_only: boolean
+  database_mutated: boolean
+  scenario: {
+    duration_days_override?: number | null
+    cargo_capacity_override_kg?: number | null
+    delayed_resupply_days: number
+    initial_stock_reduction_pct: number
+  }
+  current_state: WhatIfCurrentState
+  simulated_state: WhatIfSimulatedState
+  inventory: WhatIfInventoryItem[]
+  delayed_resupply: WhatIfDelayedResupplyItem[]
+  blockers: string[]
+  impact_summary: string[]
+}
+
+export async function runWhatIfSimulation(
+  expeditionId: string,
+  payload: WhatIfSimulationRequest
+): Promise<WhatIfSimulationResponse> {
+  const token = getAccessToken()
+  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const response = await fetch(`${API_BASE_URL}/expeditions/${encodeURIComponent(expeditionId)}/simulation`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) {
+    let errorDetail = `Failed to run mission simulation (${response.status})`
+    try {
+      const errJson = await response.json()
+      if (errJson.detail) {
+        errorDetail = typeof errJson.detail === 'string' ? errJson.detail : JSON.stringify(errJson.detail)
+      }
+    } catch {
+      const txt = await response.text()
+      if (txt) errorDetail = txt
+    }
+    throw new Error(errorDetail)
+  }
+  return response.json()
+}

@@ -41,17 +41,21 @@ import {
   Scale,
   ShieldCheck,
   Navigation,
+  Cpu,
+
 } from 'lucide-react'
 import { INITIAL_EXPEDITIONS, ExpeditionDetail } from '@/data/expeditionsData'
 import { fetchExpeditionsList } from '@/services/expeditionService'
 import { PackingAndLoadPlanner } from '@/components/expeditions/PackingAndLoadPlanner'
 import { MissionReadinessAudit } from '@/components/expeditions/MissionReadinessAudit'
 import { ExpeditionProgressTracker } from '@/components/expeditions/ExpeditionProgressTracker'
+import { WhatIfSimulator } from '@/components/expeditions/WhatIfSimulator'
 
 type TabKey =
   | 'overview'
   | 'progress'
   | 'readiness'
+  | 'simulation'
   | 'personnel'
   | 'packing'
   | 'cargo'
@@ -59,6 +63,7 @@ type TabKey =
   | 'environmental'
   | 'incidents'
   | 'timeline'
+
 
 
 
@@ -201,6 +206,7 @@ export const ExpeditionDetailPage: React.FC = () => {
             { key: 'overview', label: 'Overview', icon: Layers, count: null },
             { key: 'progress', label: 'Progress & Route', icon: Navigation, count: null },
             { key: 'readiness', label: 'Mission Readiness', icon: ShieldCheck, count: null },
+            { key: 'simulation', label: 'What-If Simulation', icon: Cpu, count: null },
             { key: 'personnel', label: 'Personnel', icon: Users, count: expedition.personnel.length },
             { key: 'packing', label: 'Individual Packing & Load', icon: Scale, count: null },
             { key: 'cargo', label: 'Cargo', icon: Package, count: expedition.cargo.length },
@@ -257,6 +263,16 @@ export const ExpeditionDetailPage: React.FC = () => {
             expeditionName={expedition.name}
           />
         )}
+
+        {/* TAB: WHAT-IF MISSION SIMULATOR */}
+        {activeTab === 'simulation' && (
+          <WhatIfSimulator
+            expeditionId={expedition.id}
+            expeditionName={expedition.name}
+            station={expedition.station}
+          />
+        )}
+
 
         {/* TAB: OVERVIEW */}
         {activeTab === 'overview' && (

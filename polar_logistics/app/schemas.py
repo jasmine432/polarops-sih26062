@@ -922,3 +922,45 @@ class MissionPhaseUpdateRequest(BaseModel):
         "ON_HOLD",
     ]
     notes: str | None = None
+
+
+# =========================================================================
+# PHASE 3.6 WHAT-IF MISSION SIMULATION SCHEMAS
+# =========================================================================
+
+class WhatIfSimulationRequest(BaseModel):
+    duration_days_override: int | None = Field(
+        default=None,
+        ge=1,
+        description="Optional simulated mission duration in days.",
+    )
+    cargo_capacity_override_kg: float | None = Field(
+        default=None,
+        ge=0.0,
+        description="Optional simulated cargo capacity in kilograms.",
+    )
+    delayed_resupply_days: int = Field(
+        default=0,
+        ge=0,
+        description="Number of simulated days added to approved or in-transit resupply deliveries.",
+    )
+    initial_stock_reduction_pct: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=100.0,
+        description="Percentage reduction applied to starting inventory in the simulation.",
+    )
+
+
+class WhatIfSimulationResponse(BaseModel):
+    expedition_id: str
+    expedition_name: str
+    simulation_only: bool = True
+    database_mutated: bool = False
+    scenario: dict[str, Any] = Field(default_factory=dict)
+    current_state: dict[str, Any] = Field(default_factory=dict)
+    simulated_state: dict[str, Any] = Field(default_factory=dict)
+    inventory: list[dict[str, Any]] = Field(default_factory=list)
+    delayed_resupply: list[dict[str, Any]] = Field(default_factory=list)
+    blockers: list[str] = Field(default_factory=list)
+    impact_summary: list[str] = Field(default_factory=list)
