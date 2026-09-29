@@ -54,6 +54,33 @@ class CargoCapacityPlan(Base):
     updated_at = Column(String(150), nullable=True)
 
 
+class ResupplyItem(Base):
+    __tablename__ = "expedition_resupply_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    expedition_id = Column(String(100), ForeignKey("expeditions.expedition_id", ondelete="CASCADE"), nullable=False, index=True)
+    inventory_id = Column(Integer, ForeignKey("inventory.id", ondelete="SET NULL"), nullable=True, index=True)
+    item_name = Column(String(255), nullable=False)
+    category = Column(String(100), nullable=False)
+    unit = Column(String(50), nullable=True, default="units")
+    current_stock = Column(Numeric(10, 2), nullable=False, default=0.0)
+    minimum_stock = Column(Numeric(10, 2), nullable=False, default=0.0)
+    predicted_demand = Column(Numeric(10, 2), nullable=False, default=0.0)
+    safety_stock = Column(Numeric(10, 2), nullable=False, default=0.0)
+    reorder_threshold = Column(Numeric(10, 2), nullable=False, default=0.0)
+    resupply_quantity = Column(Numeric(10, 2), nullable=False, default=0.0)
+    source_station_id = Column(String(100), nullable=True, default="Cape Town Staging Depot")
+    delivery_vessel_id = Column(String(100), nullable=True)
+    target_eta = Column(String(100), nullable=True)
+    priority = Column(String(50), nullable=False, default="NORMAL")
+    status = Column(String(50), nullable=False, default="SUGGESTED")
+    is_ml_recommended = Column(Boolean, default=False)
+    ml_confidence = Column(String(50), nullable=True)
+    recommendation_notes = Column(Text, nullable=True)
+    created_at = Column(String(150), nullable=True)
+    updated_at = Column(String(150), nullable=True)
+
+
 
 class Inventory(Base):
     __tablename__ = "inventory"
@@ -253,4 +280,4 @@ class Alert(Base):
     acknowledged_by = Column(String(150), nullable=True)
 
 
-
+

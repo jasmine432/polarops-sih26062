@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import sessionmaker
 
 from ..database import engine
-from ..models import Expedition, ExpeditionPlan, PackingItem, CargoCapacityPlan, Base
+from ..models import Expedition, ExpeditionPlan, PackingItem, CargoCapacityPlan, ResupplyItem, Base
 from ..schemas import (
     ExpeditionCreate,
     ExpeditionResponse,
@@ -23,6 +23,11 @@ from ..schemas import (
     CargoCapacityPlanCreateOrUpdate,
     CargoCapacitySummaryResponse,
     ExpeditionPackingSummaryResponse,
+    ResupplyItemCreate,
+    ResupplyItemUpdate,
+    ResupplyItemResponse,
+    MLResupplyGenerateRequest,
+    MLResupplyGenerateResponse,
 )
 from ..auth import AuthenticatedUser, get_current_user, require_roles
 from ..services.expedition_planner_service import (
@@ -42,6 +47,14 @@ from ..services.expedition_planner_service import (
     get_cargo_capacity_summary,
     get_expedition_packing_summary,
     seed_initial_packing_if_empty,
+)
+from ..services.resupply_service import (
+    get_resupply_items,
+    create_resupply_item,
+    update_resupply_item,
+    delete_resupply_item,
+    seed_initial_resupply_if_empty,
+    generate_ml_resupply_recommendations,
 )
 
 router = APIRouter(
@@ -544,6 +557,110 @@ def update_expedition_capacity_endpoint(
         create_or_update_capacity_plan(db, exp, payload)
         summary = get_cargo_capacity_summary(db, exp)
         return summary
+    finally:
+        db.close()
+
+
+# =========================================================================
+# PHASE 3.1 - 3.3 RESUPPLY PLANNER & ML DEMAND INTEGRATION ENDPOINTS
+# =========================================================================
+
+@router.get("/{expedition_id}/resupply", response_model=list[ResupplyItemResponse])
+@router.get("/{expedition_id}/resupply/", response_model=list[ResupplyItemResponse])
+def get_expedition_resupply_items_endpoint(
+    expedition_id: str,
+    _: Annotated[AuthenticatedUser, Depends(get_current_user)],
+) -> Any:
+    """Retrieve all planned/recommended resupply line items for an expedition."""
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        seed_initial_resupply_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        items = get_resupply_items(db, exp)
+        return items
+    finally:
+        db.close()
+
+
+@router.post("/{expedition_id}/resupply", response_model=ResupplyItemResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/{expedition_id}/resupply/", response_model=ResupplyItemResponse, status_code=status.HTTP_201_CREATED)
+def create_expedition_resupply_item_endpoint(
+    expedition_id: str,
+    payload: ResupplyItemCreate,
+    _: Annotated[AuthenticatedUser, Depends(require_roles("ADMIN", "PHC"))],
+) -> Any:
+    """Create a new planned/recommended resupply line item for an expedition."""
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        item = create_resupply_item(db, exp, payload)
+        return item
+    finally:
+        db.close()
+
+
+@router.patch("/{expedition_id}/resupply/{item_id}", response_model=ResupplyItemResponse)
+@router.patch("/{expedition_id}/resupply/{item_id}/", response_model=ResupplyItemResponse)
+def update_expedition_resupply_item_endpoint(
+    expedition_id: str,
+    item_id: int,
+    payload: ResupplyItemUpdate,
+    _: Annotated[AuthenticatedUser, Depends(require_roles("ADMIN", "PHC"))],
+) -> Any:
+    """Update a resupply item (e.g. adjust quantities, mark as APPROVED, PLANNED, or CANCELLED)."""
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        try:
+            item = update_resupply_item(db, exp, item_id, payload)
+            return item
+        except ValueError as err:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
+    finally:
+        db.close()
+
+
+@router.delete("/{expedition_id}/resupply/{item_id}")
+@router.delete("/{expedition_id}/resupply/{item_id}/")
+def remove_expedition_resupply_item_endpoint(
+    expedition_id: str,
+    item_id: int,
+    _: Annotated[AuthenticatedUser, Depends(require_roles("ADMIN", "PHC"))],
+) -> Any:
+    """Remove a resupply planning line item from an expedition."""
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        try:
+            result = delete_resupply_item(db, exp, item_id)
+            return result
+        except ValueError as err:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
+    finally:
+        db.close()
+
+
+@router.post("/{expedition_id}/resupply/generate-ml-recommendations", response_model=MLResupplyGenerateResponse)
+@router.post("/{expedition_id}/resupply/generate-ml-recommendations/", response_model=MLResupplyGenerateResponse)
+async def generate_ml_recommendations_endpoint(
+    expedition_id: str,
+    payload: MLResupplyGenerateRequest,
+    _: Annotated[AuthenticatedUser, Depends(require_roles("ADMIN", "PHC"))],
+) -> Any:
+    """
+    Run ML inventory demand forecasting across station inventory to generate
+    SUGGESTED resupply items for human-in-the-loop review.
+    """
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        response = await generate_ml_resupply_recommendations(db, exp, payload)
+        return response
     finally:
         db.close()
 

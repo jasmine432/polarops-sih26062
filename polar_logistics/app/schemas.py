@@ -711,6 +711,105 @@ class ExpeditionPackingSummaryResponse(BaseModel):
     capacity: CargoCapacitySummaryResponse
 
 
+ResupplyPriority = Literal["CRITICAL", "HIGH", "NORMAL", "LOW"]
+ResupplyStatus = Literal["SUGGESTED", "PLANNED", "APPROVED", "IN_TRANSIT", "DELIVERED", "CANCELLED"]
 
 
-
+class ResupplyItemCreate(BaseModel):
+    inventory_id: int | None = Field(default=None, alias="inventoryId")
+    item_name: str = Field(min_length=1, max_length=255, alias="itemName")
+    category: str = Field(min_length=1, max_length=100, default="Provisions & Rations")
+    unit: str | None = Field(default="units", max_length=50)
+    current_stock: float = Field(ge=0.0, default=0.0, alias="currentStock")
+    minimum_stock: float = Field(ge=0.0, default=0.0, alias="minimumStock")
+    predicted_demand: float = Field(ge=0.0, default=0.0, alias="predictedDemand")
+    safety_stock: float | None = Field(ge=0.0, default=None, alias="safetyStock")
+    reorder_threshold: float | None = Field(ge=0.0, default=None, alias="reorderThreshold")
+    resupply_quantity: float | None = Field(ge=0.0, default=None, alias="resupplyQuantity")
+    source_station_id: str | None = Field(default="Cape Town Staging Depot", alias="sourceStationId")
+    delivery_vessel_id: str | None = Field(default=None, alias="deliveryVesselId")
+    target_eta: str | None = Field(default=None, alias="targetEta")
+    priority: ResupplyPriority = Field(default="NORMAL")
+    status: ResupplyStatus = Field(default="PLANNED")
+    is_ml_recommended: bool = Field(default=False, alias="isMlRecommended")
+    ml_confidence: str | None = Field(default=None, alias="mlConfidence")
+    recommendation_notes: str | None = Field(default=None, alias="recommendationNotes")
+
+    class Config:
+        populate_by_name = True
+
+
+class ResupplyItemUpdate(BaseModel):
+    item_name: str | None = Field(default=None, min_length=1, max_length=255, alias="itemName")
+    category: str | None = Field(default=None, min_length=1, max_length=100)
+    unit: str | None = Field(default=None, max_length=50)
+    current_stock: float | None = Field(default=None, ge=0.0, alias="currentStock")
+    minimum_stock: float | None = Field(default=None, ge=0.0, alias="minimumStock")
+    predicted_demand: float | None = Field(default=None, ge=0.0, alias="predictedDemand")
+    safety_stock: float | None = Field(default=None, ge=0.0, alias="safetyStock")
+    reorder_threshold: float | None = Field(default=None, ge=0.0, alias="reorderThreshold")
+    resupply_quantity: float | None = Field(default=None, ge=0.0, alias="resupplyQuantity")
+    source_station_id: str | None = Field(default=None, alias="sourceStationId")
+    delivery_vessel_id: str | None = Field(default=None, alias="deliveryVesselId")
+    target_eta: str | None = Field(default=None, alias="targetEta")
+    priority: ResupplyPriority | None = None
+    status: ResupplyStatus | None = None
+    recommendation_notes: str | None = Field(default=None, alias="recommendationNotes")
+
+    class Config:
+        populate_by_name = True
+
+
+class ResupplyItemResponse(BaseModel):
+    id: int
+    expedition_id: str
+    inventory_id: int | None = None
+    item_name: str
+    category: str
+    unit: str | None = None
+    current_stock: float
+    minimum_stock: float
+    predicted_demand: float
+    safety_stock: float
+    reorder_threshold: float
+    resupply_quantity: float
+    source_station_id: str | None = None
+    delivery_vessel_id: str | None = None
+    target_eta: str | None = None
+    priority: str
+    status: str
+    is_ml_recommended: bool = False
+    ml_confidence: str | None = None
+    recommendation_notes: str | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
+
+    class Config:
+        from_attributes = True
+
+
+class MLResupplyGenerateRequest(BaseModel):
+    station_override: str | None = Field(default=None, alias="stationOverride")
+    duration_days_override: int | None = Field(default=None, ge=1, alias="durationDaysOverride")
+    lead_time_days: int | None = Field(default=14, ge=0, alias="leadTimeDays")
+    include_all_categories: bool = Field(default=True, alias="includeAllCategories")
+
+    class Config:
+        populate_by_name = True
+
+
+class MLResupplyGenerateResponse(BaseModel):
+    expedition_id: str
+    expedition_name: str
+    station: str
+    total_inventory_items_evaluated: int
+    ml_recommendations_count: int
+    fallback_recommendations_count: int
+    items_requiring_resupply_count: int
+    recommendations: list[ResupplyItemResponse]
+    execution_notes: str | None = None
+
+
+
+
+
