@@ -1,7 +1,25 @@
-from sqlalchemy import Column, Integer, String, Text, Numeric, Date, Boolean
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Column, Integer, String, Text, Numeric, Date, Boolean, ForeignKey
+from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
+
+
+class ExpeditionPlan(Base):
+    __tablename__ = "expedition_plans"
+
+    id = Column(Integer, primary_key=True, index=True)
+    expedition_id = Column(String(100), ForeignKey("expeditions.expedition_id", ondelete="CASCADE"), unique=True, nullable=False, index=True)
+    planning_status = Column(String(50), nullable=False, default="PLANNING")
+    mission_objective = Column(Text, nullable=True)
+    planned_start = Column(Date, nullable=True)
+    planned_end = Column(Date, nullable=True)
+    station = Column(String(150), nullable=True)
+    vessel = Column(String(150), nullable=True)
+    lead_planner = Column(String(150), nullable=True)
+    planning_notes = Column(Text, nullable=True)
+    created_at = Column(String(150), nullable=True)
+    updated_at = Column(String(150), nullable=True)
+
 
 
 class Inventory(Base):

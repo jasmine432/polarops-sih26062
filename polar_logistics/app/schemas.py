@@ -449,4 +449,136 @@ class AlertResponse(BaseModel):
         from_attributes = True
 
 
+# ==============================================================================
+# Expedition Planning & Mission Lifecycle Schemas
+# ==============================================================================
+
+PlanningStatusType = Literal[
+    "PLANNING",
+    "READY_FOR_REVIEW",
+    "READY",
+    "ACTIVE",
+    "COMPLETED",
+    "CANCELLED",
+]
+
+
+class ExpeditionPlanCreate(BaseModel):
+    planning_status: PlanningStatusType | str | None = Field(alias="planningStatus", default="PLANNING")
+    mission_objective: str | None = Field(alias="missionObjective", default=None)
+    planned_start: date | str | None = Field(alias="plannedStart", default=None)
+    planned_end: date | str | None = Field(alias="plannedEnd", default=None)
+    station: str | None = None
+    vessel: str | None = None
+    lead_planner: str | None = Field(alias="leadPlanner", default=None)
+    planning_notes: str | None = Field(alias="planningNotes", default=None)
+
+    class Config:
+        populate_by_name = True
+
+
+class ExpeditionPlanUpdate(BaseModel):
+    planning_status: PlanningStatusType | str | None = Field(alias="planningStatus", default=None)
+    mission_objective: str | None = Field(alias="missionObjective", default=None)
+    planned_start: date | str | None = Field(alias="plannedStart", default=None)
+    planned_end: date | str | None = Field(alias="plannedEnd", default=None)
+    station: str | None = None
+    vessel: str | None = None
+    lead_planner: str | None = Field(alias="leadPlanner", default=None)
+    planning_notes: str | None = Field(alias="planningNotes", default=None)
+
+    class Config:
+        populate_by_name = True
+
+
+class ExpeditionPlanStatusUpdate(BaseModel):
+    planning_status: PlanningStatusType | str = Field(alias="planningStatus")
+    planning_notes: str | None = Field(alias="planningNotes", default=None)
+
+    class Config:
+        populate_by_name = True
+
+
+class ExpeditionPlanResponse(BaseModel):
+    id: int
+    expedition_id: str
+    planning_status: str
+    mission_objective: str | None = None
+    planned_start: Any | None = None
+    planned_end: Any | None = None
+    station: str | None = None
+    vessel: str | None = None
+    lead_planner: str | None = None
+    planning_notes: str | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
+
+    class Config:
+        from_attributes = True
+
+
+class PlanningPersonnelSummary(BaseModel):
+    total_assigned: int = 0
+    medically_cleared_count: int = 0
+    survival_trained_count: int = 0
+    roles: list[str] = []
+    lead_officer: str | None = None
+
+
+class PlanningCargoSummary(BaseModel):
+    total_count: int = 0
+    total_weight_mt: float | None = 0.0
+    critical_cargo_count: int = 0
+    categories: list[str] = []
+
+
+class PlanningInventorySummary(BaseModel):
+    total_items_tracked: int = 0
+    low_stock_items_count: int = 0
+    station_monitored: str | None = None
+
+
+class PlanningReadinessSummary(BaseModel):
+    personnel_ready: bool = True
+    vessel_ready: bool = True
+    station_ready: bool = True
+    no_critical_alerts: bool = True
+    readiness_score: int = 100
+    readiness_status: Literal["READY", "PENDING_CHECKS", "BLOCKED", "OPERATIONAL"] = "READY"
+    indicators: dict[str, Any] = {}
+
+
+class ExpeditionPlanSummaryResponse(BaseModel):
+    expedition_id: str
+    expedition_name: str
+    expedition_status: str
+    planning_status: str
+    season: str | None = None
+    station: str
+    start_date: Any | None = None
+    end_date: Any | None = None
+    planned_start: Any | None = None
+    planned_end: Any | None = None
+    duration_days: int | None = None
+    lead: str | None = None
+    lead_role: str | None = None
+    lead_org: str | None = None
+    mandate: str | None = None
+    primary_vessel: str | None = None
+    air_support: str | None = None
+    comms_link: str | None = None
+    mission_objective: str | None = None
+    planning_notes: str | None = None
+    personnel: PlanningPersonnelSummary
+    cargo: PlanningCargoSummary
+    inventory: PlanningInventorySummary
+    vessel_assignment: dict[str, Any] | None = None
+    station_details: dict[str, Any] | None = None
+    active_alerts_count: int = 0
+    critical_alerts_count: int = 0
+    emergency_incident_count: int = 0
+    readiness: PlanningReadinessSummary
+
+
+
 

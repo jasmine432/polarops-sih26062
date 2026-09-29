@@ -5,9 +5,26 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import sessionmaker
 
 from ..database import engine
-from ..models import Expedition
-from ..schemas import ExpeditionCreate, ExpeditionResponse, ExpeditionStatusUpdate
+from ..models import Expedition, ExpeditionPlan, Base
+from ..schemas import (
+    ExpeditionCreate,
+    ExpeditionResponse,
+    ExpeditionStatusUpdate,
+    ExpeditionPlanCreate,
+    ExpeditionPlanUpdate,
+    ExpeditionPlanStatusUpdate,
+    ExpeditionPlanResponse,
+    ExpeditionPlanSummaryResponse,
+)
 from ..auth import AuthenticatedUser, get_current_user, require_roles
+from ..services.expedition_planner_service import (
+    find_expedition_or_404,
+    get_or_create_default_plan,
+    create_or_update_plan,
+    update_plan_status,
+    get_planning_summary,
+    seed_initial_plans_if_empty,
+)
 
 router = APIRouter(
     prefix="/expeditions",
@@ -15,6 +32,8 @@ router = APIRouter(
 )
 
 SessionLocal = sessionmaker(bind=engine)
+Base.metadata.create_all(bind=engine)
+
 
 INITIAL_SEED_EXPEDITIONS = [
     {
@@ -83,6 +102,8 @@ def _seed_expeditions_if_empty(db) -> None:
         for seed_data in INITIAL_SEED_EXPEDITIONS:
             db.add(Expedition(**seed_data))
         db.commit()
+    seed_initial_plans_if_empty(db)
+
 
 
 def _parse_date(val: Any) -> date | None:
@@ -275,3 +296,82 @@ def update_expedition_status(
         return exp
     finally:
         db.close()
+
+
+# ==============================================================================
+# Expedition Planner Endpoints
+# ==============================================================================
+
+@router.get("/{expedition_id}/plan", response_model=ExpeditionPlanResponse)
+@router.get("/{expedition_id}/plan/", response_model=ExpeditionPlanResponse)
+def get_expedition_plan(
+    expedition_id: str,
+    _: Annotated[AuthenticatedUser, Depends(get_current_user)],
+) -> Any:
+    """Retrieve complete planning information for a specific expedition."""
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        plan = get_or_create_default_plan(db, exp)
+        return plan
+    finally:
+        db.close()
+
+
+@router.post("/{expedition_id}/plan", response_model=ExpeditionPlanResponse, status_code=status.HTTP_200_OK)
+@router.post("/{expedition_id}/plan/", response_model=ExpeditionPlanResponse, status_code=status.HTTP_200_OK)
+@router.patch("/{expedition_id}/plan", response_model=ExpeditionPlanResponse)
+@router.patch("/{expedition_id}/plan/", response_model=ExpeditionPlanResponse)
+@router.put("/{expedition_id}/plan", response_model=ExpeditionPlanResponse)
+@router.put("/{expedition_id}/plan/", response_model=ExpeditionPlanResponse)
+def create_or_update_expedition_plan(
+    expedition_id: str,
+    payload: ExpeditionPlanCreate,
+    _: Annotated[AuthenticatedUser, Depends(require_roles("ADMIN", "PHC"))],
+) -> Any:
+    """Create or update planning details for a specific expedition."""
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        plan = create_or_update_plan(db, exp, payload)
+        return plan
+    finally:
+        db.close()
+
+
+@router.patch("/{expedition_id}/plan/status", response_model=ExpeditionPlanResponse)
+@router.patch("/{expedition_id}/plan/status/", response_model=ExpeditionPlanResponse)
+def update_expedition_plan_status(
+    expedition_id: str,
+    payload: ExpeditionPlanStatusUpdate,
+    _: Annotated[AuthenticatedUser, Depends(require_roles("ADMIN", "PHC"))],
+) -> Any:
+    """Update the planning lifecycle status for a specific expedition."""
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        plan = update_plan_status(db, exp, payload)
+        return plan
+    finally:
+        db.close()
+
+
+@router.get("/{expedition_id}/plan/summary", response_model=ExpeditionPlanSummaryResponse)
+@router.get("/{expedition_id}/plan/summary/", response_model=ExpeditionPlanSummaryResponse)
+def get_expedition_planning_summary(
+    expedition_id: str,
+    _: Annotated[AuthenticatedUser, Depends(get_current_user)],
+) -> Any:
+    """Retrieve an aggregated operational planning summary for an expedition."""
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        summary = get_planning_summary(db, exp)
+        return summary
+    finally:
+        db.close()
+
