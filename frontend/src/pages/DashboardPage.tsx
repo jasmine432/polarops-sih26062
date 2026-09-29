@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { getTimeBasedGreeting, formatLocalDate, formatLocalTimeWithZone } from '@/lib/utils'
 import {
   Card,
   CardHeader,
@@ -114,7 +115,15 @@ interface OperationalAlert {
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate()
   const { currentRole, currentUser } = useOperational()
-  const [lastUpdated] = useState('Monday, 22 September 2026 18:31 IST')
+  const [currentTime, setCurrentTime] = useState<Date>(() => new Date())
+
+  // Keep local clock, date, and greeting synchronized
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 30000)
+    return () => clearInterval(timer)
+  }, [])
 
   // Modals / Inspection details
   const [selectedExpedition, setSelectedExpedition] = useState<Expedition | null>(null)
@@ -317,51 +326,53 @@ export const DashboardPage: React.FC = () => {
           ? 'Emergency Coordinator'
           : 'Admin'
 
+  const timeGreeting = getTimeBasedGreeting(currentTime)
+
   // Header Title & Subtitle based on Role
   const getHeaderInfo = () => {
     switch (role) {
       case 'Admin':
         return {
           title: 'System Overview',
-          greeting: `Good Morning, ${currentUser?.name ?? 'Director'}!`,
+          greeting: `${timeGreeting}, ${currentUser?.name ?? 'Director'}!`,
           subtitle: 'Comprehensive Operational Health & Strategic Telemetry Matrix · NCPOR Directorate',
         }
       case 'Expedition Coordinator':
       case 'Expedition Manager (NCPOR)':
         return {
           title: 'Expedition Operations',
-          greeting: `Good Morning, ${currentUser?.name ?? 'Expedition Coordinator'}!`,
+          greeting: `${timeGreeting}, ${currentUser?.name ?? 'Expedition Coordinator'}!`,
           subtitle: 'Active Mission Traverses, Field Personnel & Operational Timelines',
         }
       case 'Inventory Manager':
         return {
           title: 'Inventory & Demand Forecast',
-          greeting: `Good Morning, ${currentUser?.name ?? 'Inventory Manager'}!`,
+          greeting: `${timeGreeting}, ${currentUser?.name ?? 'Inventory Manager'}!`,
           subtitle: 'Multi-Station Supply Tracking, Stock Burn Rates & AI Replenishment Forecasting',
         }
       case 'Emergency Coordinator':
         return {
           title: 'Emergency Response',
-          greeting: `Good Morning, ${currentUser?.name ?? 'Emergency Coordinator'}!`,
+          greeting: `${timeGreeting}, ${currentUser?.name ?? 'Emergency Coordinator'}!`,
           subtitle: 'Incident Command, SAR Unit Dispatches, Weather Hazards & Crew Safety',
         }
       case 'Logistics Officer':
         return {
           title: 'Cargo & Logistics',
-          greeting: `Good Morning, ${currentUser?.name ?? 'Logistics Officer'}!`,
+          greeting: `${timeGreeting}, ${currentUser?.name ?? 'Logistics Officer'}!`,
           subtitle: 'Vessel Manifests, In-Transit Containers, Port Customs & Supply Chains',
         }
       case 'Station Officer':
       case 'Station Manager (Maitri)':
         return {
           title: 'Station Operations',
-          greeting: `Good Morning, ${currentUser?.name ?? 'Station Officer'}!`,
+          greeting: `${timeGreeting}, ${currentUser?.name ?? 'Station Officer'}!`,
           subtitle: 'Base Infrastructure, Life Support, Generator Power & Environmental Telemetry',
         }
       default:
         return {
           title: 'System Overview',
-          greeting: `Good Morning, ${currentUser?.name ?? 'User'}!`,
+          greeting: `${timeGreeting}, ${currentUser?.name ?? 'User'}!`,
           subtitle: 'Real-time insights for a safer, smarter and more sustainable Antarctic mission.',
         }
     }
@@ -392,9 +403,9 @@ export const DashboardPage: React.FC = () => {
           <div className="flex items-center gap-2.5 px-3.5 py-2 bg-white dark:bg-[#2C6A74] border border-[#B9D9E1] dark:border-[#3E808C] rounded-xl shadow-2xs">
             <Calendar className="w-4 h-4 text-[#447F98] dark:text-[#AEE3E0]" />
             <div className="text-left text-xs font-bold text-[#173B46] dark:text-white leading-tight">
-              Monday, 22 September 2026
+              {formatLocalDate(currentTime)}
               <div className="text-[10px] text-[#466A75] dark:text-[#D0EFEF] font-mono font-normal">
-                18:31 IST
+                {formatLocalTimeWithZone(currentTime)}
               </div>
             </div>
           </div>
