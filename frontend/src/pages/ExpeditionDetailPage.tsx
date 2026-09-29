@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Badge,
   Button,
@@ -42,7 +42,6 @@ import {
   ShieldCheck,
   Navigation,
   Cpu,
-
 } from 'lucide-react'
 import { INITIAL_EXPEDITIONS, ExpeditionDetail } from '@/data/expeditionsData'
 import { fetchExpeditionsList } from '@/services/expeditionService'
@@ -64,12 +63,10 @@ type TabKey =
   | 'incidents'
   | 'timeline'
 
-
-
-
 export const ExpeditionDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   // Master expeditions list from PostgreSQL
   const [expeditionsList, setExpeditionsList] = useState<ExpeditionDetail[]>(INITIAL_EXPEDITIONS)
@@ -91,7 +88,38 @@ export const ExpeditionDetailPage: React.FC = () => {
       exp.id.replace(/-/g, '').toLowerCase() === id?.replace(/-/g, '').toLowerCase()
   )
 
-  const [activeTab, setActiveTab] = useState<TabKey>('overview')
+  const tabParam = searchParams.get('tab') as TabKey | null
+  const validTabs: TabKey[] = [
+    'overview',
+    'progress',
+    'readiness',
+    'simulation',
+    'personnel',
+    'packing',
+    'cargo',
+    'inventory',
+    'environmental',
+    'incidents',
+    'timeline',
+  ]
+
+  const [activeTab, setActiveTab] = useState<TabKey>(() => {
+    if (tabParam && validTabs.includes(tabParam)) {
+      return tabParam
+    }
+    return 'overview'
+  })
+
+  useEffect(() => {
+    if (tabParam && validTabs.includes(tabParam) && tabParam !== activeTab) {
+      setActiveTab(tabParam)
+    }
+  }, [tabParam])
+
+  const handleTabSelect = (tab: TabKey) => {
+    setActiveTab(tab)
+    setSearchParams({ tab })
+  }
 
   if (!expedition) {
     return (
@@ -152,17 +180,17 @@ export const ExpeditionDetailPage: React.FC = () => {
       </div>
 
       {/* 2. HEADER */}
-      <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
+      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-[#001B48] text-white tracking-wider">
+              <span className="font-mono text-xs font-bold px-2.5 py-1 rounded bg-[#001B48] text-white tracking-wider">
                 {expedition.id}
               </span>
               <Badge variant={statusVariant} size="sm" withDot>
                 {expedition.status.toUpperCase()}
               </Badge>
-              <span className="text-xs text-slate-500 font-mono">Mandate: <strong className="text-slate-700">{expedition.mandate}</strong></span>
+              <span className="text-xs text-slate-500 font-mono">Mandate: <strong className="text-slate-800 font-semibold">{expedition.mandate}</strong></span>
             </div>
             <h1 className="text-xl font-bold text-slate-900 tracking-tight">{expedition.name}</h1>
             <p className="text-xs text-slate-600 max-w-4xl">{expedition.season}</p>
@@ -182,11 +210,11 @@ export const ExpeditionDetailPage: React.FC = () => {
         <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-sans">
           <div>
             <span className="text-[11px] text-slate-500 block font-mono font-bold uppercase">Expedition Lead</span>
-            <span className="font-semibold text-slate-900">{expedition.lead}</span>
+            <span className="font-bold text-slate-900">{expedition.lead}</span>
           </div>
           <div>
             <span className="text-[11px] text-slate-500 block font-mono font-bold uppercase">Assigned Station(s)</span>
-            <span className="font-semibold text-slate-900">{expedition.station}</span>
+            <span className="font-bold text-slate-900">{expedition.station}</span>
           </div>
           <div>
             <span className="text-[11px] text-slate-500 block font-mono font-bold uppercase">Personnel Deployed</span>
@@ -194,26 +222,26 @@ export const ExpeditionDetailPage: React.FC = () => {
           </div>
           <div>
             <span className="text-[11px] text-slate-500 block font-mono font-bold uppercase">Vessel Support</span>
-            <span className="font-semibold text-slate-900 truncate block">{expedition.primaryVessel}</span>
+            <span className="font-bold text-slate-900 truncate block">{expedition.primaryVessel}</span>
           </div>
         </div>
       </div>
 
       {/* 3. TABS NAVIGATION */}
-      <div className="border-b border-slate-200 bg-white rounded-lg px-2 pt-2 shadow-xs">
-        <nav className="flex space-x-1 overflow-x-auto scrollbar-none" aria-label="Expedition Tabs">
+      <div className="border border-slate-200 bg-white rounded-xl p-1.5 shadow-xs overflow-x-auto">
+        <nav className="flex space-x-1 min-w-max" aria-label="Expedition Tabs">
           {[
-            { key: 'overview', label: 'Overview', icon: Layers, count: null },
-            { key: 'progress', label: 'Progress & Route', icon: Navigation, count: null },
-            { key: 'readiness', label: 'Mission Readiness', icon: ShieldCheck, count: null },
-            { key: 'simulation', label: 'What-If Simulation', icon: Cpu, count: null },
-            { key: 'personnel', label: 'Personnel', icon: Users, count: expedition.personnel.length },
-            { key: 'packing', label: 'Individual Packing & Load', icon: Scale, count: null },
-            { key: 'cargo', label: 'Cargo', icon: Package, count: expedition.cargo.length },
-            { key: 'inventory', label: 'Inventory Requirements', icon: Boxes, count: expedition.inventory.length },
-            { key: 'environmental', label: 'Environmental Conditions', icon: Wind, count: expedition.environmental.length },
-            { key: 'incidents', label: 'Incidents', icon: ShieldAlert, count: expedition.incidents.length },
-            { key: 'timeline', label: 'Activity Timeline', icon: Clock, count: expedition.timeline.length },
+            { key: 'overview', label: 'Overview', icon: Layers, count: null, badge: null },
+            { key: 'progress', label: 'Progress & Route', icon: Navigation, count: null, badge: 'Route Tracking' },
+            { key: 'readiness', label: 'Mission Readiness', icon: ShieldCheck, count: null, badge: '7-Pillar Audit' },
+            { key: 'simulation', label: 'What-If Simulation', icon: Cpu, count: null, badge: 'Decision Support' },
+            { key: 'personnel', label: 'Personnel', icon: Users, count: expedition.personnel.length, badge: null },
+            { key: 'packing', label: 'Individual Packing & Load', icon: Scale, count: null, badge: 'Capacity Planning' },
+            { key: 'cargo', label: 'Cargo', icon: Package, count: expedition.cargo.length, badge: null },
+            { key: 'inventory', label: 'Inventory Requirements', icon: Boxes, count: expedition.inventory.length, badge: null },
+            { key: 'environmental', label: 'Environmental Conditions', icon: Wind, count: expedition.environmental.length, badge: null },
+            { key: 'incidents', label: 'Incidents', icon: ShieldAlert, count: expedition.incidents.length, badge: null },
+            { key: 'timeline', label: 'Activity Timeline', icon: Clock, count: expedition.timeline.length, badge: null },
           ].map((tab) => {
             const Icon = tab.icon
             const isActive = activeTab === tab.key
@@ -221,19 +249,30 @@ export const ExpeditionDetailPage: React.FC = () => {
               <button
                 key={tab.key}
                 type="button"
-                onClick={() => setActiveTab(tab.key as TabKey)}
-                className={`group inline-flex items-center gap-2 py-2.5 px-3 border-b-2 font-medium text-xs whitespace-nowrap transition-colors cursor-pointer ${
+                onClick={() => handleTabSelect(tab.key as TabKey)}
+                className={`group inline-flex items-center gap-2 py-2.5 px-3.5 rounded-lg font-medium text-xs whitespace-nowrap transition-all cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#02457A] ${
                   isActive
-                    ? 'border-[#02457A] text-[#02457A] font-bold'
-                    : 'border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300'
+                    ? 'bg-[#02457A] text-white font-bold shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-semibold'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#02457A]' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 <span>{tab.label}</span>
+                {tab.badge && (
+                  <span
+                    className={`px-1.5 py-0.2 rounded text-[9px] font-mono uppercase font-bold tracking-tight ${
+                      isActive
+                        ? 'bg-sky-400/20 text-sky-200 border border-sky-300/30'
+                        : 'bg-slate-100 text-slate-500 border border-slate-200'
+                    }`}
+                  >
+                    {tab.badge}
+                  </span>
+                )}
                 {tab.count !== null && (
                   <span
                     className={`ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
-                      isActive ? 'bg-[#02457A] text-white font-bold' : 'bg-slate-100 text-slate-600'
+                      isActive ? 'bg-white/20 text-white font-bold' : 'bg-slate-100 text-slate-600'
                     }`}
                   >
                     {tab.count}
@@ -244,6 +283,7 @@ export const ExpeditionDetailPage: React.FC = () => {
           })}
         </nav>
       </div>
+
 
       {/* 4. TAB CONTENTS */}
       <div className="space-y-4">

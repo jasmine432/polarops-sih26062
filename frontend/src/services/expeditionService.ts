@@ -738,3 +738,105 @@ export async function runWhatIfSimulation(
   }
   return response.json()
 }
+
+// =========================================================================
+// RESUPPLY & MISSION CONTROL SUMMARY HELPERS
+// =========================================================================
+
+export interface ResupplyItemDto {
+  id: number
+  expedition_id: string
+  item_name: string
+  category: string
+  unit?: string | null
+  current_stock: number
+  minimum_stock: number
+  predicted_demand?: number
+  safety_stock?: number
+  reorder_threshold?: number
+  resupply_quantity: number
+  source_station_id?: string | null
+  delivery_vessel_id?: string | null
+  target_eta?: string | null
+  priority: string
+  status: string
+  is_ml_recommended?: boolean
+  recommendation_notes?: string | null
+}
+
+export async function fetchResupplyItems(expeditionId: string): Promise<ResupplyItemDto[]> {
+  const token = getAccessToken()
+  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const response = await fetch(`${API_BASE_URL}/expeditions/${encodeURIComponent(expeditionId)}/resupply`, {
+    method: 'GET',
+    headers,
+  })
+
+  if (!response.ok) {
+    const txt = await response.text().catch(() => '')
+    throw new Error(txt || `Failed to fetch resupply items (${response.status})`)
+  }
+  return response.json()
+}
+
+export interface ExpeditionMissionControlSummary {
+  expedition: ExpeditionDetail
+  readiness: MissionReadinessResponse | null
+  progress: MissionProgressResponse | null
+  capacity: CargoCapacitySummary | null
+  resupplyItems: ResupplyItemDto[]
+  attentionReasons: string[]
+}
+
+export async function fetchExpeditionMissionControlSummary(
+  expedition: ExpeditionDetail
+): Promise<ExpeditionMissionControlSummary> {
+  const [readinessRes, progressRes, capacityRes, resupplyRes] = await Promise.allSettled([
+    fetchMissionReadiness(expedition.id),
+    fetchMissionProgress(expedition.id),
+    fetchCargoCapacity(expedition.id),
+    fetchResupplyItems(expedition.id),
+  ])
+
+  const readiness = readinessRes.status === 'fulfilled' ? readinessRes.value : null
+  const progress = progressRes.status === 'fulfilled' ? progressRes.value : null
+  const capacity = capacityRes.status === 'fulfilled' ? capacityRes.value : null
+  const resupplyItems = resupplyRes.status === 'fulfilled' ? resupplyRes.value : []
+
+  const attentionReasons: string[] = []
+
+  if (readiness && readiness.overallStatus === 'NOT_READY') {
+    attentionReasons.push(
+      `${readiness.failedChecks} Readiness Blockers Detected (${readiness.pillars.filter(p => p.status === 'FAILED').map(p => p.title).join(', ')})`
+    )
+  }
+
+  if (capacity && capacity.status === 'OVER_CAPACITY') {
+    attentionReasons.push(
+      `Cargo Over Capacity (${capacity.total_planned_weight_kg.toFixed(1)} / ${capacity.maximum_capacity_kg.toFixed(0)} kg)`
+    )
+  }
+
+  const criticalResupply = resupplyItems.filter(r => r.priority === 'CRITICAL' || r.status === 'SUBMITTED')
+  if (criticalResupply.length > 0) {
+    attentionReasons.push(`${criticalResupply.length} Critical Resupply Action(s) Pending`)
+  }
+
+  if (expedition.incidents && expedition.incidents.length > 0) {
+    const activeIncidents = expedition.incidents.filter(i => i.status !== 'Resolved' && i.status !== 'Closed')
+    if (activeIncidents.length > 0) {
+      attentionReasons.push(`${activeIncidents.length} Active Operational Incident(s)`)
+    }
+  }
+
+  return {
+    expedition,
+    readiness,
+    progress,
+    capacity,
+    resupplyItems,
+    attentionReasons,
+  }
+}
