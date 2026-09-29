@@ -88,7 +88,7 @@ export const ExpeditionDetailPage: React.FC = () => {
       exp.id.replace(/-/g, '').toLowerCase() === id?.replace(/-/g, '').toLowerCase()
   )
 
-  const tabParam = searchParams.get('tab') as TabKey | null
+  const rawTabParam = searchParams.get('tab')
   const validTabs: TabKey[] = [
     'overview',
     'progress',
@@ -102,6 +102,22 @@ export const ExpeditionDetailPage: React.FC = () => {
     'incidents',
     'timeline',
   ]
+
+  const normalizeTab = (raw: string | null): TabKey | null => {
+    if (!raw) return null
+    const cleaned = raw.toLowerCase().trim()
+    if (validTabs.includes(cleaned as TabKey)) return cleaned as TabKey
+    if (['simulation', 'what-if', 'whatif', 'simulator', 'what_if'].includes(cleaned)) return 'simulation'
+    if (['progress', 'route', 'tracking', 'progress-route', 'progress_route'].includes(cleaned)) return 'progress'
+    if (['readiness', 'audit', 'mission-readiness', 'mission_readiness'].includes(cleaned)) return 'readiness'
+    if (['packing', 'load', 'packing-load', 'individual-packing', 'packing_load'].includes(cleaned)) return 'packing'
+    if (['env', 'environment', 'weather'].includes(cleaned)) return 'environmental'
+    if (['incident'].includes(cleaned)) return 'incidents'
+    if (['activity', 'history'].includes(cleaned)) return 'timeline'
+    return null
+  }
+
+  const tabParam = normalizeTab(rawTabParam)
 
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
     if (tabParam && validTabs.includes(tabParam)) {
