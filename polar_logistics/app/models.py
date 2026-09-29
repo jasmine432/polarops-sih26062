@@ -113,6 +113,7 @@ class Cargo(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     cargo_id = Column(String(100), unique=True, nullable=False, index=True)
+    expedition_id = Column(String(100), ForeignKey("expeditions.expedition_id", ondelete="SET NULL"), nullable=True, index=True)
     description = Column(Text, nullable=True)
     category = Column(String(100), nullable=True)
     weight = Column(Numeric, nullable=True)

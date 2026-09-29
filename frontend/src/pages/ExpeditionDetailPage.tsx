@@ -45,10 +45,13 @@ import {
 } from 'lucide-react'
 import { INITIAL_EXPEDITIONS, ExpeditionDetail } from '@/data/expeditionsData'
 import { fetchExpeditionsList } from '@/services/expeditionService'
+import { fetchCargoList } from '@/services/cargoService'
+import type { CargoRecord } from '@/data/cargoData'
 import { PackingAndLoadPlanner } from '@/components/expeditions/PackingAndLoadPlanner'
 import { MissionReadinessAudit } from '@/components/expeditions/MissionReadinessAudit'
 import { ExpeditionProgressTracker } from '@/components/expeditions/ExpeditionProgressTracker'
 import { WhatIfSimulator } from '@/components/expeditions/WhatIfSimulator'
+import { Loader2 } from 'lucide-react'
 
 type TabKey =
   | 'overview'
@@ -70,6 +73,8 @@ export const ExpeditionDetailPage: React.FC = () => {
 
   // Master expeditions list from PostgreSQL
   const [expeditionsList, setExpeditionsList] = useState<ExpeditionDetail[]>(INITIAL_EXPEDITIONS)
+  const [assignedCargo, setAssignedCargo] = useState<CargoRecord[]>([])
+  const [isCargoLoading, setIsCargoLoading] = useState<boolean>(false)
 
   useEffect(() => {
     fetchExpeditionsList()
@@ -87,6 +92,22 @@ export const ExpeditionDetailPage: React.FC = () => {
       exp.id.toLowerCase() === id?.toLowerCase() ||
       exp.id.replace(/-/g, '').toLowerCase() === id?.replace(/-/g, '').toLowerCase()
   )
+
+  useEffect(() => {
+    if (expedition?.id) {
+      setIsCargoLoading(true)
+      fetchCargoList(expedition.id)
+        .then((data) => {
+          setAssignedCargo(data)
+        })
+        .catch(() => {
+          setAssignedCargo([])
+        })
+        .finally(() => {
+          setIsCargoLoading(false)
+        })
+    }
+  }, [expedition?.id])
 
   const rawTabParam = searchParams.get('tab')
   const validTabs: TabKey[] = [
@@ -253,7 +274,7 @@ export const ExpeditionDetailPage: React.FC = () => {
             { key: 'simulation', label: 'What-If Simulation', icon: Cpu, count: null, badge: 'Decision Support' },
             { key: 'personnel', label: 'Personnel', icon: Users, count: expedition.personnel.length, badge: null },
             { key: 'packing', label: 'Individual Packing & Load', icon: Scale, count: null, badge: 'Capacity Planning' },
-            { key: 'cargo', label: 'Cargo', icon: Package, count: expedition.cargo.length, badge: null },
+            { key: 'cargo', label: 'Cargo', icon: Package, count: assignedCargo.length, badge: null },
             { key: 'inventory', label: 'Inventory Requirements', icon: Boxes, count: expedition.inventory.length, badge: null },
             { key: 'environmental', label: 'Environmental Conditions', icon: Wind, count: expedition.environmental.length, badge: null },
             { key: 'incidents', label: 'Incidents', icon: ShieldAlert, count: expedition.incidents.length, badge: null },
@@ -588,7 +609,6 @@ export const ExpeditionDetailPage: React.FC = () => {
 
         {/* TAB: CARGO */}
         {activeTab === 'cargo' && (
-
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
@@ -596,19 +616,24 @@ export const ExpeditionDetailPage: React.FC = () => {
                   Associated Cargo & TEU Manifests
                 </h3>
                 <p className="text-[11px] text-slate-500">
-                  Sea freight containers, air drops, and station consignments supporting this expedition
+                  Sea freight containers, air drops, and station consignments registered under campaign {expedition.id}
                 </p>
               </div>
               <Badge variant="neutral" size="sm" mono>
-                {expedition.cargo.length} Manifests Tracked
+                {assignedCargo.length} Manifests Tracked
               </Badge>
             </div>
 
-            {expedition.cargo.length === 0 ? (
+            {isCargoLoading ? (
+              <div className="py-12 flex items-center justify-center text-xs text-slate-500 font-mono">
+                <Loader2 className="w-5 h-5 animate-spin text-[#02457A] mr-2" />
+                Querying persisted campaign cargo records...
+              </div>
+            ) : assignedCargo.length === 0 ? (
               <EmptyState
                 icon={<Package className="w-6 h-6 text-slate-400" />}
                 title="No Cargo Assigned"
-                description="No active consignments are currently registered under this campaign identifier."
+                description={`No active consignments are currently registered under campaign identifier ${expedition.id}.`}
               />
             ) : (
               <Table>
@@ -616,23 +641,24 @@ export const ExpeditionDetailPage: React.FC = () => {
                   <TableRow>
                     <TableHead>Cargo ID</TableHead>
                     <TableHead>Description</TableHead>
-                    <TableHead>Carrier</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Origin</TableHead>
                     <TableHead>Destination</TableHead>
                     <TableHead>Weight</TableHead>
                     <TableHead>Priority</TableHead>
                     <TableHead>Target ETA</TableHead>
-                    <TableHead>HAZMAT</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {expedition.cargo.map((c) => (
+                  {assignedCargo.map((c) => (
                     <TableRow key={c.id}>
                       <TableCell mono className="font-bold text-slate-900">
                         {c.id}
                       </TableCell>
                       <TableCell className="font-medium text-slate-900">{c.description}</TableCell>
-                      <TableCell className="text-slate-700 text-xs font-medium">{c.carrier}</TableCell>
+                      <TableCell className="text-slate-700 text-xs font-medium">{c.category}</TableCell>
+                      <TableCell className="text-slate-600 text-xs">{c.origin}</TableCell>
                       <TableCell className="text-slate-800 font-semibold">{c.destination}</TableCell>
                       <TableCell mono className="text-slate-700 font-semibold">
                         {c.weight}
@@ -651,9 +677,8 @@ export const ExpeditionDetailPage: React.FC = () => {
                         </span>
                       </TableCell>
                       <TableCell mono className="text-slate-700 text-[11px]">
-                        {c.eta}
+                        {c.expectedArrival}
                       </TableCell>
-                      <TableCell className="text-[11px] text-slate-600 font-mono">{c.hazmat}</TableCell>
                       <TableCell>
                         <Badge
                           variant={

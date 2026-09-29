@@ -50,12 +50,15 @@ import {
   createCargo,
   CargoApiPayload,
 } from '@/services/cargoService'
+import { fetchExpeditionsList } from '@/services/expeditionService'
+import { INITIAL_EXPEDITIONS, ExpeditionDetail } from '@/data/expeditionsData'
 
 export const CargoPage: React.FC = () => {
   const navigate = useNavigate()
 
   // Master cargo state
   const [cargoList, setCargoList] = useState<CargoRecord[]>([])
+  const [availableExpeditions, setAvailableExpeditions] = useState<ExpeditionDetail[]>(INITIAL_EXPEDITIONS)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -93,7 +96,7 @@ export const CargoPage: React.FC = () => {
   const [targetStatus, setTargetStatus] = useState<CargoStatus>('In Transit')
   const [statusReason, setStatusReason] = useState('')
 
-  // Load cargo from database API
+  // Load cargo and expeditions from database API
   const loadCargoData = async () => {
     setIsLoading(true)
     setError(null)
@@ -110,6 +113,13 @@ export const CargoPage: React.FC = () => {
 
   useEffect(() => {
     loadCargoData()
+    fetchExpeditionsList()
+      .then((data) => {
+        if (data && data.length > 0) {
+          setAvailableExpeditions(data)
+        }
+      })
+      .catch(() => {})
   }, [])
 
   // Form Validation
@@ -159,6 +169,7 @@ export const CargoPage: React.FC = () => {
 
     const payload: CargoApiPayload = {
       cargo_id: nextId,
+      expedition_id: formData.expeditionId ? formData.expeditionId.trim() : null,
       description: formData.description.trim(),
       category: formData.category,
       weight: isNaN(parsedWeight) ? null : parsedWeight,
@@ -897,9 +908,12 @@ export const CargoPage: React.FC = () => {
               onChange={(e) => setFormData({ ...formData, expeditionId: e.target.value })}
               className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#018ABE]/30 focus:border-[#02457A]"
             >
-              <option value="EXP-2026-014">EXP-2026-014 · 44th ISEA (Antarctica)</option>
-              <option value="EXP-2026-015">EXP-2026-015 · Indian Arctic Campaign (Himadri)</option>
-              <option value="EXP-2026-016">EXP-2026-016 · Southern Ocean Paleoclimate Marine Cruise</option>
+              <option value="">None / Unassigned</option>
+              {availableExpeditions.map((exp) => (
+                <option key={exp.id} value={exp.id}>
+                  {exp.id} · {exp.name}
+                </option>
+              ))}
             </select>
           </div>
 

@@ -10,6 +10,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/+$/, '
 
 export interface CargoApiPayload {
   cargo_id: string
+  expedition_id?: string | null
   description: string
   category: string
   weight: number | null
@@ -25,6 +26,7 @@ export interface CargoApiPayload {
 export interface CargoApiResponse {
   id: number
   cargo_id: string
+  expedition_id: string | null
   description: string | null
   category: string | null
   weight: number | null
@@ -43,6 +45,7 @@ export function mapApiToCargoRecord(api: CargoApiResponse): CargoRecord {
   const priority = (api.priority as CargoPriority) || 'Standard'
   const status = (api.status as CargoStatus) || 'Planned'
   const arrivalDate = api.arrival_date ? `${api.arrival_date} 12:00 UTC` : 'TBD'
+  const expId = api.expedition_id || ''
 
   return {
     id: api.cargo_id,
@@ -57,8 +60,8 @@ export function mapApiToCargoRecord(api: CargoApiResponse): CargoRecord {
     expectedArrival: arrivalDate,
     actualArrival: status === 'Received' || status === 'Arrived' ? arrivalDate : null,
     status,
-    expeditionId: 'EXP-2026-014',
-    expeditionName: '44th Indian Scientific Expedition to Antarctica (ISEA)',
+    expeditionId: expId,
+    expeditionName: expId ? (expId === 'EXP-2026-014' ? '44th Indian Scientific Expedition to Antarctica (ISEA)' : expId) : 'Unassigned',
     hazmat: api.category === 'Fuel & Hydrocarbons' ? 'IMO Class 3 (Flammable)' : 'Non-Hazardous',
     riskScorePlaceholder: priority === 'Critical' ? 'Critical (0.82) · Elevated Watch' : 'Nominal (0.14) · Future Risk Engine Slot',
     notes: `Database consignment record for ${api.cargo_id}. Certified for polar transit.`,
@@ -73,7 +76,7 @@ export function mapApiToCargoRecord(api: CargoApiResponse): CargoRecord {
   }
 }
 
-export async function fetchCargoList(): Promise<CargoRecord[]> {
+export async function fetchCargoList(expeditionId?: string): Promise<CargoRecord[]> {
   const token = getAccessToken()
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -82,7 +85,11 @@ export async function fetchCargoList(): Promise<CargoRecord[]> {
     headers['Authorization'] = `Bearer ${token}`
   }
 
-  const response = await fetch(`${API_BASE_URL}/cargo`, {
+  const url = expeditionId
+    ? `${API_BASE_URL}/cargo?expedition_id=${encodeURIComponent(expeditionId)}`
+    : `${API_BASE_URL}/cargo`
+
+  const response = await fetch(url, {
     method: 'GET',
     headers,
   })
@@ -96,7 +103,7 @@ export async function fetchCargoList(): Promise<CargoRecord[]> {
   return data.map(mapApiToCargoRecord)
 }
 
-export async function createCargo(payload: CargoApiPayload): Promise<{ success: boolean; id: number; cargo_id: string }> {
+export async function createCargo(payload: CargoApiPayload): Promise<{ success: boolean; id: number; cargo_id: string; expedition_id?: string | null }> {
   const token = getAccessToken()
   const headers: HeadersInit = {
     'Content-Type': 'application/json',

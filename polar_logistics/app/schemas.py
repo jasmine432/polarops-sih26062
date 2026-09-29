@@ -53,6 +53,7 @@ class InventoryTransactionResponse(BaseModel):
 
 class CargoCreate(BaseModel):
     cargo_id: str = Field(min_length=1)
+    expedition_id: str | None = None
     description: str = Field(min_length=1)
     category: str | None = None
     weight: float | None = None
@@ -68,6 +69,7 @@ class CargoCreate(BaseModel):
 class CargoResponse(BaseModel):
     id: int
     cargo_id: str
+    expedition_id: str | None = None
     description: str | None = None
     category: str | None = None
     weight: float | None = None
@@ -94,6 +96,19 @@ class CargoStatusUpdate(BaseModel):
         "Delayed",
     ]
 
+
+class CargoUpdate(BaseModel):
+    expedition_id: str | None = None
+    description: str | None = None
+    category: str | None = None
+    weight: float | None = None
+    weight_unit: str | None = None
+    origin: str | None = None
+    destination: str | None = None
+    transport_mode: str | None = None
+    priority: str | None = None
+    arrival_date: date | str | None = None
+    status: str | None = None
 
 
 class ExpeditionCreate(BaseModel):
