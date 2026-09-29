@@ -46,6 +46,7 @@ import {
 import { INITIAL_EXPEDITIONS, ExpeditionDetail } from '@/data/expeditionsData'
 import { fetchExpeditionsList, fetchResupplyItems, ResupplyItemDto } from '@/services/expeditionService'
 import { fetchCargoList } from '@/services/cargoService'
+import { fetchPersonnelList, PersonnelRecord } from '@/services/personnelService'
 import type { CargoRecord } from '@/data/cargoData'
 import { PackingAndLoadPlanner } from '@/components/expeditions/PackingAndLoadPlanner'
 import { MissionReadinessAudit } from '@/components/expeditions/MissionReadinessAudit'
@@ -80,6 +81,11 @@ export const ExpeditionDetailPage: React.FC = () => {
   const [assignedResupplyItems, setAssignedResupplyItems] = useState<ResupplyItemDto[]>([])
   const [isResupplyLoading, setIsResupplyLoading] = useState<boolean>(false)
   const [resupplyError, setResupplyError] = useState<string | null>(null)
+
+  // Live expedition personnel from PostgreSQL
+  const [assignedPersonnel, setAssignedPersonnel] = useState<PersonnelRecord[]>([])
+  const [isPersonnelLoading, setIsPersonnelLoading] = useState<boolean>(false)
+  const [personnelError, setPersonnelError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchExpeditionsList()
@@ -125,10 +131,26 @@ export const ExpeditionDetailPage: React.FC = () => {
         .finally(() => {
           setIsResupplyLoading(false)
         })
+
+      setIsPersonnelLoading(true)
+      setPersonnelError(null)
+      fetchPersonnelList(expedition.id)
+        .then((data) => {
+          setAssignedPersonnel(Array.isArray(data) ? data : [])
+        })
+        .catch((err) => {
+          setAssignedPersonnel([])
+          setPersonnelError(err?.message || 'Failed to load expedition personnel')
+        })
+        .finally(() => {
+          setIsPersonnelLoading(false)
+        })
     } else {
       setAssignedCargo([])
       setAssignedResupplyItems([])
+      setAssignedPersonnel([])
       setResupplyError(null)
+      setPersonnelError(null)
     }
   }, [expedition?.id])
 
@@ -295,7 +317,7 @@ export const ExpeditionDetailPage: React.FC = () => {
             { key: 'progress', label: 'Progress & Route', icon: Navigation, count: null, badge: 'Route Tracking' },
             { key: 'readiness', label: 'Mission Readiness', icon: ShieldCheck, count: null, badge: '7-Pillar Audit' },
             { key: 'simulation', label: 'What-If Simulation', icon: Cpu, count: null, badge: 'Decision Support' },
-            { key: 'personnel', label: 'Personnel', icon: Users, count: expedition.personnel.length, badge: null },
+            { key: 'personnel', label: 'Personnel', icon: Users, count: assignedPersonnel.length, badge: null },
             { key: 'packing', label: 'Individual Packing & Load', icon: Scale, count: null, badge: 'Capacity Planning' },
             { key: 'cargo', label: 'Cargo', icon: Package, count: assignedCargo.length, badge: null },
             { key: 'inventory', label: 'Inventory Requirements', icon: Boxes, count: assignedResupplyItems.length, badge: null },
@@ -553,22 +575,33 @@ export const ExpeditionDetailPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider font-mono">
-                  Expedition Personnel Roster ({expedition.personnel.length} listed of {expedition.personnelCount} total)
+                  Expedition Personnel Roster ({assignedPersonnel.length} listed of {expedition.personnelCount} total)
                 </h3>
                 <p className="text-[11px] text-slate-500">
-                  Deployed scientific, technical, and military logistics personnel assigned to this campaign
+                  Deployed scientific, technical, and military logistics personnel assigned to campaign {expedition.id}
                 </p>
               </div>
               <Badge variant="neutral" size="sm" mono>
-                100% Medical & Survival Cleared
+                {assignedPersonnel.length} Members Deployed
               </Badge>
             </div>
 
-            {expedition.personnel.length === 0 ? (
+            {isPersonnelLoading ? (
+              <div className="py-12 flex items-center justify-center text-xs text-slate-500 font-mono">
+                <Loader2 className="w-5 h-5 animate-spin text-[#02457A] mr-2" />
+                Querying persisted campaign personnel roster...
+              </div>
+            ) : personnelError ? (
+              <EmptyState
+                icon={<AlertTriangle className="w-6 h-6 text-rose-500" />}
+                title="Error Loading Personnel Roster"
+                description={personnelError}
+              />
+            ) : assignedPersonnel.length === 0 ? (
               <EmptyState
                 icon={<Users className="w-6 h-6 text-slate-400" />}
-                title="No Personnel Records Assigned"
-                description="Personnel assignments for this expedition have not yet been synchronized from the NCPOR database."
+                title="No Personnel Assigned"
+                description="No personnel records are currently assigned to this expedition."
               />
             ) : (
               <Table>
@@ -577,7 +610,7 @@ export const ExpeditionDetailPage: React.FC = () => {
                     <TableHead>Member ID</TableHead>
                     <TableHead>Full Name</TableHead>
                     <TableHead>Role & Designation</TableHead>
-                    <TableHead>Station</TableHead>
+                    <TableHead>Current Station</TableHead>
                     <TableHead>Organization</TableHead>
                     <TableHead>Blood</TableHead>
                     <TableHead>Medical Clearance</TableHead>
@@ -586,14 +619,14 @@ export const ExpeditionDetailPage: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {expedition.personnel.map((p) => (
+                  {assignedPersonnel.map((p) => (
                     <TableRow key={p.id}>
                       <TableCell mono className="font-bold text-slate-900">
                         {p.id}
                       </TableCell>
                       <TableCell className="font-bold text-slate-900">{p.name}</TableCell>
                       <TableCell className="text-slate-800 font-semibold">{p.role}</TableCell>
-                      <TableCell className="font-medium text-slate-700">{p.station}</TableCell>
+                      <TableCell className="font-medium text-slate-700">{p.currentStation}</TableCell>
                       <TableCell className="text-slate-600 text-xs">{p.organization}</TableCell>
                       <TableCell mono className="font-bold text-rose-700">
                         {p.bloodGroup}
@@ -606,7 +639,7 @@ export const ExpeditionDetailPage: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant={p.status === 'Deployed' ? 'operational' : 'info'}
+                          variant={p.status === 'At Station' || p.status === 'Arrived' ? 'operational' : p.status === 'In Transit' ? 'info' : 'neutral'}
                           size="sm"
                           withDot
                         >

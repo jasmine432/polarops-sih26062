@@ -130,7 +130,7 @@ export function mapApiToPersonnelRecord(api: PersonnelApiResponse): PersonnelRec
   }
 }
 
-export async function fetchPersonnelList(): Promise<PersonnelRecord[]> {
+export async function fetchPersonnelList(expeditionId?: string): Promise<PersonnelRecord[]> {
   const token = getAccessToken()
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -139,7 +139,11 @@ export async function fetchPersonnelList(): Promise<PersonnelRecord[]> {
     headers['Authorization'] = `Bearer ${token}`
   }
 
-  const response = await fetch(`${API_BASE_URL}/personnel`, {
+  const url = expeditionId
+    ? `${API_BASE_URL}/personnel?expedition_id=${encodeURIComponent(expeditionId)}`
+    : `${API_BASE_URL}/personnel`
+
+  const response = await fetch(url, {
     method: 'GET',
     headers,
   })

@@ -51,12 +51,16 @@ import {
   createPersonnel,
   PersonnelApiPayload,
 } from '@/services/personnelService'
+import { fetchExpeditionsList } from '@/services/expeditionService'
+import type { ExpeditionDetail } from '@/data/expeditionsData'
 
 export const PersonnelPage: React.FC = () => {
   const navigate = useNavigate()
 
   // Master Personnel State from PostgreSQL
   const [personnelList, setPersonnelList] = useState<PersonnelRecord[]>([])
+  const [availableExpeditions, setAvailableExpeditions] = useState<ExpeditionDetail[]>([])
+  const [expeditionsError, setExpeditionsError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -102,6 +106,20 @@ export const PersonnelPage: React.FC = () => {
 
   useEffect(() => {
     loadPersonnelData()
+    fetchExpeditionsList()
+      .then((data) => {
+        if (data && data.length > 0) {
+          setAvailableExpeditions(data)
+          setExpeditionsError(null)
+          setMovementForm((prev) => ({
+            ...prev,
+            expeditionId: prev.expeditionId || data[0].id,
+          }))
+        }
+      })
+      .catch((err) => {
+        setExpeditionsError(err?.message || 'Failed to load expeditions from database.')
+      })
   }, [])
 
   // Reset form
@@ -144,17 +162,13 @@ export const PersonnelPage: React.FC = () => {
     setIsSubmitting(true)
     setSubmitError(null)
 
+    const matchedExp = availableExpeditions.find((exp) => exp.id === movementForm.expeditionId)
     const payload: PersonnelApiPayload = {
       name: movementForm.name.trim(),
       role: movementForm.role.trim(),
       organization: movementForm.organization.trim(),
       expeditionId: movementForm.expeditionId,
-      expeditionName:
-        movementForm.expeditionId === 'EXP-2026-014'
-          ? '44th Indian Scientific Expedition to Antarctica (ISEA)'
-          : movementForm.expeditionId === 'EXP-2026-015'
-          ? 'Indian Arctic Autumn Scientific Campaign'
-          : '43rd ISEA Wintering Relocation & Retrograde Team',
+      expeditionName: matchedExp?.name || movementForm.expeditionId,
       currentStation: movementForm.currentStation,
       destination: movementForm.destination.trim(),
       departure: movementForm.departure,
@@ -396,9 +410,11 @@ export const PersonnelPage: React.FC = () => {
                 className="px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-[#018ABE]/20 focus:border-[#02457A]"
               >
                 <option value="All">All Expeditions</option>
-                <option value="EXP-2026-014">EXP-2026-014 (44th ISEA)</option>
-                <option value="EXP-2026-015">EXP-2026-015 (Arctic Campaign)</option>
-                <option value="EXP-2026-017">EXP-2026-017 (43rd Relieved)</option>
+                {availableExpeditions.map((exp) => (
+                  <option key={exp.id} value={exp.id}>
+                    {exp.id} ({exp.name.length > 25 ? `${exp.name.slice(0, 25)}...` : exp.name})
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -666,15 +682,27 @@ export const PersonnelPage: React.FC = () => {
               <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Campaign Mandate
               </label>
-              <select
-                value={movementForm.expeditionId}
-                onChange={(e) => setMovementForm({ ...movementForm, expeditionId: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#018ABE]/20 focus:border-[#02457A]"
-              >
-                <option value="EXP-2026-014">EXP-2026-014 · 44th ISEA</option>
-                <option value="EXP-2026-015">EXP-2026-015 · Arctic Campaign</option>
-                <option value="EXP-2026-017">EXP-2026-017 · 43rd Relieved</option>
-              </select>
+              {expeditionsError ? (
+                <div className="text-[11px] text-rose-600 font-medium p-2 bg-rose-50 border border-rose-200 rounded-md">
+                  {expeditionsError}
+                </div>
+              ) : availableExpeditions.length === 0 ? (
+                <div className="text-[11px] text-slate-500 italic p-2 bg-slate-50 border border-slate-200 rounded-md">
+                  Loading active campaigns...
+                </div>
+              ) : (
+                <select
+                  value={movementForm.expeditionId}
+                  onChange={(e) => setMovementForm({ ...movementForm, expeditionId: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-md text-xs text-slate-900 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#018ABE]/20 focus:border-[#02457A]"
+                >
+                  {availableExpeditions.map((exp) => (
+                    <option key={exp.id} value={exp.id}>
+                      {exp.id} · {exp.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           </div>
 

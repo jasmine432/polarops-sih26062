@@ -1,6 +1,6 @@
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import sessionmaker
 
 from ..database import engine
@@ -197,11 +197,17 @@ def _seed_personnel_if_empty(db) -> None:
 
 @router.get("", response_model=list[PersonnelResponse])
 @router.get("/", response_model=list[PersonnelResponse])
-def get_personnel(_: Annotated[AuthenticatedUser, Depends(get_current_user)]) -> Any:
+def get_personnel(
+    _: Annotated[AuthenticatedUser, Depends(get_current_user)],
+    expedition_id: str | None = Query(None),
+) -> Any:
     db = SessionLocal()
     try:
         _seed_personnel_if_empty(db)
-        items = db.query(Personnel).order_by(Personnel.id.asc()).all()
+        query = db.query(Personnel)
+        if expedition_id:
+            query = query.filter(Personnel.expedition_id == expedition_id)
+        items = query.order_by(Personnel.id.asc()).all()
         return items
     finally:
         db.close()
