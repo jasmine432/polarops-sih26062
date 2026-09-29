@@ -810,6 +810,46 @@ class MLResupplyGenerateResponse(BaseModel):
     execution_notes: str | None = None
 
 
+# =========================================================================
+# PHASE 3.4 MISSION READINESS ENGINE SCHEMAS
+# =========================================================================
+
+PillarCategory = Literal[
+    "PERSONNEL",
+    "PACKING",
+    "CAPACITY",
+    "INVENTORY",
+    "ASSETS",
+    "STATION",
+    "SAFETY",
+]
+PillarStatus = Literal["PASSED", "WARNING", "FAILED"]
 
 
+class ReadinessPillarResult(BaseModel):
+    category: PillarCategory
+    status: PillarStatus
+    title: str
+    summary: str
+    blockers: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    details: dict[str, Any] = Field(default_factory=dict)
 
+    class Config:
+        populate_by_name = True
+
+
+class MissionReadinessResponse(BaseModel):
+    expedition_id: str = Field(alias="expeditionId")
+    expedition_name: str = Field(alias="expeditionName")
+    overall_status: Literal["READY", "NOT_READY"] = Field(alias="overallStatus")
+    readiness_summary: str = Field(alias="readinessSummary")
+    total_checks: int = Field(default=7, alias="totalChecks")
+    passed_checks: int = Field(default=0, alias="passedChecks")
+    warning_checks: int = Field(default=0, alias="warningChecks")
+    failed_checks: int = Field(default=0, alias="failedChecks")
+    pillars: list[ReadinessPillarResult] = Field(default_factory=list)
+    evaluated_at: str | None = Field(default=None, alias="evaluatedAt")
+
+    class Config:
+        populate_by_name = True

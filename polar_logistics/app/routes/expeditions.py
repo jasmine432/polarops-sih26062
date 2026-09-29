@@ -28,6 +28,7 @@ from ..schemas import (
     ResupplyItemResponse,
     MLResupplyGenerateRequest,
     MLResupplyGenerateResponse,
+    MissionReadinessResponse,
 )
 from ..auth import AuthenticatedUser, get_current_user, require_roles
 from ..services.expedition_planner_service import (
@@ -55,6 +56,9 @@ from ..services.resupply_service import (
     delete_resupply_item,
     seed_initial_resupply_if_empty,
     generate_ml_resupply_recommendations,
+)
+from ..services.readiness_service import (
+    audit_mission_readiness,
 )
 
 router = APIRouter(
@@ -665,3 +669,28 @@ async def generate_ml_recommendations_endpoint(
         db.close()
 
 
+# =========================================================================
+# PHASE 3.4 MISSION READINESS ENGINE ENDPOINT
+# =========================================================================
+
+@router.get("/{expedition_id}/readiness", response_model=MissionReadinessResponse)
+@router.get("/{expedition_id}/readiness/", response_model=MissionReadinessResponse)
+def get_expedition_mission_readiness_endpoint(
+    expedition_id: str,
+    _: Annotated[AuthenticatedUser, Depends(get_current_user)],
+) -> Any:
+    """
+    Execute real-time deterministic Mission Readiness Audit across 7 operational pillars:
+    PERSONNEL, PACKING, CAPACITY, INVENTORY, ASSETS, STATION, SAFETY.
+    Zero database mutation.
+    """
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        seed_initial_packing_if_empty(db)
+        seed_initial_resupply_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        result = audit_mission_readiness(db, exp)
+        return result
+    finally:
+        db.close()

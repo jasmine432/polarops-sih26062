@@ -502,3 +502,46 @@ export async function fetchExpeditionPackingSummary(expeditionId: string): Promi
   return response.json()
 }
 
+// =========================================================================
+// PHASE 3.4 MISSION READINESS ENGINE
+// =========================================================================
+
+export interface ReadinessPillarResult {
+  category: 'PERSONNEL' | 'PACKING' | 'CAPACITY' | 'INVENTORY' | 'ASSETS' | 'STATION' | 'SAFETY'
+  status: 'PASSED' | 'WARNING' | 'FAILED'
+  title: string
+  summary: string
+  blockers: string[]
+  warnings: string[]
+  details: Record<string, any>
+}
+
+export interface MissionReadinessResponse {
+  expeditionId: string
+  expeditionName: string
+  overallStatus: 'READY' | 'NOT_READY'
+  readinessSummary: string
+  totalChecks: number
+  passedChecks: number
+  warningChecks: number
+  failedChecks: number
+  pillars: ReadinessPillarResult[]
+  evaluatedAt: string | null
+}
+
+export async function fetchMissionReadiness(expeditionId: string): Promise<MissionReadinessResponse> {
+  const token = getAccessToken()
+  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const response = await fetch(`${API_BASE_URL}/expeditions/${encodeURIComponent(expeditionId)}/readiness`, {
+    method: 'GET',
+    headers,
+  })
+
+  if (!response.ok) {
+    const txt = await response.text().catch(() => '')
+    throw new Error(txt || `Failed to fetch mission readiness (${response.status})`)
+  }
+  return response.json()
+}
