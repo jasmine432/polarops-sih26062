@@ -746,6 +746,7 @@ export async function runWhatIfSimulation(
 export interface ResupplyItemDto {
   id: number
   expedition_id: string
+  inventory_id?: number | null
   item_name: string
   category: string
   unit?: string | null
@@ -761,7 +762,10 @@ export interface ResupplyItemDto {
   priority: string
   status: string
   is_ml_recommended?: boolean
+  ml_confidence?: string | null
   recommendation_notes?: string | null
+  created_at?: string | null
+  updated_at?: string | null
 }
 
 export async function fetchResupplyItems(expeditionId: string): Promise<ResupplyItemDto[]> {

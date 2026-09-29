@@ -44,7 +44,7 @@ import {
   Cpu,
 } from 'lucide-react'
 import { INITIAL_EXPEDITIONS, ExpeditionDetail } from '@/data/expeditionsData'
-import { fetchExpeditionsList } from '@/services/expeditionService'
+import { fetchExpeditionsList, fetchResupplyItems, ResupplyItemDto } from '@/services/expeditionService'
 import { fetchCargoList } from '@/services/cargoService'
 import type { CargoRecord } from '@/data/cargoData'
 import { PackingAndLoadPlanner } from '@/components/expeditions/PackingAndLoadPlanner'
@@ -76,6 +76,11 @@ export const ExpeditionDetailPage: React.FC = () => {
   const [assignedCargo, setAssignedCargo] = useState<CargoRecord[]>([])
   const [isCargoLoading, setIsCargoLoading] = useState<boolean>(false)
 
+  // Live expedition inventory / resupply requirements from PostgreSQL
+  const [assignedResupplyItems, setAssignedResupplyItems] = useState<ResupplyItemDto[]>([])
+  const [isResupplyLoading, setIsResupplyLoading] = useState<boolean>(false)
+  const [resupplyError, setResupplyError] = useState<string | null>(null)
+
   useEffect(() => {
     fetchExpeditionsList()
       .then((data) => {
@@ -106,6 +111,24 @@ export const ExpeditionDetailPage: React.FC = () => {
         .finally(() => {
           setIsCargoLoading(false)
         })
+
+      setIsResupplyLoading(true)
+      setResupplyError(null)
+      fetchResupplyItems(expedition.id)
+        .then((data) => {
+          setAssignedResupplyItems(Array.isArray(data) ? data : [])
+        })
+        .catch((err) => {
+          setAssignedResupplyItems([])
+          setResupplyError(err?.message || 'Failed to load expedition inventory requirements')
+        })
+        .finally(() => {
+          setIsResupplyLoading(false)
+        })
+    } else {
+      setAssignedCargo([])
+      setAssignedResupplyItems([])
+      setResupplyError(null)
     }
   }, [expedition?.id])
 
@@ -275,7 +298,7 @@ export const ExpeditionDetailPage: React.FC = () => {
             { key: 'personnel', label: 'Personnel', icon: Users, count: expedition.personnel.length, badge: null },
             { key: 'packing', label: 'Individual Packing & Load', icon: Scale, count: null, badge: 'Capacity Planning' },
             { key: 'cargo', label: 'Cargo', icon: Package, count: assignedCargo.length, badge: null },
-            { key: 'inventory', label: 'Inventory Requirements', icon: Boxes, count: expedition.inventory.length, badge: null },
+            { key: 'inventory', label: 'Inventory Requirements', icon: Boxes, count: assignedResupplyItems.length, badge: null },
             { key: 'environmental', label: 'Environmental Conditions', icon: Wind, count: expedition.environmental.length, badge: null },
             { key: 'incidents', label: 'Incidents', icon: ShieldAlert, count: expedition.incidents.length, badge: null },
             { key: 'timeline', label: 'Activity Timeline', icon: Clock, count: expedition.timeline.length, badge: null },
@@ -710,22 +733,40 @@ export const ExpeditionDetailPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider font-mono">
-                  Critical Inventory & Strategic Stock Reserves
+                  Expedition Inventory & Resupply Requirements
                 </h3>
                 <p className="text-[11px] text-slate-500">
-                  Consumables, fuel reserves, medical packs, and machinery spares allocated for this mission
+                  Station stock quotas, ML predicted demand, and calculated resupply lines under campaign {expedition.id}
                 </p>
               </div>
-              <Badge variant="warning" size="sm" withDot>
-                {expedition.inventory.filter((i) => i.status !== 'Normal').length} Attention Alerts
-              </Badge>
+              <div className="flex items-center gap-2">
+                {assignedResupplyItems.some((i) => i.resupply_quantity > 0) && (
+                  <Badge variant="warning" size="sm" withDot>
+                    {assignedResupplyItems.filter((i) => i.resupply_quantity > 0).length} Resupply Actions Required
+                  </Badge>
+                )}
+                <Badge variant="neutral" size="sm" mono>
+                  {assignedResupplyItems.length} Lines Tracked
+                </Badge>
+              </div>
             </div>
 
-            {expedition.inventory.length === 0 ? (
+            {isResupplyLoading ? (
+              <div className="py-12 flex items-center justify-center text-xs text-slate-500 font-mono">
+                <Loader2 className="w-5 h-5 animate-spin text-[#02457A] mr-2" />
+                Querying persisted campaign inventory requirements...
+              </div>
+            ) : resupplyError ? (
+              <EmptyState
+                icon={<AlertTriangle className="w-6 h-6 text-rose-500" />}
+                title="Error Loading Inventory Requirements"
+                description={resupplyError}
+              />
+            ) : assignedResupplyItems.length === 0 ? (
               <EmptyState
                 icon={<Boxes className="w-6 h-6 text-slate-400" />}
-                title="No Inventory Lines Tracked"
-                description="Stock quotas for this expedition are managed under general station inventory."
+                title="No Inventory Requirements Registered"
+                description="No inventory requirements are currently registered for this expedition."
               />
             ) : (
               <Table>
@@ -733,71 +774,97 @@ export const ExpeditionDetailPage: React.FC = () => {
                   <TableRow>
                     <TableHead>Item Nomenclature</TableHead>
                     <TableHead>Category</TableHead>
-                    <TableHead>Station</TableHead>
                     <TableHead>Current Stock</TableHead>
-                    <TableHead>Minimum Stock</TableHead>
-                    <TableHead>Days Remaining</TableHead>
-                    <TableHead>Burn Rate</TableHead>
+                    <TableHead>Min / Reorder Threshold</TableHead>
+                    <TableHead>Predicted Demand</TableHead>
+                    <TableHead>Safety Stock</TableHead>
+                    <TableHead>Resupply Required</TableHead>
+                    <TableHead>Priority</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {expedition.inventory.map((inv, idx) => (
-                    <TableRow key={idx} className={inv.status === 'Critical' ? 'bg-rose-50/25' : ''}>
-                      <TableCell className="font-bold text-slate-900">{inv.item}</TableCell>
-                      <TableCell>
-                        <span className="text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
-                          {inv.category}
-                        </span>
-                      </TableCell>
-                      <TableCell className="font-semibold text-slate-800">{inv.station}</TableCell>
-                      <TableCell mono className="font-bold text-slate-900">
-                        {inv.currentStock}
-                      </TableCell>
-                      <TableCell mono className="text-slate-500">
-                        {inv.minimumStock}
-                      </TableCell>
-                      <TableCell>
+                  {assignedResupplyItems.map((item) => (
+                    <TableRow key={item.id} className={item.priority === 'CRITICAL' ? 'bg-rose-50/25' : ''}>
+                      <TableCell className="font-bold text-slate-900">
                         <div className="flex items-center gap-2">
-                          <span
-                            className={`font-mono text-xs font-bold tabular-nums ${
-                              inv.daysRemaining <= 15
-                                ? 'text-rose-700'
-                                : inv.daysRemaining <= 30
-                                ? 'text-amber-800'
-                                : 'text-slate-800'
-                            }`}
-                          >
-                            {inv.daysRemaining} Days
-                          </span>
-                          <div className="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden shrink-0">
-                            <div
-                              className={`h-full rounded-full ${
-                                inv.daysRemaining <= 15
-                                    ? 'bg-rose-600'
-                                    : inv.daysRemaining <= 30
-                                    ? 'bg-amber-500'
-                                    : 'bg-emerald-600'
-                              }`}
-                              style={{ width: `${Math.min(100, (inv.daysRemaining / 90) * 100)}%` }}
-                            />
-                          </div>
+                          <span>{item.item_name}</span>
+                          {item.is_ml_recommended && (
+                            <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                              ML
+                            </span>
+                          )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-slate-600 text-[11px] font-mono">{inv.burnRate}</TableCell>
+                      <TableCell>
+                        <span className="text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+                          {item.category}
+                        </span>
+                      </TableCell>
+                      <TableCell mono className="font-bold text-slate-900">
+                        {item.current_stock?.toLocaleString()} {item.unit || ''}
+                      </TableCell>
+                      <TableCell mono className="text-slate-500 text-xs">
+                        {item.minimum_stock?.toLocaleString()} {item.unit || ''}
+                        {item.reorder_threshold !== undefined && item.reorder_threshold !== null && (
+                          <span className="block text-[10px] text-slate-400">
+                            Reorder: {item.reorder_threshold.toLocaleString()}
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell mono className="font-semibold text-slate-800 text-xs">
+                        {item.predicted_demand !== undefined && item.predicted_demand !== null
+                          ? `${Number(item.predicted_demand).toFixed(1)} ${item.unit || ''}`
+                          : '—'}
+                      </TableCell>
+                      <TableCell mono className="text-slate-600 text-xs">
+                        {item.safety_stock !== undefined && item.safety_stock !== null
+                          ? `${Number(item.safety_stock).toFixed(1)} ${item.unit || ''}`
+                          : '—'}
+                      </TableCell>
+                      <TableCell mono className="font-bold">
+                        {item.resupply_quantity > 0 ? (
+                          <span className="text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                            +{Number(item.resupply_quantity).toFixed(1)} {item.unit || ''}
+                          </span>
+                        ) : (
+                          <span className="text-emerald-700 font-normal">
+                            0 (Adequate)
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={`text-[10px] font-bold font-mono uppercase px-2 py-0.5 rounded border ${
+                            item.priority === 'CRITICAL'
+                              ? 'bg-rose-50 text-rose-800 border-rose-300'
+                              : item.priority === 'HIGH'
+                              ? 'bg-amber-50 text-amber-900 border-amber-300'
+                              : item.priority === 'MEDIUM'
+                              ? 'bg-blue-50 text-blue-800 border-blue-200'
+                              : 'bg-slate-100 text-slate-600 border-slate-300'
+                          }`}
+                        >
+                          {item.priority}
+                        </span>
+                      </TableCell>
                       <TableCell>
                         <Badge
                           variant={
-                            inv.status === 'Critical'
+                            item.status === 'APPROVED' || item.status === 'FULFILLED'
+                              ? 'operational'
+                              : item.status === 'CRITICAL'
                               ? 'critical'
-                              : inv.status === 'Low Stock'
+                              : item.status === 'LOW_STOCK' || item.status === 'SUGGESTED'
                               ? 'warning'
-                              : 'operational'
+                              : item.status === 'PLANNED'
+                              ? 'info'
+                              : 'neutral'
                           }
                           size="sm"
                           withDot
                         >
-                          {inv.status.toUpperCase()}
+                          {item.status.toUpperCase()}
                         </Badge>
                       </TableCell>
                     </TableRow>
