@@ -21,6 +21,39 @@ class ExpeditionPlan(Base):
     updated_at = Column(String(150), nullable=True)
 
 
+class PackingItem(Base):
+    __tablename__ = "expedition_packing_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    expedition_id = Column(String(100), ForeignKey("expeditions.expedition_id", ondelete="CASCADE"), nullable=False, index=True)
+    personnel_id = Column(String(100), nullable=False, index=True)
+    personnel_name = Column(String(150), nullable=True)
+    personnel_role = Column(String(150), nullable=True)
+    item_name = Column(String(255), nullable=False)
+    category = Column(String(100), nullable=False, default="Personal Gear")
+    quantity = Column(Integer, nullable=False, default=1)
+    unit = Column(String(50), nullable=True, default="pcs")
+    unit_weight_kg = Column(Numeric(10, 2), nullable=False, default=0.0)
+    total_weight_kg = Column(Numeric(10, 2), nullable=False, default=0.0)
+    priority = Column(String(50), nullable=False, default="NORMAL")
+    source_reason = Column(Text, nullable=True)
+    status = Column(String(50), nullable=False, default="PLANNED")
+    created_at = Column(String(150), nullable=True)
+    updated_at = Column(String(150), nullable=True)
+
+
+class CargoCapacityPlan(Base):
+    __tablename__ = "cargo_capacity_plans"
+
+    id = Column(Integer, primary_key=True, index=True)
+    expedition_id = Column(String(100), ForeignKey("expeditions.expedition_id", ondelete="CASCADE"), unique=True, nullable=False, index=True)
+    max_capacity_kg = Column(Numeric(10, 2), nullable=False, default=2000.0)
+    allocated_cargo_kg = Column(Numeric(10, 2), nullable=True, default=0.0)
+    notes = Column(Text, nullable=True)
+    created_at = Column(String(150), nullable=True)
+    updated_at = Column(String(150), nullable=True)
+
+
 
 class Inventory(Base):
     __tablename__ = "inventory"

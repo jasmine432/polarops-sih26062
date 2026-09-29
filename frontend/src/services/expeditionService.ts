@@ -206,3 +206,299 @@ export async function updateExpeditionStatus(
 
   return response.json()
 }
+
+// ==============================================================================
+// Phase 2: Individual Packing & Cargo Capacity Types & API Methods
+// ==============================================================================
+
+export type PackingPriority = 'CRITICAL' | 'HIGH' | 'NORMAL'
+export type PackingStatus = 'PLANNED' | 'PACKED' | 'INSPECTED' | 'LOADED'
+
+export interface PackingItem {
+  id: number
+  expedition_id: string
+  personnel_id: string
+  personnel_name?: string | null
+  personnel_role?: string | null
+  item_name: string
+  category: string
+  quantity: number
+  unit?: string | null
+  unit_weight_kg: number
+  total_weight_kg: number
+  priority: PackingPriority
+  source_reason?: string | null
+  status: PackingStatus
+  created_at?: string | null
+  updated_at?: string | null
+}
+
+export interface PackingItemCreatePayload {
+  personnelId: string
+  personnelName?: string
+  personnelRole?: string
+  itemName: string
+  category?: string
+  quantity: number
+  unit?: string
+  unitWeightKg: number
+  priority?: PackingPriority
+  sourceReason?: string
+  status?: PackingStatus
+}
+
+export interface PackingItemUpdatePayload {
+  personnelId?: string
+  personnelName?: string
+  personnelRole?: string
+  itemName?: string
+  category?: string
+  quantity?: number
+  unit?: string
+  unitWeightKg?: number
+  priority?: PackingPriority
+  sourceReason?: string
+  status?: PackingStatus
+}
+
+export interface IndividualPackingSummary {
+  personnel_id: string
+  personnel_name: string
+  personnel_role?: string | null
+  organization?: string | null
+  station?: string | null
+  total_items_count: number
+  total_quantity: number
+  total_weight_kg: number
+  items: PackingItem[]
+}
+
+export interface PriorityBreakdownItem {
+  item_count: number
+  total_quantity: number
+  weight_kg: number
+  percentage: number
+}
+
+export interface TeamLoadSummary {
+  expedition_id: string
+  expedition_name: string
+  station: string
+  total_personnel_count: number
+  personnel_with_packing_lists_count: number
+  total_items_count: number
+  total_quantity: number
+  total_team_load_kg: number
+  priority_breakdown: Record<string, PriorityBreakdownItem>
+  category_breakdown: Record<string, PriorityBreakdownItem>
+  personnel_breakdown: IndividualPackingSummary[]
+}
+
+export interface CargoCapacitySummary {
+  expedition_id: string
+  expedition_name: string
+  maximum_capacity_kg: number
+  allocated_cargo_weight_kg: number
+  team_personal_load_kg: number
+  total_planned_weight_kg: number
+  remaining_capacity_kg: number
+  over_capacity_kg: number
+  capacity_utilization_pct: number
+  status: 'WITHIN_CAPACITY' | 'OVER_CAPACITY'
+  critical_weight_kg: number
+  high_weight_kg: number
+  normal_weight_kg: number
+  notes?: string | null
+  updated_at?: string | null
+}
+
+export interface ExpeditionPackingSummary {
+  expedition_id: string
+  expedition_name: string
+  team_load: TeamLoadSummary
+  capacity: CargoCapacitySummary
+}
+
+export async function fetchExpeditionPackingItems(
+  expeditionId: string,
+  personnelId?: string
+): Promise<PackingItem[]> {
+  const token = getAccessToken()
+  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const url = personnelId
+    ? `${API_BASE_URL}/expeditions/${encodeURIComponent(expeditionId)}/packing?personnel_id=${encodeURIComponent(personnelId)}`
+    : `${API_BASE_URL}/expeditions/${encodeURIComponent(expeditionId)}/packing`
+
+  const response = await fetch(url, { method: 'GET', headers })
+  if (!response.ok) {
+    const txt = await response.text().catch(() => '')
+    throw new Error(txt || `Failed to fetch packing items (${response.status})`)
+  }
+  return response.json()
+}
+
+export async function createExpeditionPackingItem(
+  expeditionId: string,
+  payload: PackingItemCreatePayload
+): Promise<PackingItem> {
+  const token = getAccessToken()
+  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const response = await fetch(`${API_BASE_URL}/expeditions/${encodeURIComponent(expeditionId)}/packing`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) {
+    let errorDetail = `Failed to create packing item (${response.status})`
+    try {
+      const errJson = await response.json()
+      if (errJson.detail) errorDetail = errJson.detail
+    } catch {
+      const txt = await response.text()
+      if (txt) errorDetail = txt
+    }
+    throw new Error(errorDetail)
+  }
+  return response.json()
+}
+
+export async function updateExpeditionPackingItem(
+  expeditionId: string,
+  itemId: number,
+  payload: PackingItemUpdatePayload
+): Promise<PackingItem> {
+  const token = getAccessToken()
+  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const response = await fetch(`${API_BASE_URL}/expeditions/${encodeURIComponent(expeditionId)}/packing/${itemId}`, {
+    method: 'PATCH',
+    headers,
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) {
+    let errorDetail = `Failed to update packing item (${response.status})`
+    try {
+      const errJson = await response.json()
+      if (errJson.detail) errorDetail = errJson.detail
+    } catch {
+      const txt = await response.text()
+      if (txt) errorDetail = txt
+    }
+    throw new Error(errorDetail)
+  }
+  return response.json()
+}
+
+export async function deleteExpeditionPackingItem(
+  expeditionId: string,
+  itemId: number
+): Promise<{ success: boolean; message: string }> {
+  const token = getAccessToken()
+  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const response = await fetch(`${API_BASE_URL}/expeditions/${encodeURIComponent(expeditionId)}/packing/${itemId}`, {
+    method: 'DELETE',
+    headers,
+  })
+
+  if (!response.ok) {
+    let errorDetail = `Failed to delete packing item (${response.status})`
+    try {
+      const errJson = await response.json()
+      if (errJson.detail) errorDetail = errJson.detail
+    } catch {
+      const txt = await response.text()
+      if (txt) errorDetail = txt
+    }
+    throw new Error(errorDetail)
+  }
+  return response.json()
+}
+
+export async function fetchTeamLoadSummary(expeditionId: string): Promise<TeamLoadSummary> {
+  const token = getAccessToken()
+  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const response = await fetch(`${API_BASE_URL}/expeditions/${encodeURIComponent(expeditionId)}/load-summary`, {
+    method: 'GET',
+    headers,
+  })
+
+  if (!response.ok) {
+    const txt = await response.text().catch(() => '')
+    throw new Error(txt || `Failed to fetch team load summary (${response.status})`)
+  }
+  return response.json()
+}
+
+export async function fetchCargoCapacity(expeditionId: string): Promise<CargoCapacitySummary> {
+  const token = getAccessToken()
+  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const response = await fetch(`${API_BASE_URL}/expeditions/${encodeURIComponent(expeditionId)}/capacity`, {
+    method: 'GET',
+    headers,
+  })
+
+  if (!response.ok) {
+    const txt = await response.text().catch(() => '')
+    throw new Error(txt || `Failed to fetch cargo capacity (${response.status})`)
+  }
+  return response.json()
+}
+
+export async function updateCargoCapacity(
+  expeditionId: string,
+  payload: { maxCapacityKg: number; allocatedCargoKg?: number; notes?: string }
+): Promise<CargoCapacitySummary> {
+  const token = getAccessToken()
+  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const response = await fetch(`${API_BASE_URL}/expeditions/${encodeURIComponent(expeditionId)}/capacity`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) {
+    let errorDetail = `Failed to update cargo capacity (${response.status})`
+    try {
+      const errJson = await response.json()
+      if (errJson.detail) errorDetail = errJson.detail
+    } catch {
+      const txt = await response.text()
+      if (txt) errorDetail = txt
+    }
+    throw new Error(errorDetail)
+  }
+  return response.json()
+}
+
+export async function fetchExpeditionPackingSummary(expeditionId: string): Promise<ExpeditionPackingSummary> {
+  const token = getAccessToken()
+  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const response = await fetch(`${API_BASE_URL}/expeditions/${encodeURIComponent(expeditionId)}/packing/summary`, {
+    method: 'GET',
+    headers,
+  })
+
+  if (!response.ok) {
+    const txt = await response.text().catch(() => '')
+    throw new Error(txt || `Failed to fetch packing summary (${response.status})`)
+  }
+  return response.json()
+}
+

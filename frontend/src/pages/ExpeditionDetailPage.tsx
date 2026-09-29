@@ -38,18 +38,22 @@ import {
   HeartPulse,
   Activity,
   Layers,
+  Scale,
 } from 'lucide-react'
 import { INITIAL_EXPEDITIONS, ExpeditionDetail } from '@/data/expeditionsData'
 import { fetchExpeditionsList } from '@/services/expeditionService'
+import { PackingAndLoadPlanner } from '@/components/expeditions/PackingAndLoadPlanner'
 
 type TabKey =
   | 'overview'
   | 'personnel'
+  | 'packing'
   | 'cargo'
   | 'inventory'
   | 'environmental'
   | 'incidents'
   | 'timeline'
+
 
 export const ExpeditionDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -189,6 +193,7 @@ export const ExpeditionDetailPage: React.FC = () => {
           {[
             { key: 'overview', label: 'Overview', icon: Layers, count: null },
             { key: 'personnel', label: 'Personnel', icon: Users, count: expedition.personnel.length },
+            { key: 'packing', label: 'Individual Packing & Load', icon: Scale, count: null },
             { key: 'cargo', label: 'Cargo', icon: Package, count: expedition.cargo.length },
             { key: 'inventory', label: 'Inventory Requirements', icon: Boxes, count: expedition.inventory.length },
             { key: 'environmental', label: 'Environmental Conditions', icon: Wind, count: expedition.environmental.length },
@@ -474,8 +479,18 @@ export const ExpeditionDetailPage: React.FC = () => {
           </div>
         )}
 
+        {/* TAB: INDIVIDUAL PACKING & LOAD PLANNER */}
+        {activeTab === 'packing' && (
+          <PackingAndLoadPlanner
+            expeditionId={expedition.id}
+            expeditionName={expedition.name}
+            station={expedition.station}
+          />
+        )}
+
         {/* TAB: CARGO */}
         {activeTab === 'cargo' && (
+
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>

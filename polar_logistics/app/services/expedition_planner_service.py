@@ -12,6 +12,8 @@ from sqlalchemy.orm import Session
 from ..models import (
     Expedition,
     ExpeditionPlan,
+    PackingItem,
+    CargoCapacityPlan,
     Personnel,
     Cargo,
     Inventory,
@@ -24,6 +26,9 @@ from ..schemas import (
     ExpeditionPlanCreate,
     ExpeditionPlanUpdate,
     ExpeditionPlanStatusUpdate,
+    PackingItemCreate,
+    PackingItemUpdate,
+    CargoCapacityPlanCreateOrUpdate,
 )
 
 VALID_PLANNING_STATUSES = [
@@ -522,3 +527,718 @@ def get_planning_summary(db: Session, exp: Expedition) -> dict[str, Any]:
             },
         },
     }
+
+
+# ==============================================================================
+# Phase 2: Individual Packing, Team Load & Cargo Capacity Functions
+# ==============================================================================
+
+VALID_PACKING_PRIORITIES = ["CRITICAL", "HIGH", "NORMAL"]
+VALID_PACKING_STATUSES = ["PLANNED", "PACKED", "INSPECTED", "LOADED"]
+
+INITIAL_SEED_PACKING_ITEMS = [
+    # EXP-2026-014 - Dr. Alok Verma
+    {
+        "expedition_id": "EXP-2026-014",
+        "personnel_id": "NCPOR-P-4401",
+        "personnel_name": "Dr. Alok Verma",
+        "personnel_role": "Expedition Leader / Senior Glaciologist",
+        "item_name": "Extreme Cold Weather Polar Parka & Salopettes",
+        "category": "Protective Clothing",
+        "quantity": 2,
+        "unit": "sets",
+        "unit_weight_kg": 2.4,
+        "total_weight_kg": 4.8,
+        "priority": "HIGH",
+        "source_reason": "Mandatory Antarctic field survival equipment",
+        "status": "PACKED",
+        "created_at": "2026-09-01 00:00:00 UTC",
+        "updated_at": "2026-09-18 10:00:00 UTC",
+    },
+    {
+        "expedition_id": "EXP-2026-014",
+        "personnel_id": "NCPOR-P-4401",
+        "personnel_name": "Dr. Alok Verma",
+        "personnel_role": "Expedition Leader / Senior Glaciologist",
+        "item_name": "Polar Ice Core Sampling Auger & Core Tubes",
+        "category": "Scientific Instrumentation",
+        "quantity": 1,
+        "unit": "kit",
+        "unit_weight_kg": 5.5,
+        "total_weight_kg": 5.5,
+        "priority": "CRITICAL",
+        "source_reason": "Dronning Maud Land deep ice-core paleoclimate mission",
+        "status": "INSPECTED",
+        "created_at": "2026-09-01 00:00:00 UTC",
+        "updated_at": "2026-09-18 10:00:00 UTC",
+    },
+    {
+        "expedition_id": "EXP-2026-014",
+        "personnel_id": "NCPOR-P-4401",
+        "personnel_name": "Dr. Alok Verma",
+        "personnel_role": "Expedition Leader / Senior Glaciologist",
+        "item_name": "Differential GPS Cryo-Survey Field Station",
+        "category": "Field Navigation",
+        "quantity": 1,
+        "unit": "unit",
+        "unit_weight_kg": 3.2,
+        "total_weight_kg": 3.2,
+        "priority": "HIGH",
+        "source_reason": "Maitri II replacement site survey mapping",
+        "status": "PLANNED",
+        "created_at": "2026-09-01 00:00:00 UTC",
+        "updated_at": "2026-09-18 10:00:00 UTC",
+    },
+    {
+        "expedition_id": "EXP-2026-014",
+        "personnel_id": "NCPOR-P-4401",
+        "personnel_name": "Dr. Alok Verma",
+        "personnel_role": "Expedition Leader / Senior Glaciologist",
+        "item_name": "Personal Hypothermia Trauma Kit & O2 Canister",
+        "category": "Medical Supplies",
+        "quantity": 1,
+        "unit": "kit",
+        "unit_weight_kg": 1.2,
+        "total_weight_kg": 1.2,
+        "priority": "CRITICAL",
+        "source_reason": "Class-1 Polar survival requirement",
+        "status": "PACKED",
+        "created_at": "2026-09-01 00:00:00 UTC",
+        "updated_at": "2026-09-18 10:00:00 UTC",
+    },
+    # EXP-2026-014 - Lt. Col. Vikramaditya Singh
+    {
+        "expedition_id": "EXP-2026-014",
+        "personnel_id": "NCPOR-P-4404",
+        "personnel_name": "Lt. Col. Vikramaditya Singh",
+        "personnel_role": "Operations & Logistics Commander",
+        "item_name": "Satellite Emergency Comms Terminal & LiFePO4 Battery",
+        "category": "Communications",
+        "quantity": 1,
+        "unit": "unit",
+        "unit_weight_kg": 4.5,
+        "total_weight_kg": 4.5,
+        "priority": "CRITICAL",
+        "source_reason": "Primary overland traverse emergency communications link",
+        "status": "INSPECTED",
+        "created_at": "2026-09-01 00:00:00 UTC",
+        "updated_at": "2026-09-18 10:00:00 UTC",
+    },
+    {
+        "expedition_id": "EXP-2026-014",
+        "personnel_id": "NCPOR-P-4404",
+        "personnel_name": "Lt. Col. Vikramaditya Singh",
+        "personnel_role": "Operations & Logistics Commander",
+        "item_name": "Avalanche Search Beacon & Carbon Fiber Probe",
+        "category": "Survival Equipment",
+        "quantity": 1,
+        "unit": "set",
+        "unit_weight_kg": 0.9,
+        "total_weight_kg": 0.9,
+        "priority": "CRITICAL",
+        "source_reason": "Glacial crevasse safety requirement",
+        "status": "PACKED",
+        "created_at": "2026-09-01 00:00:00 UTC",
+        "updated_at": "2026-09-18 10:00:00 UTC",
+    },
+    {
+        "expedition_id": "EXP-2026-014",
+        "personnel_id": "NCPOR-P-4404",
+        "personnel_name": "Lt. Col. Vikramaditya Singh",
+        "personnel_role": "Operations & Logistics Commander",
+        "item_name": "Heavy Vehicle Towing Rig & Synthetic Snatch Straps",
+        "category": "Field Gear",
+        "quantity": 1,
+        "unit": "rig",
+        "unit_weight_kg": 6.8,
+        "total_weight_kg": 6.8,
+        "priority": "HIGH",
+        "source_reason": "Kässbohrer PistenBully traverse logistics",
+        "status": "PLANNED",
+        "created_at": "2026-09-01 00:00:00 UTC",
+        "updated_at": "2026-09-18 10:00:00 UTC",
+    },
+    # EXP-2026-014 - Dr. Sunita Deshmukh
+    {
+        "expedition_id": "EXP-2026-014",
+        "personnel_id": "NCPOR-P-4409",
+        "personnel_name": "Dr. Sunita Deshmukh",
+        "personnel_role": "Medical Officer / Hyperbaric Specialist",
+        "item_name": "Field Surgical & Cold Trauma Emergency Bag",
+        "category": "Medical Supplies",
+        "quantity": 1,
+        "unit": "bag",
+        "unit_weight_kg": 7.4,
+        "total_weight_kg": 7.4,
+        "priority": "CRITICAL",
+        "source_reason": "Station field deployment medical officer requirement",
+        "status": "INSPECTED",
+        "created_at": "2026-09-01 00:00:00 UTC",
+        "updated_at": "2026-09-18 10:00:00 UTC",
+    },
+    {
+        "expedition_id": "EXP-2026-014",
+        "personnel_id": "NCPOR-P-4409",
+        "personnel_name": "Dr. Sunita Deshmukh",
+        "personnel_role": "Medical Officer / Hyperbaric Specialist",
+        "item_name": "Portable Automated External Defibrillator (AED Polar)",
+        "category": "Medical Supplies",
+        "quantity": 1,
+        "unit": "unit",
+        "unit_weight_kg": 2.1,
+        "total_weight_kg": 2.1,
+        "priority": "CRITICAL",
+        "source_reason": "Mission-critical life support",
+        "status": "PACKED",
+        "created_at": "2026-09-01 00:00:00 UTC",
+        "updated_at": "2026-09-18 10:00:00 UTC",
+    },
+    # EXP-2026-014 - Er. Rajesh K. Nair
+    {
+        "expedition_id": "EXP-2026-014",
+        "personnel_id": "NCPOR-P-4414",
+        "personnel_name": "Er. Rajesh K. Nair",
+        "personnel_role": "Chief Generator & Heavy Machinery Engineer",
+        "item_name": "Arctic Generator Diagnostic Kit & Calibration Tools",
+        "category": "Machinery Spares",
+        "quantity": 1,
+        "unit": "kit",
+        "unit_weight_kg": 8.5,
+        "total_weight_kg": 8.5,
+        "priority": "HIGH",
+        "source_reason": "Powerhouse turbine maintenance and wintering overhaul",
+        "status": "PACKED",
+        "created_at": "2026-09-01 00:00:00 UTC",
+        "updated_at": "2026-09-18 10:00:00 UTC",
+    },
+]
+
+INITIAL_SEED_CAPACITIES = [
+    {
+        "expedition_id": "EXP-2026-014",
+        "max_capacity_kg": 2500.0,
+        "allocated_cargo_kg": 420.0,
+        "notes": "Basler BT-67 Air Bridge & PistenBully 300 Polar Traverse payload ceiling",
+        "created_at": "2026-09-01 00:00:00 UTC",
+        "updated_at": "2026-09-18 10:00:00 UTC",
+    },
+    {
+        "expedition_id": "EXP-2026-015",
+        "max_capacity_kg": 1200.0,
+        "allocated_cargo_kg": 150.0,
+        "notes": "Dornier 228 Longyearbyen payload limit",
+        "created_at": "2026-09-01 00:00:00 UTC",
+        "updated_at": "2026-09-18 10:00:00 UTC",
+    },
+    {
+        "expedition_id": "EXP-2026-016",
+        "max_capacity_kg": 3000.0,
+        "allocated_cargo_kg": 600.0,
+        "notes": "ORV Sagar Nidhi science hold payload quota",
+        "created_at": "2026-09-01 00:00:00 UTC",
+        "updated_at": "2026-09-18 10:00:00 UTC",
+    },
+]
+
+
+def seed_initial_packing_if_empty(db: Session) -> None:
+    """Seeds initial packing items and cargo capacity plans if empty."""
+    # Seed capacity plans
+    cap_count = db.query(CargoCapacityPlan).count()
+    if cap_count == 0:
+        for seed_data in INITIAL_SEED_CAPACITIES:
+            exp_exists = db.query(Expedition).filter(
+                Expedition.expedition_id == seed_data["expedition_id"]
+            ).first()
+            if exp_exists:
+                db.add(CargoCapacityPlan(**seed_data))
+        db.commit()
+
+    # Seed packing items
+    item_count = db.query(PackingItem).count()
+    if item_count == 0:
+        for item_data in INITIAL_SEED_PACKING_ITEMS:
+            exp_exists = db.query(Expedition).filter(
+                Expedition.expedition_id == item_data["expedition_id"]
+            ).first()
+            if exp_exists:
+                db.add(PackingItem(**item_data))
+        db.commit()
+
+
+def find_packing_item_or_404(db: Session, expedition_id: str, item_id: int) -> PackingItem:
+    """Finds a packing item by ID and expedition_id, or raises 404."""
+    item = db.query(PackingItem).filter(
+        PackingItem.id == item_id,
+        (PackingItem.expedition_id.ilike(expedition_id))
+        | (PackingItem.expedition_id.ilike(expedition_id.replace("-", "")))
+    ).first()
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Packing item #{item_id} not found for expedition '{expedition_id}'.",
+        )
+    return item
+
+
+def get_or_create_capacity_plan(db: Session, exp: Expedition) -> CargoCapacityPlan:
+    """Retrieves or creates default cargo capacity plan for an expedition."""
+    plan = db.query(CargoCapacityPlan).filter(
+        CargoCapacityPlan.expedition_id == exp.expedition_id
+    ).first()
+    if plan:
+        return plan
+
+    # Check seed match
+    for seed in INITIAL_SEED_CAPACITIES:
+        if seed["expedition_id"].lower() == exp.expedition_id.lower():
+            plan = CargoCapacityPlan(**seed)
+            db.add(plan)
+            db.commit()
+            db.refresh(plan)
+            return plan
+
+    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    default_plan = CargoCapacityPlan(
+        expedition_id=exp.expedition_id,
+        max_capacity_kg=2000.0,
+        allocated_cargo_kg=0.0,
+        notes=f"Default payload capacity allocated for {exp.name}",
+        created_at=now_str,
+        updated_at=now_str,
+    )
+    db.add(default_plan)
+    db.commit()
+    db.refresh(default_plan)
+    return default_plan
+
+
+def create_or_update_capacity_plan(
+    db: Session,
+    exp: Expedition,
+    payload: CargoCapacityPlanCreateOrUpdate,
+) -> CargoCapacityPlan:
+    """Creates or updates the cargo capacity plan for an expedition."""
+    if payload.max_capacity_kg <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Maximum cargo capacity must be greater than 0 kg.",
+        )
+    if payload.allocated_cargo_kg is not None and payload.allocated_cargo_kg < 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Allocated cargo weight cannot be negative.",
+        )
+
+    plan = db.query(CargoCapacityPlan).filter(
+        CargoCapacityPlan.expedition_id == exp.expedition_id
+    ).first()
+    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+
+    if not plan:
+        plan = CargoCapacityPlan(
+            expedition_id=exp.expedition_id,
+            max_capacity_kg=round(float(payload.max_capacity_kg), 2),
+            allocated_cargo_kg=round(float(payload.allocated_cargo_kg or 0.0), 2),
+            notes=payload.notes.strip() if payload.notes else None,
+            created_at=now_str,
+            updated_at=now_str,
+        )
+        db.add(plan)
+    else:
+        plan.max_capacity_kg = round(float(payload.max_capacity_kg), 2)
+        if payload.allocated_cargo_kg is not None:
+            plan.allocated_cargo_kg = round(float(payload.allocated_cargo_kg), 2)
+        if payload.notes is not None:
+            plan.notes = payload.notes.strip() if payload.notes else None
+        plan.updated_at = now_str
+
+    db.commit()
+    db.refresh(plan)
+    return plan
+
+
+def create_packing_item(
+    db: Session,
+    exp: Expedition,
+    payload: PackingItemCreate,
+) -> PackingItem:
+    """Creates a new packing item for a specific person in an expedition."""
+    if payload.quantity < 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Quantity cannot be negative.",
+        )
+    if payload.unit_weight_kg < 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unit weight cannot be negative.",
+        )
+
+    clean_item_name = payload.item_name.strip()
+    if not clean_item_name:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Item name is required.",
+        )
+
+    clean_priority = str(payload.priority or "NORMAL").strip().upper()
+    if clean_priority not in VALID_PACKING_PRIORITIES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid priority '{payload.priority}'. Allowed: {', '.join(VALID_PACKING_PRIORITIES)}",
+        )
+
+    clean_status = str(payload.status or "PLANNED").strip().upper()
+    if clean_status not in VALID_PACKING_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid status '{payload.status}'. Allowed: {', '.join(VALID_PACKING_STATUSES)}",
+        )
+
+    clean_pid = payload.personnel_id.strip()
+    # Validate personnel exists in system
+    person = db.query(Personnel).filter(
+        (Personnel.personnel_id.ilike(clean_pid))
+        | (Personnel.personnel_id.ilike(clean_pid.replace("-", "")))
+        | (Personnel.name.ilike(clean_pid))
+    ).first()
+
+    person_name = payload.personnel_name.strip() if payload.personnel_name else (person.name if person else clean_pid)
+    person_role = payload.personnel_role.strip() if payload.personnel_role else (person.role if person else "Expedition Member")
+
+    # If personnel not found in DB, and not even a valid personnel ID or name provided
+    if not person and not payload.personnel_name:
+        # Check if clean_pid has at least some name/id format
+        if not clean_pid or len(clean_pid) < 2:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Personnel '{clean_pid}' not found in roster.",
+            )
+
+    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    total_weight = round(float(payload.quantity) * float(payload.unit_weight_kg), 2)
+
+    new_item = PackingItem(
+        expedition_id=exp.expedition_id,
+        personnel_id=clean_pid,
+        personnel_name=person_name,
+        personnel_role=person_role,
+        item_name=clean_item_name,
+        category=payload.category.strip() if payload.category else "Personal Gear",
+        quantity=payload.quantity,
+        unit=payload.unit.strip() if payload.unit else "pcs",
+        unit_weight_kg=round(float(payload.unit_weight_kg), 2),
+        total_weight_kg=total_weight,
+        priority=clean_priority,
+        source_reason=payload.source_reason.strip() if payload.source_reason else None,
+        status=clean_status,
+        created_at=now_str,
+        updated_at=now_str,
+    )
+    db.add(new_item)
+    db.commit()
+    db.refresh(new_item)
+    return new_item
+
+
+def update_packing_item(
+    db: Session,
+    exp: Expedition,
+    item_id: int,
+    payload: PackingItemUpdate,
+) -> PackingItem:
+    """Updates an existing packing item."""
+    item = find_packing_item_or_404(db, exp.expedition_id, item_id)
+    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+
+    if payload.quantity is not None:
+        if payload.quantity < 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Quantity cannot be negative.",
+            )
+        item.quantity = payload.quantity
+
+    if payload.unit_weight_kg is not None:
+        if payload.unit_weight_kg < 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unit weight cannot be negative.",
+            )
+        item.unit_weight_kg = round(float(payload.unit_weight_kg), 2)
+
+    # Recalculate deterministic total weight
+    item.total_weight_kg = round(float(item.quantity) * float(item.unit_weight_kg), 2)
+
+    if payload.item_name is not None:
+        clean_name = payload.item_name.strip()
+        if not clean_name:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Item name cannot be empty.",
+            )
+        item.item_name = clean_name
+
+    if payload.category is not None:
+        item.category = payload.category.strip()
+    if payload.unit is not None:
+        item.unit = payload.unit.strip()
+
+    if payload.priority is not None:
+        clean_priority = str(payload.priority).strip().upper()
+        if clean_priority not in VALID_PACKING_PRIORITIES:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid priority '{payload.priority}'. Allowed: {', '.join(VALID_PACKING_PRIORITIES)}",
+            )
+        item.priority = clean_priority
+
+    if payload.status is not None:
+        clean_status = str(payload.status).strip().upper()
+        if clean_status not in VALID_PACKING_STATUSES:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid status '{payload.status}'. Allowed: {', '.join(VALID_PACKING_STATUSES)}",
+            )
+        item.status = clean_status
+
+    if payload.personnel_id is not None:
+        item.personnel_id = payload.personnel_id.strip()
+    if payload.personnel_name is not None:
+        item.personnel_name = payload.personnel_name.strip()
+    if payload.personnel_role is not None:
+        item.personnel_role = payload.personnel_role.strip()
+    if payload.source_reason is not None:
+        item.source_reason = payload.source_reason.strip() if payload.source_reason else None
+
+    item.updated_at = now_str
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+def delete_packing_item(
+    db: Session,
+    exp: Expedition,
+    item_id: int,
+) -> dict[str, Any]:
+    """Deletes a packing item from an expedition."""
+    item = find_packing_item_or_404(db, exp.expedition_id, item_id)
+    db.delete(item)
+    db.commit()
+    return {
+        "success": True,
+        "message": f"Packing item #{item_id} deleted successfully.",
+        "id": item_id,
+        "expedition_id": exp.expedition_id,
+    }
+
+
+def get_expedition_packing_items(
+    db: Session,
+    exp: Expedition,
+    personnel_id: str | None = None,
+) -> list[PackingItem]:
+    """Retrieves packing items for an expedition, optionally filtered by personnel_id."""
+    query = db.query(PackingItem).filter(
+        (PackingItem.expedition_id.ilike(exp.expedition_id))
+        | (PackingItem.expedition_id.ilike(exp.expedition_id.replace("-", "")))
+    )
+    if personnel_id:
+        clean_pid = personnel_id.strip()
+        query = query.filter(
+            (PackingItem.personnel_id.ilike(clean_pid))
+            | (PackingItem.personnel_id.ilike(clean_pid.replace("-", "")))
+            | (PackingItem.personnel_name.ilike(clean_pid))
+        )
+    return query.order_by(PackingItem.id.asc()).all()
+
+
+def get_individual_packing_summary(
+    db: Session,
+    exp: Expedition,
+    personnel_id: str,
+) -> dict[str, Any]:
+    """Computes packing summary and total load for an individual person."""
+    clean_pid = personnel_id.strip()
+    person = db.query(Personnel).filter(
+        (Personnel.personnel_id.ilike(clean_pid))
+        | (Personnel.personnel_id.ilike(clean_pid.replace("-", "")))
+        | (Personnel.name.ilike(clean_pid))
+    ).first()
+
+    items = get_expedition_packing_items(db, exp, personnel_id=clean_pid)
+    total_qty = sum(item.quantity for item in items)
+    total_weight = round(sum(float(item.total_weight_kg) for item in items), 2)
+
+    person_name = person.name if person else (items[0].personnel_name if items else clean_pid)
+    person_role = person.role if person else (items[0].personnel_role if items else "Expedition Member")
+    organization = person.organization if person else exp.lead_org
+    station = person.current_station if person else exp.station
+
+    return {
+        "personnel_id": person.personnel_id if person else clean_pid,
+        "personnel_name": person_name,
+        "personnel_role": person_role,
+        "organization": organization,
+        "station": station,
+        "total_items_count": len(items),
+        "total_quantity": total_qty,
+        "total_weight_kg": total_weight,
+        "items": items,
+    }
+
+
+def get_team_load_summary(db: Session, exp: Expedition) -> dict[str, Any]:
+    """Computes total team load, per-person breakdowns, and priority distributions."""
+    all_packing_items = get_expedition_packing_items(db, exp)
+    all_personnel = db.query(Personnel).filter(
+        (Personnel.expedition_id.ilike(exp.expedition_id))
+        | (Personnel.expedition_id.ilike(exp.expedition_id.replace("-", "")))
+    ).all()
+
+    # Map items by personnel_id
+    items_by_pid: dict[str, list[PackingItem]] = {}
+    for item in all_packing_items:
+        items_by_pid.setdefault(item.personnel_id, []).append(item)
+
+    # Build per-person breakdowns
+    personnel_breakdown: list[dict[str, Any]] = []
+    processed_pids = set()
+
+    # First add assigned personnel from Personnel table
+    for p in all_personnel:
+        p_items = items_by_pid.get(p.personnel_id, [])
+        total_qty = sum(i.quantity for i in p_items)
+        total_wt = round(sum(float(i.total_weight_kg) for i in p_items), 2)
+        personnel_breakdown.append({
+            "personnel_id": p.personnel_id,
+            "personnel_name": p.name,
+            "personnel_role": p.role,
+            "organization": p.organization,
+            "station": p.current_station,
+            "total_items_count": len(p_items),
+            "total_quantity": total_qty,
+            "total_weight_kg": total_wt,
+            "items": p_items,
+        })
+        processed_pids.add(p.personnel_id)
+
+    # Add any personnel from packing items not in assigned Personnel table
+    for pid, p_items in items_by_pid.items():
+        if pid not in processed_pids:
+            first_i = p_items[0]
+            total_qty = sum(i.quantity for i in p_items)
+            total_wt = round(sum(float(i.total_weight_kg) for i in p_items), 2)
+            personnel_breakdown.append({
+                "personnel_id": pid,
+                "personnel_name": first_i.personnel_name or pid,
+                "personnel_role": first_i.personnel_role or "Expedition Specialist",
+                "organization": exp.lead_org,
+                "station": exp.station,
+                "total_items_count": len(p_items),
+                "total_quantity": total_qty,
+                "total_weight_kg": total_wt,
+                "items": p_items,
+            })
+            processed_pids.add(pid)
+
+    total_team_load = round(sum(float(i.total_weight_kg) for i in all_packing_items), 2)
+    total_items = len(all_packing_items)
+    total_qty_sum = sum(i.quantity for i in all_packing_items)
+
+    # Priority breakdown
+    priority_breakdown = {}
+    for prio in VALID_PACKING_PRIORITIES:
+        p_items = [i for i in all_packing_items if i.priority == prio]
+        p_wt = round(sum(float(i.total_weight_kg) for i in p_items), 2)
+        p_pct = round((p_wt / total_team_load * 100.0), 1) if total_team_load > 0 else 0.0
+        priority_breakdown[prio] = {
+            "item_count": len(p_items),
+            "total_quantity": sum(i.quantity for i in p_items),
+            "weight_kg": p_wt,
+            "percentage": p_pct,
+        }
+
+    # Category breakdown
+    category_breakdown = {}
+    categories = sorted(list({i.category for i in all_packing_items if i.category}))
+    for cat in categories:
+        c_items = [i for i in all_packing_items if i.category == cat]
+        c_wt = round(sum(float(i.total_weight_kg) for i in c_items), 2)
+        c_pct = round((c_wt / total_team_load * 100.0), 1) if total_team_load > 0 else 0.0
+        category_breakdown[cat] = {
+            "item_count": len(c_items),
+            "total_quantity": sum(i.quantity for i in c_items),
+            "weight_kg": c_wt,
+            "percentage": c_pct,
+        }
+
+    total_personnel_count = len(all_personnel) if all_personnel else (exp.personnel_count or len(personnel_breakdown))
+    personnel_with_lists = sum(1 for p in personnel_breakdown if p["total_items_count"] > 0)
+
+    return {
+        "expedition_id": exp.expedition_id,
+        "expedition_name": exp.name,
+        "station": exp.station,
+        "total_personnel_count": max(total_personnel_count, len(personnel_breakdown)),
+        "personnel_with_packing_lists_count": personnel_with_lists,
+        "total_items_count": total_items,
+        "total_quantity": total_qty_sum,
+        "total_team_load_kg": total_team_load,
+        "priority_breakdown": priority_breakdown,
+        "category_breakdown": category_breakdown,
+        "personnel_breakdown": personnel_breakdown,
+    }
+
+
+def get_cargo_capacity_summary(db: Session, exp: Expedition) -> dict[str, Any]:
+    """Computes planned load, remaining capacity, utilization, and capacity status."""
+    cap_plan = get_or_create_capacity_plan(db, exp)
+    all_packing_items = get_expedition_packing_items(db, exp)
+
+    team_personal_load = round(sum(float(i.total_weight_kg) for i in all_packing_items), 2)
+    allocated_cargo_wt = round(float(cap_plan.allocated_cargo_kg or 0.0), 2)
+    total_planned_weight = round(team_personal_load + allocated_cargo_wt, 2)
+    max_cap = round(float(cap_plan.max_capacity_kg or 2000.0), 2)
+
+    remaining_cap = round(max(0.0, max_cap - total_planned_weight), 2)
+    over_cap = round(max(0.0, total_planned_weight - max_cap), 2)
+    utilization_pct = round((total_planned_weight / max_cap * 100.0), 2) if max_cap > 0 else 0.0
+    status_str = "OVER_CAPACITY" if total_planned_weight > max_cap else "WITHIN_CAPACITY"
+
+    critical_wt = round(sum(float(i.total_weight_kg) for i in all_packing_items if i.priority == "CRITICAL"), 2)
+    high_wt = round(sum(float(i.total_weight_kg) for i in all_packing_items if i.priority == "HIGH"), 2)
+    normal_wt = round(sum(float(i.total_weight_kg) for i in all_packing_items if i.priority == "NORMAL"), 2)
+
+    return {
+        "expedition_id": exp.expedition_id,
+        "expedition_name": exp.name,
+        "maximum_capacity_kg": max_cap,
+        "allocated_cargo_weight_kg": allocated_cargo_wt,
+        "team_personal_load_kg": team_personal_load,
+        "total_planned_weight_kg": total_planned_weight,
+        "remaining_capacity_kg": remaining_cap,
+        "over_capacity_kg": over_cap,
+        "capacity_utilization_pct": utilization_pct,
+        "status": status_str,
+        "critical_weight_kg": critical_wt,
+        "high_weight_kg": high_wt,
+        "normal_weight_kg": normal_wt,
+        "notes": cap_plan.notes,
+        "updated_at": cap_plan.updated_at,
+    }
+
+
+def get_expedition_packing_summary(db: Session, exp: Expedition) -> dict[str, Any]:
+    """Aggregates both team load and cargo capacity into unified packing summary."""
+    team_load = get_team_load_summary(db, exp)
+    capacity = get_cargo_capacity_summary(db, exp)
+    return {
+        "expedition_id": exp.expedition_id,
+        "expedition_name": exp.name,
+        "team_load": team_load,
+        "capacity": capacity,
+    }
+

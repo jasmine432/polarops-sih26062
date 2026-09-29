@@ -580,5 +580,137 @@ class ExpeditionPlanSummaryResponse(BaseModel):
     readiness: PlanningReadinessSummary
 
 
+# ==============================================================================
+# Phase 2: Individual Packing, Team Load & Cargo Capacity Schemas
+# ==============================================================================
+
+PackingPriorityType = Literal["CRITICAL", "HIGH", "NORMAL"]
+PackingStatusType = Literal["PLANNED", "PACKED", "INSPECTED", "LOADED"]
+
+
+class PackingItemCreate(BaseModel):
+    personnel_id: str = Field(alias="personnelId", min_length=1)
+    personnel_name: str | None = Field(alias="personnelName", default=None)
+    personnel_role: str | None = Field(alias="personnelRole", default=None)
+    item_name: str = Field(alias="itemName", min_length=1, max_length=255)
+    category: str | None = "Personal Gear"
+    quantity: int = Field(ge=0, default=1)
+    unit: str | None = "pcs"
+    unit_weight_kg: float = Field(alias="unitWeightKg", ge=0.0, default=0.0)
+    priority: PackingPriorityType | str = "NORMAL"
+    source_reason: str | None = Field(alias="sourceReason", default=None)
+    status: PackingStatusType | str = "PLANNED"
+
+    class Config:
+        populate_by_name = True
+
+
+class PackingItemUpdate(BaseModel):
+    personnel_id: str | None = Field(alias="personnelId", default=None)
+    personnel_name: str | None = Field(alias="personnelName", default=None)
+    personnel_role: str | None = Field(alias="personnelRole", default=None)
+    item_name: str | None = Field(alias="itemName", default=None)
+    category: str | None = None
+    quantity: int | None = Field(ge=0, default=None)
+    unit: str | None = None
+    unit_weight_kg: float | None = Field(alias="unitWeightKg", ge=0.0, default=None)
+    priority: PackingPriorityType | str | None = None
+    source_reason: str | None = Field(alias="sourceReason", default=None)
+    status: PackingStatusType | str | None = None
+
+    class Config:
+        populate_by_name = True
+
+
+class PackingItemResponse(BaseModel):
+    id: int
+    expedition_id: str
+    personnel_id: str
+    personnel_name: str | None = None
+    personnel_role: str | None = None
+    item_name: str
+    category: str
+    quantity: int
+    unit: str | None = None
+    unit_weight_kg: float
+    total_weight_kg: float
+    priority: str
+    source_reason: str | None = None
+    status: str
+    created_at: str | None = None
+    updated_at: str | None = None
+
+    class Config:
+        from_attributes = True
+
+
+class IndividualPackingSummary(BaseModel):
+    personnel_id: str
+    personnel_name: str
+    personnel_role: str | None = None
+    organization: str | None = None
+    station: str | None = None
+    total_items_count: int = 0
+    total_quantity: int = 0
+    total_weight_kg: float = 0.0
+    items: list[PackingItemResponse] = []
+
+
+class PriorityBreakdownItem(BaseModel):
+    item_count: int = 0
+    total_quantity: int = 0
+    weight_kg: float = 0.0
+    percentage: float = 0.0
+
+
+class TeamLoadSummaryResponse(BaseModel):
+    expedition_id: str
+    expedition_name: str
+    station: str
+    total_personnel_count: int = 0
+    personnel_with_packing_lists_count: int = 0
+    total_items_count: int = 0
+    total_quantity: int = 0
+    total_team_load_kg: float = 0.0
+    priority_breakdown: dict[str, PriorityBreakdownItem] = {}
+    category_breakdown: dict[str, PriorityBreakdownItem] = {}
+    personnel_breakdown: list[IndividualPackingSummary] = []
+
+
+class CargoCapacityPlanCreateOrUpdate(BaseModel):
+    max_capacity_kg: float = Field(alias="maxCapacityKg", gt=0)
+    allocated_cargo_kg: float | None = Field(alias="allocatedCargoKg", ge=0.0, default=0.0)
+    notes: str | None = None
+
+    class Config:
+        populate_by_name = True
+
+
+class CargoCapacitySummaryResponse(BaseModel):
+    expedition_id: str
+    expedition_name: str
+    maximum_capacity_kg: float
+    allocated_cargo_weight_kg: float
+    team_personal_load_kg: float
+    total_planned_weight_kg: float
+    remaining_capacity_kg: float
+    over_capacity_kg: float
+    capacity_utilization_pct: float
+    status: Literal["WITHIN_CAPACITY", "OVER_CAPACITY"]
+    critical_weight_kg: float = 0.0
+    high_weight_kg: float = 0.0
+    normal_weight_kg: float = 0.0
+    notes: str | None = None
+    updated_at: str | None = None
+
+
+class ExpeditionPackingSummaryResponse(BaseModel):
+    expedition_id: str
+    expedition_name: str
+    team_load: TeamLoadSummaryResponse
+    capacity: CargoCapacitySummaryResponse
+
+
+
 
 

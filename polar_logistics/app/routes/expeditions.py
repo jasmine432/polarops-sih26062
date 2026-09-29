@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import sessionmaker
 
 from ..database import engine
-from ..models import Expedition, ExpeditionPlan, Base
+from ..models import Expedition, ExpeditionPlan, PackingItem, CargoCapacityPlan, Base
 from ..schemas import (
     ExpeditionCreate,
     ExpeditionResponse,
@@ -15,6 +15,14 @@ from ..schemas import (
     ExpeditionPlanStatusUpdate,
     ExpeditionPlanResponse,
     ExpeditionPlanSummaryResponse,
+    PackingItemCreate,
+    PackingItemUpdate,
+    PackingItemResponse,
+    IndividualPackingSummary,
+    TeamLoadSummaryResponse,
+    CargoCapacityPlanCreateOrUpdate,
+    CargoCapacitySummaryResponse,
+    ExpeditionPackingSummaryResponse,
 )
 from ..auth import AuthenticatedUser, get_current_user, require_roles
 from ..services.expedition_planner_service import (
@@ -24,6 +32,16 @@ from ..services.expedition_planner_service import (
     update_plan_status,
     get_planning_summary,
     seed_initial_plans_if_empty,
+    create_packing_item,
+    update_packing_item,
+    delete_packing_item,
+    get_expedition_packing_items,
+    get_individual_packing_summary,
+    get_team_load_summary,
+    create_or_update_capacity_plan,
+    get_cargo_capacity_summary,
+    get_expedition_packing_summary,
+    seed_initial_packing_if_empty,
 )
 
 router = APIRouter(
@@ -103,6 +121,7 @@ def _seed_expeditions_if_empty(db) -> None:
             db.add(Expedition(**seed_data))
         db.commit()
     seed_initial_plans_if_empty(db)
+    seed_initial_packing_if_empty(db)
 
 
 
@@ -374,4 +393,158 @@ def get_expedition_planning_summary(
         return summary
     finally:
         db.close()
+
+
+# ==============================================================================
+# Phase 2: Individual Packing & Load Planning Endpoints
+# ==============================================================================
+
+@router.get("/{expedition_id}/packing", response_model=list[PackingItemResponse])
+@router.get("/{expedition_id}/packing/", response_model=list[PackingItemResponse])
+def get_expedition_packing(
+    expedition_id: str,
+    personnel_id: str | None = None,
+    _: Annotated[AuthenticatedUser, Depends(get_current_user)] = None,
+) -> Any:
+    """Retrieve packing list for an expedition, optionally filtered by personnel_id."""
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        items = get_expedition_packing_items(db, exp, personnel_id=personnel_id)
+        return items
+    finally:
+        db.close()
+
+
+@router.post("/{expedition_id}/packing", response_model=PackingItemResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/{expedition_id}/packing/", response_model=PackingItemResponse, status_code=status.HTTP_201_CREATED)
+def add_expedition_packing_item(
+    expedition_id: str,
+    payload: PackingItemCreate,
+    _: Annotated[AuthenticatedUser, Depends(require_roles("ADMIN", "PHC"))],
+) -> Any:
+    """Add a new packing item requirement for an individual in an expedition."""
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        item = create_packing_item(db, exp, payload)
+        return item
+    finally:
+        db.close()
+
+
+@router.patch("/{expedition_id}/packing/{item_id}", response_model=PackingItemResponse)
+@router.patch("/{expedition_id}/packing/{item_id}/", response_model=PackingItemResponse)
+@router.put("/{expedition_id}/packing/{item_id}", response_model=PackingItemResponse)
+@router.put("/{expedition_id}/packing/{item_id}/", response_model=PackingItemResponse)
+def modify_expedition_packing_item(
+    expedition_id: str,
+    item_id: int,
+    payload: PackingItemUpdate,
+    _: Annotated[AuthenticatedUser, Depends(require_roles("ADMIN", "PHC"))],
+) -> Any:
+    """Modify details, quantity, or unit weight of an individual's packing item."""
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        item = update_packing_item(db, exp, item_id, payload)
+        return item
+    finally:
+        db.close()
+
+
+@router.delete("/{expedition_id}/packing/{item_id}")
+@router.delete("/{expedition_id}/packing/{item_id}/")
+def remove_expedition_packing_item(
+    expedition_id: str,
+    item_id: int,
+    _: Annotated[AuthenticatedUser, Depends(require_roles("ADMIN", "PHC"))],
+) -> Any:
+    """Remove a packing item requirement from an expedition."""
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        result = delete_packing_item(db, exp, item_id)
+        return result
+    finally:
+        db.close()
+
+
+@router.get("/{expedition_id}/packing/summary", response_model=ExpeditionPackingSummaryResponse)
+@router.get("/{expedition_id}/packing/summary/", response_model=ExpeditionPackingSummaryResponse)
+def get_expedition_packing_summary_endpoint(
+    expedition_id: str,
+    _: Annotated[AuthenticatedUser, Depends(get_current_user)],
+) -> Any:
+    """Retrieve complete team load & cargo capacity planning summary for an expedition."""
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        summary = get_expedition_packing_summary(db, exp)
+        return summary
+    finally:
+        db.close()
+
+
+@router.get("/{expedition_id}/load-summary", response_model=TeamLoadSummaryResponse)
+@router.get("/{expedition_id}/load-summary/", response_model=TeamLoadSummaryResponse)
+def get_expedition_load_summary_endpoint(
+    expedition_id: str,
+    _: Annotated[AuthenticatedUser, Depends(get_current_user)],
+) -> Any:
+    """Retrieve team load aggregation, individual breakdowns, and weight distributions."""
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        summary = get_team_load_summary(db, exp)
+        return summary
+    finally:
+        db.close()
+
+
+@router.get("/{expedition_id}/capacity", response_model=CargoCapacitySummaryResponse)
+@router.get("/{expedition_id}/capacity/", response_model=CargoCapacitySummaryResponse)
+def get_expedition_capacity_endpoint(
+    expedition_id: str,
+    _: Annotated[AuthenticatedUser, Depends(get_current_user)],
+) -> Any:
+    """Retrieve cargo capacity analysis, remaining margin, utilization %, and over-capacity status."""
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        summary = get_cargo_capacity_summary(db, exp)
+        return summary
+    finally:
+        db.close()
+
+
+@router.post("/{expedition_id}/capacity", response_model=CargoCapacitySummaryResponse)
+@router.post("/{expedition_id}/capacity/", response_model=CargoCapacitySummaryResponse)
+@router.patch("/{expedition_id}/capacity", response_model=CargoCapacitySummaryResponse)
+@router.patch("/{expedition_id}/capacity/", response_model=CargoCapacitySummaryResponse)
+@router.put("/{expedition_id}/capacity", response_model=CargoCapacitySummaryResponse)
+@router.put("/{expedition_id}/capacity/", response_model=CargoCapacitySummaryResponse)
+def update_expedition_capacity_endpoint(
+    expedition_id: str,
+    payload: CargoCapacityPlanCreateOrUpdate,
+    _: Annotated[AuthenticatedUser, Depends(require_roles("ADMIN", "PHC"))],
+) -> Any:
+    """Set or update cargo capacity constraints and allocated cargo weights for an expedition."""
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        create_or_update_capacity_plan(db, exp, payload)
+        summary = get_cargo_capacity_summary(db, exp)
+        return summary
+    finally:
+        db.close()
+
 
