@@ -853,3 +853,72 @@ class MissionReadinessResponse(BaseModel):
 
     class Config:
         populate_by_name = True
+
+
+# =========================================================================
+# PHASE 3.5 MISSION PROGRESS & ROUTE TRACKING SCHEMAS
+# =========================================================================
+
+class RouteWaypoint(BaseModel):
+    name: str | None = None
+    latitude: float
+    longitude: float
+    order: int
+    passed: bool = False
+    estimated_arrival: str | None = Field(default=None, alias="estimatedArrival")
+
+    class Config:
+        populate_by_name = True
+
+
+class LocationCoordinate(BaseModel):
+    name: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    formatted_coordinates: str | None = Field(default=None, alias="formattedCoordinates")
+
+    class Config:
+        populate_by_name = True
+
+
+class MissionProgressResponse(BaseModel):
+    expedition_id: str = Field(alias="expeditionId")
+    expedition_name: str = Field(alias="expeditionName")
+    current_phase: str = Field(alias="currentPhase")
+    status: str
+    origin: LocationCoordinate
+    destination: LocationCoordinate
+    current_location: LocationCoordinate | None = Field(default=None, alias="currentLocation")
+    waypoints: list[RouteWaypoint] = Field(default_factory=list)
+    total_distance_km: float = Field(alias="totalDistanceKm")
+    distance_traveled_km: float = Field(alias="distanceTraveledKm")
+    remaining_distance_km: float = Field(alias="remainingDistanceKm")
+    progress_percent: float = Field(alias="progressPercent")
+    telemetry_source: Literal["LIVE_GPS", "PROTOTYPE_SIMULATED", "LOCATION_UNAVAILABLE"] = Field(alias="telemetrySource")
+    telemetry_label: str = Field(alias="telemetryLabel")
+    telemetry_is_live: bool = Field(alias="telemetryIsLive")
+    heading: str | None = None
+    speed_knots: float | None = Field(default=None, alias="speedKnots")
+    eta: str | None = None
+    eta_breakdown: str | None = Field(default=None, alias="etaBreakdown")
+    vessel_name: str | None = Field(default=None, alias="vesselName")
+    last_known_timestamp: str | None = Field(default=None, alias="lastKnownTimestamp")
+    notes: list[str] = Field(default_factory=list)
+
+    class Config:
+        populate_by_name = True
+
+
+class MissionPhaseUpdateRequest(BaseModel):
+    phase: Literal[
+        "PLANNING",
+        "PREPARATION",
+        "DEPARTED",
+        "IN_TRANSIT",
+        "ARRIVED",
+        "ACTIVE",
+        "RETURNING",
+        "COMPLETED",
+        "ON_HOLD",
+    ]
+    notes: str | None = None

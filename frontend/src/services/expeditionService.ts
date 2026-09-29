@@ -545,3 +545,96 @@ export async function fetchMissionReadiness(expeditionId: string): Promise<Missi
   }
   return response.json()
 }
+
+// =========================================================================
+// PHASE 3.5 MISSION PROGRESS & ROUTE TRACKING
+// =========================================================================
+
+export interface RouteWaypoint {
+  name?: string | null
+  latitude: number
+  longitude: number
+  order: number
+  passed: boolean
+  estimatedArrival?: string | null
+}
+
+export interface LocationCoordinate {
+  name?: string | null
+  latitude?: number | null
+  longitude?: number | null
+  formattedCoordinates?: string | null
+}
+
+export type TelemetrySourceType = 'LIVE_GPS' | 'PROTOTYPE_SIMULATED' | 'LOCATION_UNAVAILABLE'
+
+export interface MissionProgressResponse {
+  expeditionId: string
+  expeditionName: string
+  currentPhase: string
+  status: string
+  origin: LocationCoordinate
+  destination: LocationCoordinate
+  currentLocation?: LocationCoordinate | null
+  waypoints: RouteWaypoint[]
+  totalDistanceKm: number
+  distanceTraveledKm: number
+  remainingDistanceKm: number
+  progressPercent: number
+  telemetrySource: TelemetrySourceType
+  telemetryLabel: string
+  telemetryIsLive: boolean
+  heading?: string | null
+  speedKnots?: number | null
+  eta?: string | null
+  etaBreakdown?: string | null
+  vesselName?: string | null
+  lastKnownTimestamp?: string | null
+  notes: string[]
+}
+
+export async function fetchMissionProgress(expeditionId: string): Promise<MissionProgressResponse> {
+  const token = getAccessToken()
+  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const response = await fetch(`${API_BASE_URL}/expeditions/${encodeURIComponent(expeditionId)}/progress`, {
+    method: 'GET',
+    headers,
+  })
+
+  if (!response.ok) {
+    const txt = await response.text().catch(() => '')
+    throw new Error(txt || `Failed to fetch mission progress (${response.status})`)
+  }
+  return response.json()
+}
+
+export async function updateMissionPhase(
+  expeditionId: string,
+  phase: string,
+  notes?: string
+): Promise<MissionProgressResponse> {
+  const token = getAccessToken()
+  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const response = await fetch(`${API_BASE_URL}/expeditions/${encodeURIComponent(expeditionId)}/progress/phase`, {
+    method: 'PATCH',
+    headers,
+    body: JSON.stringify({ phase, notes }),
+  })
+
+  if (!response.ok) {
+    let errorDetail = `Failed to update mission phase (${response.status})`
+    try {
+      const errJson = await response.json()
+      if (errJson.detail) errorDetail = errJson.detail
+    } catch {
+      const txt = await response.text()
+      if (txt) errorDetail = txt
+    }
+    throw new Error(errorDetail)
+  }
+  return response.json()
+}

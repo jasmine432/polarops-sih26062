@@ -29,6 +29,8 @@ from ..schemas import (
     MLResupplyGenerateRequest,
     MLResupplyGenerateResponse,
     MissionReadinessResponse,
+    MissionProgressResponse,
+    MissionPhaseUpdateRequest,
 )
 from ..auth import AuthenticatedUser, get_current_user, require_roles
 from ..services.expedition_planner_service import (
@@ -60,6 +62,12 @@ from ..services.resupply_service import (
 from ..services.readiness_service import (
     audit_mission_readiness,
 )
+from ..services.tracking_service import (
+    get_expedition_mission_progress,
+    update_expedition_mission_phase,
+)
+from .stations import _seed_stations_if_empty
+from .vessels import _seed_vessels_if_empty
 
 router = APIRouter(
     prefix="/expeditions",
@@ -692,5 +700,60 @@ def get_expedition_mission_readiness_endpoint(
         exp = find_expedition_or_404(db, expedition_id)
         result = audit_mission_readiness(db, exp)
         return result
+    finally:
+        db.close()
+
+
+# =========================================================================
+# PHASE 3.5 MISSION PROGRESS & ROUTE TRACKING ENDPOINTS
+# =========================================================================
+
+@router.get("/{expedition_id}/progress", response_model=MissionProgressResponse)
+@router.get("/{expedition_id}/progress/", response_model=MissionProgressResponse)
+def get_expedition_mission_progress_endpoint(
+    expedition_id: str,
+    _: Annotated[AuthenticatedUser, Depends(get_current_user)],
+) -> Any:
+    """
+    Retrieve real-time computed mission progress, route waypoints, traveled distance,
+    remaining distance, current location fix, and telemetry provenance.
+    Zero database mutation.
+    """
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        _seed_stations_if_empty(db)
+        _seed_vessels_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        return get_expedition_mission_progress(db, exp)
+    finally:
+        db.close()
+
+
+@router.patch("/{expedition_id}/progress/phase", response_model=MissionProgressResponse)
+@router.patch("/{expedition_id}/progress/phase/", response_model=MissionProgressResponse)
+def update_expedition_mission_phase_endpoint(
+    expedition_id: str,
+    payload: MissionPhaseUpdateRequest,
+    current_user: Annotated[
+        AuthenticatedUser,
+        Depends(require_roles("ADMIN", "PHC")),
+    ],
+) -> Any:
+    """
+    Controlled manual advancement/update of expedition mission phase.
+    """
+    db = SessionLocal()
+    try:
+        _seed_expeditions_if_empty(db)
+        _seed_stations_if_empty(db)
+        _seed_vessels_if_empty(db)
+        exp = find_expedition_or_404(db, expedition_id)
+        try:
+            return update_expedition_mission_phase(
+                db, exp, payload.phase, current_user, payload.notes
+            )
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     finally:
         db.close()

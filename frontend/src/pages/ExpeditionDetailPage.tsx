@@ -40,14 +40,17 @@ import {
   Layers,
   Scale,
   ShieldCheck,
+  Navigation,
 } from 'lucide-react'
 import { INITIAL_EXPEDITIONS, ExpeditionDetail } from '@/data/expeditionsData'
 import { fetchExpeditionsList } from '@/services/expeditionService'
 import { PackingAndLoadPlanner } from '@/components/expeditions/PackingAndLoadPlanner'
 import { MissionReadinessAudit } from '@/components/expeditions/MissionReadinessAudit'
+import { ExpeditionProgressTracker } from '@/components/expeditions/ExpeditionProgressTracker'
 
 type TabKey =
   | 'overview'
+  | 'progress'
   | 'readiness'
   | 'personnel'
   | 'packing'
@@ -196,6 +199,7 @@ export const ExpeditionDetailPage: React.FC = () => {
         <nav className="flex space-x-1 overflow-x-auto scrollbar-none" aria-label="Expedition Tabs">
           {[
             { key: 'overview', label: 'Overview', icon: Layers, count: null },
+            { key: 'progress', label: 'Progress & Route', icon: Navigation, count: null },
             { key: 'readiness', label: 'Mission Readiness', icon: ShieldCheck, count: null },
             { key: 'personnel', label: 'Personnel', icon: Users, count: expedition.personnel.length },
             { key: 'packing', label: 'Individual Packing & Load', icon: Scale, count: null },
@@ -237,6 +241,15 @@ export const ExpeditionDetailPage: React.FC = () => {
 
       {/* 4. TAB CONTENTS */}
       <div className="space-y-4">
+        {/* TAB: PROGRESS & ROUTE TRACKER */}
+        {activeTab === 'progress' && (
+          <ExpeditionProgressTracker
+            expeditionId={expedition.id}
+            expeditionName={expedition.name}
+            station={expedition.station}
+          />
+        )}
+
         {/* TAB: MISSION READINESS ENGINE */}
         {activeTab === 'readiness' && (
           <MissionReadinessAudit
