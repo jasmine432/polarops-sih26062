@@ -313,20 +313,20 @@ def get_planning_summary(db: Session, exp: Expedition) -> dict[str, Any]:
         | (Personnel.expedition_id.ilike(exp.expedition_id.replace("-", "")))
     ).all()
 
-    total_assigned_personnel = len(personnel_list) if personnel_list else (exp.personnel_count or 0)
+    total_assigned_personnel = len(personnel_list)
     medically_cleared_count = sum(
         1 for p in personnel_list
         if p.medical_clearance and any(
             k in p.medical_clearance.lower() for k in ["valid", "certified", "fit", "shape-1", "class-1"]
         )
-    ) if personnel_list else total_assigned_personnel
+    )
 
     survival_trained_count = sum(
         1 for p in personnel_list
         if p.survival_training and any(
             k in p.survival_training.lower() for k in ["valid", "certified", "master", "qualified", "fellow"]
         )
-    ) if personnel_list else total_assigned_personnel
+    )
 
     roles = list({p.role for p in personnel_list if p.role}) if personnel_list else ([exp.lead_role] if exp.lead_role else [])
     lead_officer = exp.lead or (personnel_list[0].name if personnel_list else None)
@@ -1175,14 +1175,14 @@ def get_team_load_summary(db: Session, exp: Expedition) -> dict[str, Any]:
             "percentage": c_pct,
         }
 
-    total_personnel_count = len(all_personnel) if all_personnel else (exp.personnel_count or len(personnel_breakdown))
+    total_personnel_count = len(personnel_breakdown)
     personnel_with_lists = sum(1 for p in personnel_breakdown if p["total_items_count"] > 0)
 
     return {
         "expedition_id": exp.expedition_id,
         "expedition_name": exp.name,
         "station": exp.station,
-        "total_personnel_count": max(total_personnel_count, len(personnel_breakdown)),
+        "total_personnel_count": total_personnel_count,
         "personnel_with_packing_lists_count": personnel_with_lists,
         "total_items_count": total_items,
         "total_quantity": total_qty_sum,

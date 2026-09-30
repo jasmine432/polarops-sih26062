@@ -265,7 +265,10 @@ export const ExpeditionsPage: React.FC = () => {
     const totalExpeditions = expeditions.length
     const activeExpeditions = expeditions.filter((e) => e.status === 'Active').length
     const planningExpeditions = expeditions.filter((e) => e.status === 'Planning').length
-    const totalPersonnel = expeditions.reduce((acc, e) => acc + (e.personnelCount || 0), 0)
+    const totalPersonnel = expeditions.reduce((acc, e) => {
+      const sum = summaries[e.id]
+      return acc + (sum?.personnelCount !== undefined ? sum.personnelCount : 0)
+    }, 0)
 
     let readinessPassed = 0
     let readinessBlocked = 0
@@ -756,7 +759,9 @@ export const ExpeditionsPage: React.FC = () => {
                       </div>
                       <div>
                         <span className="text-[10px] text-slate-400 block font-mono uppercase font-bold">Personnel Roster</span>
-                        <span className="font-mono font-bold text-sky-300 text-xs">{exp.personnelCount} Members</span>
+                        <span className="font-mono font-bold text-sky-300 text-xs">
+                          {summary?.personnelCount !== undefined ? `${summary.personnelCount} Members` : 'Querying roster...'}
+                        </span>
                       </div>
                       <div>
                         <span className="text-[10px] text-slate-400 block font-mono uppercase font-bold">Vessel Support</span>
@@ -821,7 +826,11 @@ export const ExpeditionsPage: React.FC = () => {
                           </span>
                         </div>
                         <p className="text-[10px] text-slate-500 font-mono truncate">
-                          {progress ? `${progress.distanceTraveledKm.toLocaleString()} / ${progress.totalDistanceKm.toLocaleString()} km` : 'Route initialized'}
+                          {progress
+                            ? progress.totalDistanceKm > 0
+                              ? `${progress.distanceTraveledKm.toLocaleString()} / ${progress.totalDistanceKm.toLocaleString()} km`
+                              : 'Route data unavailable'
+                            : 'Route data unavailable'}
                         </p>
                       </div>
 
@@ -941,7 +950,7 @@ export const ExpeditionsPage: React.FC = () => {
                           title="Open Expedition Personnel Roster"
                         >
                           <Users className="w-3 h-3 text-slate-600" />
-                          Personnel ({exp.personnelCount})
+                          Personnel ({summary?.personnelCount !== undefined ? summary.personnelCount : '—'})
                         </button>
 
                         {/* 6. Cargo */}
@@ -952,7 +961,7 @@ export const ExpeditionsPage: React.FC = () => {
                           title="Open Cargo Items Manifest"
                         >
                           <Package className="w-3 h-3 text-slate-600" />
-                          Cargo ({exp.cargoCount})
+                          Cargo ({summary?.cargoCount !== undefined ? summary.cargoCount : '—'})
                         </button>
 
                         {/* 7. Inventory */}
@@ -963,7 +972,7 @@ export const ExpeditionsPage: React.FC = () => {
                           title="Open Station Inventory Requirements"
                         >
                           <Boxes className="w-3 h-3 text-slate-600" />
-                          Inventory ({exp.inventory.length})
+                          Inventory ({summary?.resupplyItems ? summary.resupplyItems.length : 0})
                         </button>
 
                         {/* 8. Mission Overview */}
@@ -1025,7 +1034,7 @@ export const ExpeditionsPage: React.FC = () => {
                       {exp.startDate} → {exp.endDate}
                     </TableCell>
                     <TableCell mono className="text-slate-900 font-bold">
-                      {exp.personnelCount} staff
+                      {summary?.personnelCount !== undefined ? `${summary.personnelCount} staff` : '—'}
                     </TableCell>
                     <TableCell>
                       {summary?.readiness ? (

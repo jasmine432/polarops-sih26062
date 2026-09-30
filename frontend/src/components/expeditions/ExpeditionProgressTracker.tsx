@@ -264,10 +264,18 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
             <Compass className="w-3.5 h-3.5 text-[#02457A]" />
           </div>
           <div className="mt-1 text-2xl font-bold font-mono text-slate-900">
-            {progressData.totalDistanceKm.toLocaleString()} <span className="text-sm font-medium text-slate-500">km</span>
+            {progressData.totalDistanceKm > 0 ? (
+              <>
+                {progressData.totalDistanceKm.toLocaleString()} <span className="text-sm font-medium text-slate-500">km</span>
+              </>
+            ) : (
+              <span className="text-sm text-slate-500 font-sans font-medium">Route data unavailable</span>
+            )}
           </div>
           <div className="text-[11px] text-slate-500 mt-0.5 font-mono">
-            {(progressData.totalDistanceKm * 0.539957).toFixed(1)} nautical miles
+            {progressData.totalDistanceKm > 0
+              ? `${(progressData.totalDistanceKm * 0.539957).toFixed(1)} nautical miles`
+              : 'Deterministic Haversine computation'}
           </div>
         </div>
 
@@ -278,10 +286,18 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
             <Navigation className="w-3.5 h-3.5 text-emerald-600" />
           </div>
           <div className="mt-1 text-2xl font-bold font-mono text-emerald-800">
-            {progressData.distanceTraveledKm.toLocaleString()} <span className="text-sm font-medium text-slate-500">km</span>
+            {progressData.totalDistanceKm > 0 ? (
+              <>
+                {progressData.distanceTraveledKm.toLocaleString()} <span className="text-sm font-medium text-slate-500">km</span>
+              </>
+            ) : (
+              <span className="text-sm text-slate-500 font-sans font-medium">0.0 km</span>
+            )}
           </div>
           <div className="text-[11px] text-slate-500 mt-0.5 font-mono">
-            {progressData.progressPercent.toFixed(1)}% route completed
+            {progressData.totalDistanceKm > 0
+              ? `${progressData.progressPercent.toFixed(1)}% route completed`
+              : 'Staged at origin base'}
           </div>
         </div>
 
@@ -292,10 +308,18 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
             <Anchor className="w-3.5 h-3.5 text-amber-600" />
           </div>
           <div className="mt-1 text-2xl font-bold font-mono text-slate-900">
-            {progressData.remainingDistanceKm.toLocaleString()} <span className="text-sm font-medium text-slate-500">km</span>
+            {progressData.totalDistanceKm > 0 ? (
+              <>
+                {progressData.remainingDistanceKm.toLocaleString()} <span className="text-sm font-medium text-slate-500">km</span>
+              </>
+            ) : (
+              <span className="text-sm text-slate-500 font-sans font-medium">—</span>
+            )}
           </div>
           <div className="text-[11px] text-slate-500 mt-0.5 font-mono">
-            {(progressData.remainingDistanceKm * 0.539957).toFixed(1)} NM to destination
+            {progressData.totalDistanceKm > 0
+              ? `${(progressData.remainingDistanceKm * 0.539957).toFixed(1)} NM to destination`
+              : 'Destination pending'}
           </div>
         </div>
 
@@ -373,8 +397,12 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
             </CardHeader>
             <CardContent className="p-4">
               {progressData.waypoints.length === 0 ? (
-                <div className="text-center py-6 text-xs text-slate-500">
-                  No waypoint coordinates assigned. Route is evaluated directly from origin to destination.
+                <div className="text-center py-8 text-xs text-slate-500 space-y-2">
+                  <Navigation className="w-8 h-8 text-slate-300 mx-auto" />
+                  <div className="font-bold font-mono text-slate-700 uppercase">Route Data Unavailable</div>
+                  <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                    No route waypoints or transit coordinates are currently registered in the database for campaign {progressData.expeditionId}.
+                  </p>
                 </div>
               ) : (
                 <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">

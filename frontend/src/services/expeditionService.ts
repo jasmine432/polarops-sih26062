@@ -62,20 +62,7 @@ export function mapApiToExpeditionDetail(api: ExpeditionApiResponse): Expedition
     primaryVessel: api.primary_vessel || 'Vessel Assignment in Progress',
     airSupport: api.air_support || 'Air Logistics Awaiting Charter',
     commsLink: api.comms_link || 'NCPOR Satellite Dispatch',
-    personnel: [
-      {
-        id: `NCPOR-P-${api.id.toString().padStart(4, '0')}01`,
-        name: leadName,
-        role: 'Expedition Lead',
-        station: stationName,
-        organization: api.lead_org || 'NCPOR / MoES',
-        team: 'Mission Command',
-        bloodGroup: 'O+',
-        medicalClearance: 'AIIMS Certified Valid',
-        survivalTraining: 'ITBP Auli Polar Qualified',
-        status: statusVal === 'Active' ? 'Deployed' : 'Standby',
-      },
-    ],
+    personnel: [],
     cargo: [],
     inventory: [],
     environmental: [
@@ -791,23 +778,48 @@ export interface ExpeditionMissionControlSummary {
   progress: MissionProgressResponse | null
   capacity: CargoCapacitySummary | null
   resupplyItems: ResupplyItemDto[]
+  personnelCount: number
+  cargoCount: number
   attentionReasons: string[]
 }
 
 export async function fetchExpeditionMissionControlSummary(
   expedition: ExpeditionDetail
 ): Promise<ExpeditionMissionControlSummary> {
-  const [readinessRes, progressRes, capacityRes, resupplyRes] = await Promise.allSettled([
+  const token = getAccessToken()
+  const headers: HeadersInit = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const fetchPersonnel = async () => {
+    const res = await fetch(`${API_BASE_URL}/personnel?expedition_id=${encodeURIComponent(expedition.id)}`, { headers })
+    if (!res.ok) return []
+    return res.json()
+  }
+
+  const fetchCargo = async () => {
+    const res = await fetch(`${API_BASE_URL}/cargo?expedition_id=${encodeURIComponent(expedition.id)}`, { headers })
+    if (!res.ok) return []
+    return res.json()
+  }
+
+  const [readinessRes, progressRes, capacityRes, resupplyRes, personnelRes, cargoRes] = await Promise.allSettled([
     fetchMissionReadiness(expedition.id),
     fetchMissionProgress(expedition.id),
     fetchCargoCapacity(expedition.id),
     fetchResupplyItems(expedition.id),
+    fetchPersonnel(),
+    fetchCargo(),
   ])
 
   const readiness = readinessRes.status === 'fulfilled' ? readinessRes.value : null
   const progress = progressRes.status === 'fulfilled' ? progressRes.value : null
   const capacity = capacityRes.status === 'fulfilled' ? capacityRes.value : null
   const resupplyItems = resupplyRes.status === 'fulfilled' ? resupplyRes.value : []
+  const personnel = personnelRes.status === 'fulfilled' ? personnelRes.value : []
+  const cargo = cargoRes.status === 'fulfilled' ? cargoRes.value : []
+
+  const personnelCount = Array.isArray(personnel) ? personnel.length : 0
+  const cargoCount = Array.isArray(cargo) ? cargo.length : 0
 
   const attentionReasons: string[] = []
 
@@ -841,6 +853,8 @@ export async function fetchExpeditionMissionControlSummary(
     progress,
     capacity,
     resupplyItems,
+    personnelCount,
+    cargoCount,
     attentionReasons,
   }
 }

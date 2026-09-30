@@ -24,14 +24,10 @@ import {
   Trash2,
   Edit2,
   AlertTriangle,
-  CheckCircle2,
   Scale,
-  ShieldCheck,
-  ShieldAlert,
   Loader2,
   RefreshCw,
   Sliders,
-  Sparkles,
 } from 'lucide-react'
 import { useOperational } from '@/context/OperationalContext'
 import {
@@ -47,6 +43,7 @@ import {
   deleteExpeditionPackingItem,
   updateCargoCapacity,
 } from '@/services/expeditionService'
+import { fetchPersonnelList } from '@/services/personnelService'
 
 interface PackingAndLoadPlannerProps {
   expeditionId: string
@@ -71,6 +68,7 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
   // Item Modal State (Create / Edit)
   const [isItemModalOpen, setIsItemModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<PackingItem | null>(null)
+  const [modalPersonnelId, setModalPersonnelId] = useState<string>('')
   const [itemFormData, setItemFormData] = useState({
     itemName: '',
     category: 'Protective Clothing',
@@ -94,36 +92,87 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
   const [capacityFormErrors, setCapacityFormErrors] = useState<Record<string, string>>({})
   const [isSubmittingCapacity, setIsSubmittingCapacity] = useState(false)
 
-  // Load Data from Backend
-  const loadData = useCallback(async () => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const [loadRes, capRes] = await Promise.all([
-        fetchTeamLoadSummary(expeditionId),
-        fetchCargoCapacity(expeditionId),
-      ])
-      setTeamLoad(loadRes)
-      setCapacity(capRes)
+  // Load Data from Backend with live personnel querying and preferred personnel ID retention
+  const loadData = useCallback(
+    async (preferredPid?: string) => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const [loadRes, capRes, persRes] = await Promise.all([
+          fetchTeamLoadSummary(expeditionId),
+          fetchCargoCapacity(expeditionId),
+          fetchPersonnelList(expeditionId).catch(() => []),
+        ])
 
-      // Set default selected personnel if not set
-      if (!selectedPersonnelId && loadRes.personnel_breakdown.length > 0) {
-        setSelectedPersonnelId(loadRes.personnel_breakdown[0].personnel_id)
+        // Merge live assigned personnel with team load breakdown
+        const breakdown = [...(loadRes.personnel_breakdown || [])]
+        if (persRes && Array.isArray(persRes)) {
+          const existingIds = new Set(
+            breakdown.map((p) => p.personnel_id.toLowerCase().replace(/-/g, ''))
+          )
+          for (const p of persRes) {
+            const cleanId = (p.id || '').toLowerCase().replace(/-/g, '')
+            if (cleanId && !existingIds.has(cleanId)) {
+              breakdown.push({
+                personnel_id: p.id,
+                personnel_name: p.name,
+                personnel_role: p.role,
+                organization: p.organization,
+                station: p.currentStation,
+                total_items_count: 0,
+                total_quantity: 0,
+                total_weight_kg: 0,
+                items: [],
+              })
+              existingIds.add(cleanId)
+            }
+          }
+        }
+
+        const mergedLoadRes: TeamLoadSummary = {
+          ...loadRes,
+          personnel_breakdown: breakdown,
+          total_personnel_count: Math.max(loadRes.total_personnel_count || 0, breakdown.length),
+        }
+
+        setTeamLoad(mergedLoadRes)
+        setCapacity(capRes)
+
+        setSelectedPersonnelId((prevId) => {
+          const target = preferredPid || prevId
+          if (breakdown.length === 0) return ''
+
+          const hasTarget = breakdown.some(
+            (p) =>
+              p.personnel_id.toLowerCase() === target.toLowerCase() ||
+              p.personnel_id.replace(/-/g, '').toLowerCase() === target.replace(/-/g, '').toLowerCase()
+          )
+          if (hasTarget) return target
+          return breakdown[0]?.personnel_id || ''
+        })
+      } catch (err: any) {
+        setError(err?.message || 'Failed to load packing and capacity data.')
+      } finally {
+        setIsLoading(false)
       }
-    } catch (err: any) {
-      setError(err?.message || 'Failed to load packing and capacity data.')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [expeditionId, selectedPersonnelId])
+    },
+    [expeditionId]
+  )
 
   useEffect(() => {
+    setSelectedPersonnelId('')
     loadData()
   }, [loadData])
 
+  const hasPersonnel = useMemo(() => {
+    return (teamLoad?.personnel_breakdown?.length || 0) > 0
+  }, [teamLoad])
+
   // Selected Personnel details & items
   const selectedPersonSummary = useMemo(() => {
-    if (!teamLoad) return null
+    if (!teamLoad || !teamLoad.personnel_breakdown || teamLoad.personnel_breakdown.length === 0) {
+      return null
+    }
     return (
       teamLoad.personnel_breakdown.find(
         (p) =>
@@ -134,8 +183,18 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
   }, [teamLoad, selectedPersonnelId])
 
   // Open Create Item Modal
-  const handleOpenCreateModal = () => {
-    if (!selectedPersonSummary) return
+  const handleOpenCreateModal = (targetPersonId?: string) => {
+    const targetPid =
+      targetPersonId ||
+      selectedPersonnelId ||
+      teamLoad?.personnel_breakdown?.[0]?.personnel_id ||
+      ''
+
+    if (!targetPid || !teamLoad || (teamLoad.personnel_breakdown?.length || 0) === 0) {
+      return
+    }
+
+    setModalPersonnelId(targetPid)
     setEditingItem(null)
     setItemFormData({
       itemName: '',
@@ -154,6 +213,7 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
   // Open Edit Item Modal
   const handleOpenEditModal = (item: PackingItem) => {
     setEditingItem(item)
+    setModalPersonnelId(item.personnel_id)
     setItemFormData({
       itemName: item.item_name,
       category: item.category,
@@ -171,6 +231,9 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
   // Validate Item Form
   const validateItemForm = () => {
     const errors: Record<string, string> = {}
+    if (!modalPersonnelId) {
+      errors.personnelId = 'A team member must be selected.'
+    }
     if (!itemFormData.itemName.trim()) {
       errors.itemName = 'Item name is required.'
     }
@@ -189,7 +252,18 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
   // Submit Item (Create or Update)
   const handleSubmitItem = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!validateItemForm() || !selectedPersonSummary) return
+    if (!validateItemForm()) return
+
+    const targetPerson = teamLoad?.personnel_breakdown.find(
+      (p) =>
+        p.personnel_id.toLowerCase() === modalPersonnelId.toLowerCase() ||
+        p.personnel_id.replace(/-/g, '').toLowerCase() === modalPersonnelId.replace(/-/g, '').toLowerCase()
+    )
+
+    if (!targetPerson) {
+      setItemFormErrors({ personnelId: 'Selected team member was not found in expedition roster.' })
+      return
+    }
 
     setIsSubmittingItem(true)
     try {
@@ -209,9 +283,9 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
         })
       } else {
         await createExpeditionPackingItem(expeditionId, {
-          personnelId: selectedPersonSummary.personnel_id,
-          personnelName: selectedPersonSummary.personnel_name,
-          personnelRole: selectedPersonSummary.personnel_role || undefined,
+          personnelId: targetPerson.personnel_id,
+          personnelName: targetPerson.personnel_name,
+          personnelRole: targetPerson.personnel_role || undefined,
           itemName: itemFormData.itemName.trim(),
           category: itemFormData.category.trim(),
           quantity: qty,
@@ -222,8 +296,10 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
           sourceReason: itemFormData.sourceReason.trim() || undefined,
         })
       }
+
       setIsItemModalOpen(false)
-      await loadData()
+      setSelectedPersonnelId(targetPerson.personnel_id)
+      await loadData(targetPerson.personnel_id)
     } catch (err: any) {
       setItemFormErrors({ submit: err?.message || 'Failed to save packing item.' })
     } finally {
@@ -236,7 +312,7 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
     if (!confirm('Are you sure you want to remove this packing item?')) return
     try {
       await deleteExpeditionPackingItem(expeditionId, itemId)
-      await loadData()
+      await loadData(selectedPersonnelId)
     } catch (err: any) {
       alert(err?.message || 'Failed to delete packing item.')
     }
@@ -280,7 +356,7 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
         notes: capacityFormData.notes.trim() || undefined,
       })
       setIsCapacityModalOpen(false)
-      await loadData()
+      await loadData(selectedPersonnelId)
     } catch (err: any) {
       setCapacityFormErrors({ submit: err?.message || 'Failed to update capacity.' })
     } finally {
@@ -293,7 +369,7 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
       <div className="bg-white border border-slate-200 rounded-lg p-12 flex flex-col items-center justify-center space-y-3">
         <Loader2 className="w-8 h-8 text-[#02457A] animate-spin" />
         <p className="text-xs font-mono text-slate-600 font-medium">
-          Calculating individual packing loads & team cargo margins...
+          Loading expedition personnel packing & capacity margins...
         </p>
       </div>
     )
@@ -308,7 +384,7 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
               <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
               <span>{error}</span>
             </div>
-            <Button variant="secondary" size="xs" onClick={loadData} iconLeft={<RefreshCw className="w-3.5 h-3.5" />}>
+            <Button variant="secondary" size="xs" onClick={() => loadData()} iconLeft={<RefreshCw className="w-3.5 h-3.5" />}>
               Retry
             </Button>
           </div>
@@ -332,13 +408,15 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
           </div>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-2xl font-bold font-mono text-slate-900">
-              {teamLoad?.total_team_load_kg.toFixed(1)}
+              {(teamLoad?.total_team_load_kg || 0).toFixed(1)}
             </span>
             <span className="text-xs font-bold text-slate-500 font-mono">kg</span>
           </div>
           <div className="text-[11px] text-slate-500 mt-1 flex items-center justify-between font-mono">
-            <span>{teamLoad?.total_items_count} line items ({teamLoad?.total_quantity} units)</span>
-            <span className="text-[#02457A] font-bold">{teamLoad?.personnel_with_packing_lists_count}/{teamLoad?.total_personnel_count} active</span>
+            <span>{teamLoad?.total_items_count || 0} line items ({teamLoad?.total_quantity || 0} units)</span>
+            <span className="text-[#02457A] font-bold">
+              {teamLoad?.personnel_with_packing_lists_count || 0}/{teamLoad?.total_personnel_count || 0} active
+            </span>
           </div>
         </div>
 
@@ -362,10 +440,10 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
           <div className="mt-2 flex items-baseline justify-between">
             <div>
               <span className="text-2xl font-bold font-mono">
-                {capacity?.total_planned_weight_kg.toFixed(1)}
+                {(capacity?.total_planned_weight_kg || 0).toFixed(1)}
               </span>
               <span className="text-xs font-bold text-slate-500 font-mono ml-1">
-                / {capacity?.maximum_capacity_kg.toFixed(0)} kg
+                / {(capacity?.maximum_capacity_kg || 2000).toFixed(0)} kg
               </span>
             </div>
             {canEdit && (
@@ -397,8 +475,8 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
               </span>
               <span className={isOverCapacity ? 'text-rose-800 font-bold' : 'text-slate-500'}>
                 {isOverCapacity
-                  ? `Exceeded by +${capacity?.over_capacity_kg.toFixed(1)} kg`
-                  : `${capacity?.remaining_capacity_kg.toFixed(1)} kg margin`}
+                  ? `Exceeded by +${(capacity?.over_capacity_kg || 0).toFixed(1)} kg`
+                  : `${(capacity?.remaining_capacity_kg || 0).toFixed(1)} kg margin`}
               </span>
             </div>
           </div>
@@ -415,27 +493,27 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
             <div className="p-2 bg-rose-50 border border-rose-100 rounded-lg">
               <span className="text-[10px] uppercase font-bold text-rose-700 block font-mono">Critical</span>
               <span className="text-xs font-bold font-mono text-rose-950">
-                {capacity?.critical_weight_kg.toFixed(1)} kg
+                {(capacity?.critical_weight_kg || 0).toFixed(1)} kg
               </span>
             </div>
 
             <div className="p-2 bg-amber-50 border border-amber-100 rounded-lg">
               <span className="text-[10px] uppercase font-bold text-amber-700 block font-mono">High</span>
               <span className="text-xs font-bold font-mono text-amber-950">
-                {capacity?.high_weight_kg.toFixed(1)} kg
+                {(capacity?.high_weight_kg || 0).toFixed(1)} kg
               </span>
             </div>
 
             <div className="p-2 bg-slate-50 border border-slate-200 rounded-lg">
               <span className="text-[10px] uppercase font-bold text-slate-600 block font-mono">Normal</span>
               <span className="text-xs font-bold font-mono text-slate-900">
-                {capacity?.normal_weight_kg.toFixed(1)} kg
+                {(capacity?.normal_weight_kg || 0).toFixed(1)} kg
               </span>
             </div>
           </div>
 
           <div className="text-[10px] text-slate-500 mt-2 font-mono text-right">
-            Allocated Heavy Cargo: {capacity?.allocated_cargo_weight_kg.toFixed(0)} kg
+            Allocated Heavy Cargo: {(capacity?.allocated_cargo_weight_kg || 0).toFixed(0)} kg
           </div>
         </div>
       </div>
@@ -464,13 +542,18 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
               <select
                 value={selectedPersonnelId}
                 onChange={(e) => setSelectedPersonnelId(e.target.value)}
-                className="bg-white border border-slate-300 text-xs font-semibold rounded-md px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#02457A] text-slate-900 cursor-pointer shadow-2xs max-w-[240px]"
+                disabled={!hasPersonnel}
+                className="bg-white border border-slate-300 text-xs font-semibold rounded-md px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#02457A] text-slate-900 cursor-pointer shadow-2xs max-w-[280px] disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
               >
-                {teamLoad?.personnel_breakdown.map((p) => (
-                  <option key={p.personnel_id} value={p.personnel_id}>
-                    {p.personnel_name} ({p.total_weight_kg.toFixed(1)} kg)
-                  </option>
-                ))}
+                {hasPersonnel ? (
+                  teamLoad?.personnel_breakdown.map((p) => (
+                    <option key={p.personnel_id} value={p.personnel_id}>
+                      {p.personnel_name} · {p.personnel_id} ({p.personnel_role || 'Member'}) — {p.total_weight_kg.toFixed(1)} kg ({p.total_items_count} items)
+                    </option>
+                  ))
+                ) : (
+                  <option value="">No personnel assigned</option>
+                )}
               </select>
             </div>
 
@@ -478,7 +561,9 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
               <Button
                 variant="primary"
                 size="xs"
-                onClick={handleOpenCreateModal}
+                disabled={!hasPersonnel}
+                onClick={() => handleOpenCreateModal(selectedPersonnelId)}
+                title={hasPersonnel ? 'Add packing item for selected member' : 'Assign personnel to this expedition first'}
                 iconLeft={<Plus className="w-3.5 h-3.5" />}
               >
                 Add Item
@@ -488,165 +573,192 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
         </CardHeader>
 
         <CardContent className="p-0">
-          {/* Active Person Info Strip */}
-          {selectedPersonSummary && (
-            <div className="px-4 py-3 bg-slate-50/50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#001B48] text-white flex items-center justify-center font-bold font-mono text-xs shadow-2xs">
-                  {selectedPersonSummary.personnel_name.substring(0, 2).toUpperCase()}
+          {!hasPersonnel ? (
+            <div className="py-12 px-6 text-center">
+              <div className="max-w-md mx-auto space-y-3">
+                <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                  <Users className="w-6 h-6" />
                 </div>
-                <div>
-                  <div className="font-bold text-slate-900 flex items-center gap-2">
-                    <span>{selectedPersonSummary.personnel_name}</span>
-                    <span className="font-mono text-[10px] text-slate-500 px-1.5 py-0.2 bg-slate-200 rounded">
-                      {selectedPersonSummary.personnel_id}
-                    </span>
-                  </div>
-                  <div className="text-[11px] text-slate-600">
-                    {selectedPersonSummary.personnel_role || 'Expedition Member'} · {selectedPersonSummary.organization || 'NCPOR'}
-                  </div>
-                </div>
+                <h4 className="text-sm font-bold text-slate-900 font-mono uppercase">
+                  No Personnel Assigned to Expedition
+                </h4>
+                <p className="text-xs text-slate-600">
+                  No personnel records are currently assigned to campaign <strong className="font-mono text-slate-800">{expeditionId}</strong>.
+                  Individual packing lists and personal load allocations require active expedition members.
+                </p>
+                <p className="text-[11px] text-slate-500 font-mono">
+                  Assign personnel to this campaign in the <span className="font-bold text-[#02457A]">Personnel</span> tab to enable packing checklists.
+                </p>
               </div>
-
-              <div className="flex items-center gap-4 text-right">
-                <div>
-                  <span className="text-[10px] text-slate-500 uppercase font-mono font-bold block">Assigned Items</span>
-                  <span className="font-mono font-bold text-slate-800 text-xs">
-                    {selectedPersonSummary.total_items_count} items ({selectedPersonSummary.total_quantity} pcs)
-                  </span>
-                </div>
-
-                <div className="pl-3 border-l border-slate-200">
-                  <span className="text-[10px] text-slate-500 uppercase font-mono font-bold block">Personal Load</span>
-                  <span className="font-mono font-bold text-[#02457A] text-sm">
-                    {selectedPersonSummary.total_weight_kg.toFixed(2)} kg
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Packing Items Table */}
-          {selectedPersonSummary && selectedPersonSummary.items.length > 0 ? (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-slate-50/60 text-[11px]">
-                    <TableHead className="w-12">#</TableHead>
-                    <TableHead>Item & Equipment Name</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Priority</TableHead>
-                    <TableHead className="text-right">Qty</TableHead>
-                    <TableHead className="text-right">Unit Wt</TableHead>
-                    <TableHead className="text-right">Total Wt</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Source / Reason</TableHead>
-                    {canEdit && <TableHead className="w-20 text-center">Actions</TableHead>}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {selectedPersonSummary.items.map((item, idx) => {
-                    const prioVariant =
-                      item.priority === 'CRITICAL'
-                        ? 'critical'
-                        : item.priority === 'HIGH'
-                        ? 'warning'
-                        : 'neutral'
-
-                    const statusVariant =
-                      item.status === 'LOADED' || item.status === 'INSPECTED'
-                        ? 'operational'
-                        : item.status === 'PACKED'
-                        ? 'info'
-                        : 'neutral'
-
-                    return (
-                      <TableRow key={item.id} className="text-xs hover:bg-slate-50/80">
-                        <TableCell className="font-mono text-slate-400 text-[11px]">{idx + 1}</TableCell>
-                        <TableCell className="font-bold text-slate-900">{item.item_name}</TableCell>
-                        <TableCell className="text-slate-700">{item.category}</TableCell>
-                        <TableCell>
-                          <Badge variant={prioVariant} size="sm">
-                            {item.priority}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right font-mono font-bold text-slate-900">
-                          {item.quantity} {item.unit || 'pcs'}
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-slate-600">
-                          {Number(item.unit_weight_kg).toFixed(2)} kg
-                        </TableCell>
-                        <TableCell className="text-right font-mono font-bold text-[#02457A]">
-                          {Number(item.total_weight_kg).toFixed(2)} kg
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={statusVariant} size="sm">
-                            {item.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-slate-500 text-[11px] max-w-xs truncate">
-                          {item.source_reason || '—'}
-                        </TableCell>
-                        {canEdit && (
-                          <TableCell className="text-center">
-                            <div className="flex items-center justify-center gap-1">
-                              <button
-                                type="button"
-                                onClick={() => handleOpenEditModal(item)}
-                                className="p-1 hover:bg-slate-100 rounded text-slate-600 hover:text-[#02457A] transition-colors"
-                                title="Edit Item"
-                              >
-                                <Edit2 className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteItem(item.id)}
-                                className="p-1 hover:bg-rose-50 rounded text-slate-400 hover:text-rose-600 transition-colors"
-                                title="Delete Item"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    )
-                  })}
-
-                  {/* Summary Row */}
-                  <TableRow className="bg-slate-100/70 font-bold border-t-2 border-slate-300">
-                    <TableCell colSpan={4} className="text-slate-900 font-mono text-xs uppercase">
-                      Total Personal Load ({selectedPersonSummary.personnel_name})
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-slate-900">
-                      {selectedPersonSummary.total_quantity} pcs
-                    </TableCell>
-                    <TableCell className="text-right text-slate-500 font-mono text-[11px]">—</TableCell>
-                    <TableCell className="text-right font-mono text-[#02457A] text-sm font-bold">
-                      {selectedPersonSummary.total_weight_kg.toFixed(2)} kg
-                    </TableCell>
-                    <TableCell colSpan={canEdit ? 3 : 2} className="text-right text-[11px] text-slate-500 font-mono font-normal">
-                      Deterministic calculation: Quantity × Unit Weight
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
             </div>
           ) : (
-            <div className="py-10">
-              <EmptyState
-                icon={<Package className="w-6 h-6 text-slate-400" />}
-                title="No Packing Items Assigned"
-                description={`No individual packing items recorded for ${selectedPersonSummary?.personnel_name || 'this member'}.`}
-                action={
-                  canEdit ? (
-                    <Button variant="primary" size="sm" onClick={handleOpenCreateModal} iconLeft={<Plus className="w-3.5 h-3.5" />}>
-                      Add First Packing Item
-                    </Button>
-                  ) : undefined
-                }
-              />
-            </div>
+            <>
+              {/* Active Person Info Strip */}
+              {selectedPersonSummary && (
+                <div className="px-4 py-3 bg-slate-50/50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-[#001B48] text-white flex items-center justify-center font-bold font-mono text-xs shadow-2xs">
+                      {selectedPersonSummary.personnel_name.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="font-bold text-slate-900 flex items-center gap-2">
+                        <span>{selectedPersonSummary.personnel_name}</span>
+                        <span className="font-mono text-[10px] text-slate-500 px-1.5 py-0.2 bg-slate-200 rounded">
+                          {selectedPersonSummary.personnel_id}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-600">
+                        {selectedPersonSummary.personnel_role || 'Expedition Member'} · {selectedPersonSummary.organization || 'NCPOR'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 text-right">
+                    <div>
+                      <span className="text-[10px] text-slate-500 uppercase font-mono font-bold block">Assigned Items</span>
+                      <span className="font-mono font-bold text-slate-800 text-xs">
+                        {selectedPersonSummary.total_items_count} items ({selectedPersonSummary.total_quantity} pcs)
+                      </span>
+                    </div>
+
+                    <div className="pl-3 border-l border-slate-200">
+                      <span className="text-[10px] text-slate-500 uppercase font-mono font-bold block">Personal Load</span>
+                      <span className="font-mono font-bold text-[#02457A] text-sm">
+                        {selectedPersonSummary.total_weight_kg.toFixed(2)} kg
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Packing Items Table */}
+              {selectedPersonSummary && selectedPersonSummary.items.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-slate-50/60 text-[11px]">
+                        <TableHead className="w-12">#</TableHead>
+                        <TableHead>Item & Equipment Name</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Priority</TableHead>
+                        <TableHead className="text-right">Qty</TableHead>
+                        <TableHead className="text-right">Unit Wt</TableHead>
+                        <TableHead className="text-right">Total Wt</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Source / Reason</TableHead>
+                        {canEdit && <TableHead className="w-20 text-center">Actions</TableHead>}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedPersonSummary.items.map((item, idx) => {
+                        const prioVariant =
+                          item.priority === 'CRITICAL'
+                            ? 'critical'
+                            : item.priority === 'HIGH'
+                            ? 'warning'
+                            : 'neutral'
+
+                        const statusVariant =
+                          item.status === 'LOADED' || item.status === 'INSPECTED'
+                            ? 'operational'
+                            : item.status === 'PACKED'
+                            ? 'info'
+                            : 'neutral'
+
+                        return (
+                          <TableRow key={item.id} className="text-xs hover:bg-slate-50/80">
+                            <TableCell className="font-mono text-slate-400 text-[11px]">{idx + 1}</TableCell>
+                            <TableCell className="font-bold text-slate-900">{item.item_name}</TableCell>
+                            <TableCell className="text-slate-700">{item.category}</TableCell>
+                            <TableCell>
+                              <Badge variant={prioVariant} size="sm">
+                                {item.priority}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right font-mono font-bold text-slate-900">
+                              {item.quantity} {item.unit || 'pcs'}
+                            </TableCell>
+                            <TableCell className="text-right font-mono text-slate-600">
+                              {Number(item.unit_weight_kg).toFixed(2)} kg
+                            </TableCell>
+                            <TableCell className="text-right font-mono font-bold text-[#02457A]">
+                              {Number(item.total_weight_kg).toFixed(2)} kg
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={statusVariant} size="sm">
+                                {item.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-slate-500 text-[11px] max-w-xs truncate">
+                              {item.source_reason || '—'}
+                            </TableCell>
+                            {canEdit && (
+                              <TableCell className="text-center">
+                                <div className="flex items-center justify-center gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenEditModal(item)}
+                                    className="p-1 hover:bg-slate-100 rounded text-slate-600 hover:text-[#02457A] transition-colors"
+                                    title="Edit Item"
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteItem(item.id)}
+                                    className="p-1 hover:bg-rose-50 rounded text-slate-400 hover:text-rose-600 transition-colors"
+                                    title="Delete Item"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </TableCell>
+                            )}
+                          </TableRow>
+                        )
+                      })}
+
+                      {/* Summary Row */}
+                      <TableRow className="bg-slate-100/70 font-bold border-t-2 border-slate-300">
+                        <TableCell colSpan={4} className="text-slate-900 font-mono text-xs uppercase">
+                          Total Personal Load ({selectedPersonSummary.personnel_name})
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-slate-900">
+                          {selectedPersonSummary.total_quantity} pcs
+                        </TableCell>
+                        <TableCell className="text-right text-slate-500 font-mono text-[11px]">—</TableCell>
+                        <TableCell className="text-right font-mono text-[#02457A] text-sm font-bold">
+                          {selectedPersonSummary.total_weight_kg.toFixed(2)} kg
+                        </TableCell>
+                        <TableCell colSpan={canEdit ? 3 : 2} className="text-right text-[11px] text-slate-500 font-mono font-normal">
+                          Deterministic calculation: Quantity × Unit Weight
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="py-10">
+                  <EmptyState
+                    icon={<Package className="w-6 h-6 text-slate-400" />}
+                    title="No Packing Items Assigned"
+                    description={`No individual packing items recorded for ${selectedPersonSummary?.personnel_name || 'this member'}.`}
+                    action={
+                      canEdit && selectedPersonSummary ? (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleOpenCreateModal(selectedPersonSummary.personnel_id)}
+                          iconLeft={<Plus className="w-3.5 h-3.5" />}
+                        >
+                          Add First Packing Item
+                        </Button>
+                      ) : undefined
+                    }
+                  />
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
@@ -663,72 +775,79 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
             </CardDescription>
           </div>
           <span className="text-xs font-mono font-bold text-slate-700">
-            Total Team Weight: <strong className="text-[#02457A]">{teamLoad?.total_team_load_kg.toFixed(1)} kg</strong>
+            Total Team Weight: <strong className="text-[#02457A]">{(teamLoad?.total_team_load_kg || 0).toFixed(1)} kg</strong>
           </span>
         </CardHeader>
 
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="text-[11px] bg-slate-50/60">
-                  <TableHead>Member ID</TableHead>
-                  <TableHead>Personnel Name</TableHead>
-                  <TableHead>Role & Duty</TableHead>
-                  <TableHead>Station</TableHead>
-                  <TableHead className="text-right">Items</TableHead>
-                  <TableHead className="text-right">Quantity</TableHead>
-                  <TableHead className="text-right">Personal Load</TableHead>
-                  <TableHead className="text-right">% of Team Load</TableHead>
-                  <TableHead className="text-center">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {teamLoad?.personnel_breakdown.map((p) => {
-                  const pct = teamLoad.total_team_load_kg > 0 ? (p.total_weight_kg / teamLoad.total_team_load_kg) * 100 : 0
-                  const isSelected = p.personnel_id === selectedPersonnelId
+          {!hasPersonnel ? (
+            <div className="py-8 text-center text-xs text-slate-500 font-mono">
+              No personnel assigned to this campaign roster.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="text-[11px] bg-slate-50/60">
+                    <TableHead>Member ID</TableHead>
+                    <TableHead>Personnel Name</TableHead>
+                    <TableHead>Role & Duty</TableHead>
+                    <TableHead>Station</TableHead>
+                    <TableHead className="text-right">Items</TableHead>
+                    <TableHead className="text-right">Quantity</TableHead>
+                    <TableHead className="text-right">Personal Load</TableHead>
+                    <TableHead className="text-right">% of Team Load</TableHead>
+                    <TableHead className="text-center">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {teamLoad?.personnel_breakdown.map((p) => {
+                    const totalTeamLoad = teamLoad.total_team_load_kg || 0
+                    const pct = totalTeamLoad > 0 ? (p.total_weight_kg / totalTeamLoad) * 100 : 0
+                    const isSelected = p.personnel_id === selectedPersonnelId
 
-                  return (
-                    <TableRow
-                      key={p.personnel_id}
-                      className={`text-xs transition-colors cursor-pointer ${
-                        isSelected ? 'bg-blue-50/50 font-semibold' : 'hover:bg-slate-50'
-                      }`}
-                      onClick={() => setSelectedPersonnelId(p.personnel_id)}
-                    >
-                      <TableCell mono className="font-bold text-slate-900 text-[11px]">
-                        {p.personnel_id}
-                      </TableCell>
-                      <TableCell className="font-bold text-slate-900">{p.personnel_name}</TableCell>
-                      <TableCell className="text-slate-700">{p.personnel_role || 'Member'}</TableCell>
-                      <TableCell className="text-slate-600">{p.station || station}</TableCell>
-                      <TableCell className="text-right font-mono">{p.total_items_count}</TableCell>
-                      <TableCell className="text-right font-mono">{p.total_quantity}</TableCell>
-                      <TableCell className="text-right font-mono font-bold text-[#02457A]">
-                        {p.total_weight_kg.toFixed(2)} kg
-                      </TableCell>
-                      <TableCell className="text-right font-mono text-slate-600">
-                        {pct.toFixed(1)}%
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Button
-                          variant={isSelected ? 'secondary' : 'ghost'}
-                          size="xs"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setSelectedPersonnelId(p.personnel_id)
-                          }}
-                          className="h-6 text-[10px]"
-                        >
-                          {isSelected ? 'Viewing' : 'Inspect'}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          </div>
+                    return (
+                      <TableRow
+                        key={p.personnel_id}
+                        className={`text-xs transition-colors cursor-pointer ${
+                          isSelected ? 'bg-blue-50/50 font-semibold' : 'hover:bg-slate-50'
+                        }`}
+                        onClick={() => setSelectedPersonnelId(p.personnel_id)}
+                      >
+                        <TableCell mono className="font-bold text-slate-900 text-[11px]">
+                          {p.personnel_id}
+                        </TableCell>
+                        <TableCell className="font-bold text-slate-900">{p.personnel_name}</TableCell>
+                        <TableCell className="text-slate-700">{p.personnel_role || 'Member'}</TableCell>
+                        <TableCell className="text-slate-600">{p.station || station}</TableCell>
+                        <TableCell className="text-right font-mono">{p.total_items_count}</TableCell>
+                        <TableCell className="text-right font-mono">{p.total_quantity}</TableCell>
+                        <TableCell className="text-right font-mono font-bold text-[#02457A]">
+                          {p.total_weight_kg.toFixed(2)} kg
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-slate-600">
+                          {pct.toFixed(1)}%
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            variant={isSelected ? 'secondary' : 'ghost'}
+                            size="xs"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedPersonnelId(p.personnel_id)
+                            }}
+                            className="h-6 text-[10px]"
+                          >
+                            {isSelected ? 'Viewing' : 'Inspect'}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -737,7 +856,14 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
         <Modal
           isOpen={isItemModalOpen}
           onClose={() => setIsItemModalOpen(false)}
-          title={editingItem ? 'Edit Packing Item' : `Add Packing Item for ${selectedPersonSummary?.personnel_name}`}
+          title={
+            editingItem
+              ? 'Edit Packing Item'
+              : `Add Packing Item for ${
+                  teamLoad?.personnel_breakdown.find((p) => p.personnel_id === modalPersonnelId)?.personnel_name ||
+                  'Team Member'
+                }`
+          }
         >
           <form onSubmit={handleSubmitItem} className="space-y-4 text-xs">
             {itemFormErrors.submit && (
@@ -745,6 +871,26 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
                 {itemFormErrors.submit}
               </div>
             )}
+
+            {/* Target Member Selector */}
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">Target Team Member *</label>
+              <select
+                value={modalPersonnelId}
+                onChange={(e) => setModalPersonnelId(e.target.value)}
+                disabled={!!editingItem}
+                className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-xs font-semibold text-slate-900 focus:ring-1 focus:ring-[#02457A] focus:outline-none disabled:bg-slate-100 disabled:text-slate-500"
+              >
+                {teamLoad?.personnel_breakdown.map((p) => (
+                  <option key={p.personnel_id} value={p.personnel_id}>
+                    {p.personnel_name} · {p.personnel_id} ({p.personnel_role || 'Member'})
+                  </option>
+                ))}
+              </select>
+              {itemFormErrors.personnelId && (
+                <span className="text-[11px] text-rose-600 mt-0.5 block">{itemFormErrors.personnelId}</span>
+              )}
+            </div>
 
             <div>
               <label className="block font-bold text-slate-700 mb-1">Item / Equipment Name *</label>
@@ -755,7 +901,9 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
                 placeholder="e.g. Polar Ice Core Sampling Auger"
                 className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-xs focus:ring-1 focus:ring-[#02457A] focus:outline-none"
               />
-              {itemFormErrors.itemName && <span className="text-[11px] text-rose-600 mt-0.5 block">{itemFormErrors.itemName}</span>}
+              {itemFormErrors.itemName && (
+                <span className="text-[11px] text-rose-600 mt-0.5 block">{itemFormErrors.itemName}</span>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -804,7 +952,9 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
                   onChange={(e) => setItemFormData({ ...itemFormData, quantity: e.target.value })}
                   className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-xs font-mono focus:ring-1 focus:ring-[#02457A] focus:outline-none"
                 />
-                {itemFormErrors.quantity && <span className="text-[11px] text-rose-600 mt-0.5 block">{itemFormErrors.quantity}</span>}
+                {itemFormErrors.quantity && (
+                  <span className="text-[11px] text-rose-600 mt-0.5 block">{itemFormErrors.quantity}</span>
+                )}
               </div>
 
               <div>
@@ -828,7 +978,9 @@ export const PackingAndLoadPlanner: React.FC<PackingAndLoadPlannerProps> = ({
                   onChange={(e) => setItemFormData({ ...itemFormData, unitWeightKg: e.target.value })}
                   className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-xs font-mono focus:ring-1 focus:ring-[#02457A] focus:outline-none"
                 />
-                {itemFormErrors.unitWeightKg && <span className="text-[11px] text-rose-600 mt-0.5 block">{itemFormErrors.unitWeightKg}</span>}
+                {itemFormErrors.unitWeightKg && (
+                  <span className="text-[11px] text-rose-600 mt-0.5 block">{itemFormErrors.unitWeightKg}</span>
+                )}
               </div>
             </div>
 

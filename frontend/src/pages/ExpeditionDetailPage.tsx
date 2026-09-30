@@ -300,7 +300,7 @@ export const ExpeditionDetailPage: React.FC = () => {
           </div>
           <div>
             <span className="text-[11px] text-slate-500 block font-mono font-bold uppercase">Personnel Deployed</span>
-            <span className="font-mono font-bold text-slate-900">{expedition.personnelCount} Members</span>
+            <span className="font-mono font-bold text-slate-900">{assignedPersonnel.length} Members</span>
           </div>
           <div>
             <span className="text-[11px] text-slate-500 block font-mono font-bold uppercase">Vessel Support</span>
@@ -383,6 +383,7 @@ export const ExpeditionDetailPage: React.FC = () => {
           <MissionReadinessAudit
             expeditionId={expedition.id}
             expeditionName={expedition.name}
+            onNavigateTab={(tabKey) => handleTabSelect(tabKey as TabKey)}
           />
         )}
 
@@ -407,10 +408,10 @@ export const ExpeditionDetailPage: React.FC = () => {
                   <Users className="w-3.5 h-3.5 text-slate-400" />
                 </div>
                 <div className="mt-1 text-2xl font-bold font-mono text-slate-900">
-                  {expedition.personnelCount}
+                  {assignedPersonnel.length}
                 </div>
                 <div className="text-[11px] text-slate-500 mt-0.5 font-mono">
-                  {expedition.personnel.length} listed in active duty
+                  {assignedPersonnel.length} listed in active duty
                 </div>
               </div>
 
@@ -420,23 +421,23 @@ export const ExpeditionDetailPage: React.FC = () => {
                   <Package className="w-3.5 h-3.5 text-[#02457A]" />
                 </div>
                 <div className="mt-1 text-2xl font-bold font-mono text-slate-900">
-                  {expedition.cargoCount}
+                  {assignedCargo.length}
                 </div>
                 <div className="text-[11px] text-slate-500 mt-0.5 font-mono">
-                  {expedition.cargo.filter((c) => c.status === 'Delayed').length} delayed shipments
+                  {assignedCargo.filter((c) => c.status === 'Delayed').length} delayed shipments
                 </div>
               </div>
 
               <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
                 <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase font-mono">
-                  <span>Inventory Items</span>
+                  <span>Inventory Requirements</span>
                   <Boxes className="w-3.5 h-3.5 text-amber-500" />
                 </div>
                 <div className="mt-1 text-2xl font-bold font-mono text-slate-900">
-                  {expedition.inventory.length}
+                  {assignedResupplyItems.length}
                 </div>
                 <div className="text-[11px] text-amber-800 font-semibold mt-0.5">
-                  {expedition.inventory.filter((i) => i.status !== 'Normal').length} require attention
+                  {assignedResupplyItems.filter((i) => i.resupply_quantity > 0).length} require attention
                 </div>
               </div>
 
@@ -488,7 +489,7 @@ export const ExpeditionDetailPage: React.FC = () => {
                           <span>Personnel & Safety</span>
                         </div>
                         <p className="text-slate-600 text-[11px] mt-1">
-                          {expedition.personnelCount} personnel deployed. Full AIIMS medical clearance and ITBP polar survival certs active.
+                          {assignedPersonnel.length} {assignedPersonnel.length === 1 ? 'member' : 'personnel'} assigned to campaign. AIIMS medical clearance and ITBP polar survival records verified.
                         </p>
                       </div>
 
@@ -575,7 +576,7 @@ export const ExpeditionDetailPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider font-mono">
-                  Expedition Personnel Roster ({assignedPersonnel.length} listed of {expedition.personnelCount} total)
+                  Expedition Personnel Roster ({assignedPersonnel.length} {assignedPersonnel.length === 1 ? 'Member' : 'Members'} Assigned)
                 </h3>
                 <p className="text-[11px] text-slate-500">
                   Deployed scientific, technical, and military logistics personnel assigned to campaign {expedition.id}
