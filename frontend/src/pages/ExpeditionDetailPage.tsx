@@ -272,7 +272,7 @@ export const ExpeditionDetailPage: React.FC = () => {
               <Badge variant={statusVariant} size="sm" withDot>
                 {expedition.status.toUpperCase()}
               </Badge>
-              <span className="text-xs text-slate-500 font-mono">Mandate: <strong className="text-slate-800 font-semibold">{expedition.mandate}</strong></span>
+              <span className="text-xs text-slate-600 font-mono">Mandate: <strong className="text-slate-900 font-semibold">{expedition.mandate}</strong></span>
             </div>
             <h1 className="text-xl font-bold text-slate-900 tracking-tight">{expedition.name}</h1>
             <p className="text-xs text-slate-600 max-w-4xl">{expedition.season}</p>
@@ -280,7 +280,7 @@ export const ExpeditionDetailPage: React.FC = () => {
 
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-right min-w-[180px]">
-              <div className="text-[10px] uppercase font-bold text-slate-500 font-mono">Campaign Window</div>
+              <div className="text-xs uppercase font-bold text-slate-500 font-mono">Campaign Window</div>
               <div className="text-xs font-bold font-mono text-slate-900 mt-0.5">
                 {expedition.startDate} → {expedition.endDate}
               </div>
@@ -289,29 +289,29 @@ export const ExpeditionDetailPage: React.FC = () => {
         </div>
 
         {/* Quick summary strip */}
-        <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-sans">
+        <div className="mt-4 pt-3.5 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-sans">
           <div>
-            <span className="text-[11px] text-slate-500 block font-mono font-bold uppercase">Expedition Lead</span>
-            <span className="font-bold text-slate-900">{expedition.lead}</span>
+            <span className="text-xs text-slate-500 block font-mono font-bold uppercase mb-0.5">Expedition Lead</span>
+            <span className="font-bold text-slate-900 text-sm">{expedition.lead}</span>
           </div>
           <div>
-            <span className="text-[11px] text-slate-500 block font-mono font-bold uppercase">Assigned Station(s)</span>
-            <span className="font-bold text-slate-900">{expedition.station}</span>
+            <span className="text-xs text-slate-500 block font-mono font-bold uppercase mb-0.5">Assigned Station(s)</span>
+            <span className="font-bold text-slate-900 text-sm">{expedition.station}</span>
           </div>
           <div>
-            <span className="text-[11px] text-slate-500 block font-mono font-bold uppercase">Personnel Deployed</span>
-            <span className="font-mono font-bold text-slate-900">{assignedPersonnel.length} Members</span>
+            <span className="text-xs text-slate-500 block font-mono font-bold uppercase mb-0.5">Personnel Deployed</span>
+            <span className="font-mono font-bold text-slate-900 text-sm">{assignedPersonnel.length} Members</span>
           </div>
           <div>
-            <span className="text-[11px] text-slate-500 block font-mono font-bold uppercase">Vessel Support</span>
-            <span className="font-bold text-slate-900 truncate block">{expedition.primaryVessel}</span>
+            <span className="text-xs text-slate-500 block font-mono font-bold uppercase mb-0.5">Vessel Support</span>
+            <span className="font-bold text-slate-900 text-sm truncate block">{expedition.primaryVessel}</span>
           </div>
         </div>
       </div>
 
       {/* 3. TABS NAVIGATION */}
-      <div className="border border-slate-200 bg-white rounded-xl p-1.5 shadow-xs overflow-x-auto">
-        <nav className="flex space-x-1 min-w-max" aria-label="Expedition Tabs">
+      <div className="border border-slate-200 bg-white rounded-xl p-2 shadow-xs overflow-x-auto">
+        <nav className="flex space-x-1.5 min-w-max" aria-label="Expedition Tabs">
           {[
             { key: 'overview', label: 'Overview', icon: Layers, count: null, badge: null },
             { key: 'progress', label: 'Progress & Route', icon: Navigation, count: null, badge: 'Route Tracking' },
@@ -332,20 +332,20 @@ export const ExpeditionDetailPage: React.FC = () => {
                 key={tab.key}
                 type="button"
                 onClick={() => handleTabSelect(tab.key as TabKey)}
-                className={`group inline-flex items-center gap-2 py-2.5 px-3.5 rounded-lg font-medium text-xs whitespace-nowrap transition-all cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#02457A] ${
+                className={`group inline-flex items-center gap-2 py-2.5 px-4 rounded-lg font-semibold text-xs whitespace-nowrap transition-all cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#02457A] ${
                   isActive
                     ? 'bg-[#02457A] text-white font-bold shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 font-semibold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
                 }`}
               >
                 <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 <span>{tab.label}</span>
                 {tab.badge && (
                   <span
-                    className={`px-1.5 py-0.2 rounded text-[9px] font-mono uppercase font-bold tracking-tight ${
+                    className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold tracking-tight ${
                       isActive
                         ? 'bg-sky-400/20 text-sky-200 border border-sky-300/30'
-                        : 'bg-slate-100 text-slate-500 border border-slate-200'
+                        : 'bg-slate-100 text-slate-600 border border-slate-200'
                     }`}
                   >
                     {tab.badge}
@@ -353,8 +353,8 @@ export const ExpeditionDetailPage: React.FC = () => {
                 )}
                 {tab.count !== null && (
                   <span
-                    className={`ml-1 px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
-                      isActive ? 'bg-white/20 text-white font-bold' : 'bg-slate-100 text-slate-600'
+                    className={`ml-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                      isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
                     }`}
                   >
                     {tab.count}
@@ -403,53 +403,53 @@ export const ExpeditionDetailPage: React.FC = () => {
             {/* Operational Metrics Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase font-mono">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-600 uppercase font-mono">
                   <span>Personnel Roster</span>
-                  <Users className="w-3.5 h-3.5 text-slate-400" />
+                  <Users className="w-4 h-4 text-slate-500" />
                 </div>
                 <div className="mt-1 text-2xl font-bold font-mono text-slate-900">
                   {assignedPersonnel.length}
                 </div>
-                <div className="text-[11px] text-slate-500 mt-0.5 font-mono">
+                <div className="text-xs text-slate-600 mt-0.5 font-medium">
                   {assignedPersonnel.length} listed in active duty
                 </div>
               </div>
 
               <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase font-mono">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-600 uppercase font-mono">
                   <span>Cargo Manifests</span>
-                  <Package className="w-3.5 h-3.5 text-[#02457A]" />
+                  <Package className="w-4 h-4 text-[#02457A]" />
                 </div>
                 <div className="mt-1 text-2xl font-bold font-mono text-slate-900">
                   {assignedCargo.length}
                 </div>
-                <div className="text-[11px] text-slate-500 mt-0.5 font-mono">
+                <div className="text-xs text-slate-600 mt-0.5 font-medium">
                   {assignedCargo.filter((c) => c.status === 'Delayed').length} delayed shipments
                 </div>
               </div>
 
               <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase font-mono">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-600 uppercase font-mono">
                   <span>Inventory Requirements</span>
-                  <Boxes className="w-3.5 h-3.5 text-amber-500" />
+                  <Boxes className="w-4 h-4 text-amber-500" />
                 </div>
                 <div className="mt-1 text-2xl font-bold font-mono text-slate-900">
                   {assignedResupplyItems.length}
                 </div>
-                <div className="text-[11px] text-amber-800 font-semibold mt-0.5">
+                <div className="text-xs text-amber-900 font-semibold mt-0.5">
                   {assignedResupplyItems.filter((i) => i.resupply_quantity > 0).length} require attention
                 </div>
               </div>
 
               <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
-                <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase font-mono">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-600 uppercase font-mono">
                   <span>Active Incidents</span>
-                  <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
+                  <ShieldAlert className="w-4 h-4 text-rose-500" />
                 </div>
                 <div className="mt-1 text-2xl font-bold font-mono text-slate-900">
                   {expedition.incidents.length}
                 </div>
-                <div className="text-[11px] text-slate-500 mt-0.5 font-mono">
+                <div className="text-xs text-slate-600 mt-0.5 font-medium">
                   {expedition.incidents.filter((i) => i.severity === 'Critical').length} critical safety flag
                 </div>
               </div>
@@ -459,16 +459,16 @@ export const ExpeditionDetailPage: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
                 <Card>
-                  <CardHeader className="py-2.5 px-4 bg-slate-50/80 border-b border-slate-200">
+                  <CardHeader className="py-3 px-4 bg-slate-50 border-b border-slate-200">
                     <CardTitle className="text-xs text-slate-900 uppercase tracking-wider font-bold font-mono">
                       Operational Brief & Mission Objectives
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-4 space-y-3 text-xs leading-relaxed text-slate-700">
-                    <p className="font-semibold text-slate-900 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                  <CardContent className="p-4.5 space-y-3 text-xs leading-relaxed text-slate-800">
+                    <p className="font-semibold text-slate-900 bg-slate-50/90 p-3.5 rounded-lg border border-slate-200 leading-relaxed text-xs">
                       {expedition.notes}
                     </p>
-                    <p className="text-slate-600">
+                    <p className="text-slate-600 leading-relaxed">
                       Operations are conducted under the authority of the Ministry of Earth Sciences (MoES) and managed by NCPOR Goa. Environmental protocols adhere strictly to the Protocol on Environmental Protection to the Antarctic Treaty (Madrid Protocol, 1991).
                     </p>
                   </CardContent>
@@ -476,49 +476,49 @@ export const ExpeditionDetailPage: React.FC = () => {
 
                 {/* Sub-system quick matrix */}
                 <Card>
-                  <CardHeader className="py-2.5 px-4 bg-slate-50/80 border-b border-slate-200">
+                  <CardHeader className="py-3 px-4 bg-slate-50 border-b border-slate-200">
                     <CardTitle className="text-xs text-slate-900 uppercase tracking-wider font-bold font-mono">
                       Expedition Integration Sub-systems
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                  <CardContent className="p-4.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
+                      <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
                         <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                          <Users className="w-3.5 h-3.5 text-[#02457A]" />
-                          <span>Personnel & Safety</span>
+                          <Users className="w-4 h-4 text-[#02457A]" />
+                          <span className="font-semibold">Personnel & Safety</span>
                         </div>
-                        <p className="text-slate-600 text-[11px] mt-1">
+                        <p className="text-slate-700 text-xs mt-1 leading-relaxed">
                           {assignedPersonnel.length} {assignedPersonnel.length === 1 ? 'member' : 'personnel'} assigned to campaign. AIIMS medical clearance and ITBP polar survival records verified.
                         </p>
                       </div>
 
-                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                      <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
                         <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                          <Package className="w-3.5 h-3.5 text-[#018ABE]" />
-                          <span>Cargo & Vessel Staging</span>
+                          <Package className="w-4 h-4 text-[#018ABE]" />
+                          <span className="font-semibold">Cargo & Vessel Staging</span>
                         </div>
-                        <p className="text-slate-600 text-[11px] mt-1">
+                        <p className="text-slate-700 text-xs mt-1 leading-relaxed">
                           Vessel {expedition.primaryVessel}. Air bridge via {expedition.airSupport}.
                         </p>
                       </div>
 
-                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                      <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
                         <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                          <Boxes className="w-3.5 h-3.5 text-amber-600" />
-                          <span>Critical Consumables</span>
+                          <Boxes className="w-4 h-4 text-amber-600" />
+                          <span className="font-semibold">Critical Consumables</span>
                         </div>
-                        <p className="text-slate-600 text-[11px] mt-1">
+                        <p className="text-slate-700 text-xs mt-1 leading-relaxed">
                           Fuel, RO membrane filters, emergency blood plasma, and turbine turbochargers tracked.
                         </p>
                       </div>
 
-                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                      <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
                         <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                          <Radio className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>Telemetry & Comms</span>
+                          <Radio className="w-4 h-4 text-emerald-600" />
+                          <span className="font-semibold">Telemetry & Comms</span>
                         </div>
-                        <p className="text-slate-600 text-[11px] mt-1">
+                        <p className="text-slate-700 text-xs mt-1 leading-relaxed">
                           Ground Station link: {expedition.commsLink}.
                         </p>
                       </div>

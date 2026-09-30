@@ -76,6 +76,7 @@ export const InventoryDetailPage: React.FC = () => {
   const [txnOfficer, setTxnOfficer] = useState('Logistics Officer')
   const [txnDoc, setTxnDoc] = useState('')
   const [isSubmittingTxn, setIsSubmittingTxn] = useState(false)
+  const [txnError, setTxnError] = useState<string | null>(null)
 
   // Forecast Inspection Modal State
   const [isForecastModalOpen, setIsForecastModalOpen] = useState(false)
@@ -136,8 +137,6 @@ export const InventoryDetailPage: React.FC = () => {
       </div>
     )
   }
-
-  const [txnError, setTxnError] = useState<string | null>(null)
 
   // Handle manual transaction submission with PostgreSQL backend persistence
   const handleLogTransaction = async (e: React.FormEvent) => {
@@ -741,78 +740,87 @@ export const InventoryDetailPage: React.FC = () => {
         }
       >
         <div className="space-y-4 text-xs font-sans">
-          <div className="p-3 bg-indigo-50/80 border border-indigo-200 rounded-lg text-indigo-950 flex items-start gap-2.5">
+          <div className="p-3.5 bg-indigo-50/90 border border-indigo-200 rounded-lg text-indigo-950 flex items-start gap-3">
             <Sparkles className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
-            <div>
-              <div className="font-bold font-mono">ML Demand Prediction Engine</div>
-              <p className="text-indigo-900 text-[11px] leading-relaxed mt-0.5">
+            <div className="space-y-1">
+              <div className="font-bold font-mono text-xs text-indigo-950">ML Demand Prediction Engine</div>
+              <p className="text-indigo-900 text-xs leading-relaxed">
                 Structured inference model calculating multi-factor supply burn rates under severe sub-zero thermal extremes, wintering crew density, and scheduled air-link windows.
               </p>
             </div>
           </div>
 
-          <div className="p-2.5 bg-amber-50 border border-amber-200 rounded text-[11px] text-amber-900">
-            <strong>Prototype operational inputs used.</strong>
+          <div className="p-3 bg-amber-50/90 border border-amber-300 rounded-lg text-xs text-amber-950 leading-relaxed">
+            <strong className="font-semibold text-amber-950">Prototype operational inputs used.</strong>
             {item.prototypeForecastInputs.scenario === 'cold-start-demo' &&
               ' Synthetic zero-history demo; displayed monthly history is not sent as daily model input.'}
           </div>
 
           {forecastLoading && (
-            <div role="status" className="p-4 bg-slate-50 border border-slate-200 rounded text-slate-600">
-              Requesting inventory forecast...
+            <div role="status" className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 text-xs flex items-center gap-2">
+              <span className="font-medium">Requesting inventory forecast from backend...</span>
             </div>
           )}
           {forecastError && (
-            <div role="alert" className="p-4 bg-rose-50 border border-rose-200 rounded text-rose-800">
-              {forecastError}
+            <div role="alert" className="p-4 bg-rose-50 border border-rose-200 rounded-lg text-rose-900 text-xs">
+              <strong className="font-bold">Forecast Error:</strong> {forecastError}
             </div>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
-              <span className="text-[11px] text-slate-500 uppercase font-mono font-bold">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+            <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
+              <span className="text-xs text-slate-600 uppercase font-mono font-bold block">
                 Predicted Requirement
               </span>
-              <div className="text-xl font-bold font-mono text-slate-900 mt-1">
+              <div className="text-2xl font-bold font-mono text-slate-900 mt-1">
                 {forecastResult ? `${forecastResult.data.predicted_requirement.toLocaleString()} ${item.unit}` : '—'}
               </div>
-              <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">
+              <span className="text-xs text-slate-500 font-mono mt-0.5 block">
                 Live backend forecast
               </span>
             </div>
 
-            <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg">
-              <span className="text-[11px] text-slate-500 uppercase font-mono font-bold">
+            <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
+              <span className="text-xs text-slate-600 uppercase font-mono font-bold block">
                 Current Stock On Hand
               </span>
-              <div className="text-xl font-bold font-mono text-slate-900 mt-1">
+              <div className="text-2xl font-bold font-mono text-slate-900 mt-1">
                 {forecastResult ? `${forecastResult.data.current_stock.toLocaleString()} ${item.unit}` : '—'}
               </div>
-              <span className="text-[10px] text-slate-500 font-mono mt-0.5 block">
+              <span className="text-xs text-slate-500 font-mono mt-0.5 block">
                 Physical station stock
               </span>
             </div>
 
-            <div className="p-3 bg-[#0D1316] border border-[#263238] rounded-lg">
-              <span className="text-[11px] block uppercase font-mono font-bold tracking-wider text-[#A7B2B8]">
+            <div className="p-3.5 bg-[#0D1316] border border-[#263238] rounded-lg shadow-xs">
+              <span className="text-xs block uppercase font-mono font-bold tracking-wider text-[#A7B2B8]">
                 RECOMMENDED ADDITIONAL QUANTITY
               </span>
-              <div className="text-xl font-bold font-mono mt-1 text-[#FFD21C]">
+              <div className="text-2xl font-bold font-mono mt-1 text-[#FFD21C]">
                 {forecastResult
                   ? `${forecastResult.data.recommended_additional_qty.toLocaleString()} ${item.unit}`
                   : '—'}
               </div>
-              <span className="text-[10px] font-mono mt-0.5 block text-[#A7B2B8]">
+              <span className="text-xs font-mono mt-0.5 block text-slate-400">
                 Targeted for next freight dispatch
               </span>
             </div>
           </div>
 
-          <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2 text-[11px] text-slate-700 font-mono">
-            <div><strong className="text-slate-900">Status:</strong> {forecastResult?.data.status ?? '—'}</div>
-            <div><strong className="text-slate-900">Prediction Source:</strong> {forecastResult?.data.prediction_source ?? '—'}</div>
-            <div><strong className="text-slate-900">Model Version:</strong> {forecastResult?.data.model_version ?? '—'}</div>
-            <div><strong className="text-slate-900">Low Confidence:</strong> {forecastResult ? (forecastResult.data.low_confidence ? 'Yes' : 'No') : '—'}</div>
-            <div><strong className="text-slate-900">Recommendation:</strong> {forecastResult?.data.recommendation ?? '—'}</div>
+          <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2 text-xs text-slate-800 font-mono">
+            <div><strong className="text-slate-900 font-semibold">Status:</strong> {forecastResult?.data.status ?? '—'}</div>
+            <div><strong className="text-slate-900 font-semibold">Prediction Source:</strong> {forecastResult?.data.prediction_source ?? '—'}</div>
+            <div><strong className="text-slate-900 font-semibold">Model Version:</strong> {forecastResult?.data.model_version ?? '—'}</div>
+            <div className={forecastResult?.data.low_confidence ? 'font-bold text-amber-800' : ''}>
+              <strong className="text-slate-900 font-semibold">Low Confidence:</strong> {forecastResult ? (forecastResult.data.low_confidence ? 'Yes (Higher uncertainty margin)' : 'No (High confidence)') : '—'}
+            </div>
+            <div><strong className="text-slate-900 font-semibold">Recommendation:</strong> {forecastResult?.data.recommendation ?? '—'}</div>
+          </div>
+
+          <div className="p-3 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-700 flex items-start gap-2.5 leading-relaxed">
+            <Info className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+            <div>
+              <strong className="text-slate-900 font-semibold">Non-Automated Safeguard:</strong> ML predictions do not automatically modify station stock ledgers. All replenishment allocations require Expedition Manager manual authorization.
+            </div>
           </div>
         </div>
       </Modal>

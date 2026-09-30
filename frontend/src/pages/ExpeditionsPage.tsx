@@ -706,9 +706,9 @@ export const ExpeditionsPage: React.FC = () => {
                   className="border-slate-200 shadow-sm hover:border-[#02457A]/50 transition-all overflow-hidden rounded-xl"
                 >
                   {/* Card Header Strip */}
-                  <div className="bg-slate-900 border-b border-slate-800 p-4 text-white">
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-                      <div className="space-y-1">
+                  <div className="bg-slate-900 border-b border-slate-800 p-4.5 text-white">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
+                      <div className="space-y-1.5">
                         <div className="flex items-center gap-2.5 flex-wrap">
                           <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 tracking-wider">
                             {exp.id}
@@ -716,22 +716,22 @@ export const ExpeditionsPage: React.FC = () => {
                           <Badge variant={statusVariant} size="sm" withDot>
                             {exp.status.toUpperCase()}
                           </Badge>
-                          <span className="text-xs text-slate-300 font-mono">
-                            Mandate: <strong className="text-slate-100 font-medium">{exp.mandate}</strong>
+                          <span className="text-xs text-slate-200 font-mono">
+                            Mandate: <strong className="text-white font-semibold">{exp.mandate}</strong>
                           </span>
                         </div>
                         <h2 className="text-base font-bold text-white tracking-tight">
                           {exp.name}
                         </h2>
-                        <p className="text-[11px] text-slate-400 font-mono">
+                        <p className="text-xs text-slate-300 font-sans">
                           {exp.season}
                         </p>
                       </div>
 
                       <div className="flex items-center gap-3 shrink-0">
-                        <div className="bg-slate-800/90 border border-slate-700/80 rounded-lg px-3 py-1.5 text-right font-mono">
-                          <div className="text-[10px] uppercase font-bold text-slate-400">Campaign Window</div>
-                          <div className="text-xs font-bold text-sky-200">
+                        <div className="bg-slate-800/95 border border-slate-700 rounded-lg px-3.5 py-2 text-right font-mono">
+                          <div className="text-xs uppercase font-bold text-slate-300 font-mono">Campaign Window</div>
+                          <div className="text-xs font-bold font-mono text-sky-300 mt-0.5">
                             {exp.startDate} → {exp.endDate}
                           </div>
                         </div>
@@ -748,39 +748,39 @@ export const ExpeditionsPage: React.FC = () => {
                     </div>
 
                     {/* Officer & Logistics Strip */}
-                    <div className="mt-3.5 pt-3 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-sans">
+                    <div className="mt-4 pt-3.5 border-t border-slate-800/90 grid grid-cols-2 sm:grid-cols-4 gap-3.5 text-xs font-sans">
                       <div>
-                        <span className="text-[10px] text-slate-400 block font-mono uppercase font-bold">Expedition Lead</span>
-                        <span className="font-bold text-slate-100 text-xs">{exp.lead}</span>
+                        <span className="text-xs text-slate-300 block font-mono uppercase font-semibold mb-0.5">Expedition Lead</span>
+                        <span className="font-bold text-white text-xs">{exp.lead}</span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-slate-400 block font-mono uppercase font-bold">Assigned Stations</span>
-                        <span className="font-bold text-slate-100 text-xs">{exp.station}</span>
+                        <span className="text-xs text-slate-300 block font-mono uppercase font-semibold mb-0.5">Assigned Stations</span>
+                        <span className="font-bold text-white text-xs">{exp.station}</span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-slate-400 block font-mono uppercase font-bold">Personnel Roster</span>
+                        <span className="text-xs text-slate-300 block font-mono uppercase font-semibold mb-0.5">Personnel Roster</span>
                         <span className="font-mono font-bold text-sky-300 text-xs">
                           {summary?.personnelCount !== undefined ? `${summary.personnelCount} Members` : 'Querying roster...'}
                         </span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-slate-400 block font-mono uppercase font-bold">Vessel Support</span>
-                        <span className="font-bold text-slate-100 text-xs truncate block">{exp.primaryVessel}</span>
+                        <span className="text-xs text-slate-300 block font-mono uppercase font-semibold mb-0.5">Vessel Support</span>
+                        <span className="font-bold text-white text-xs truncate block">{exp.primaryVessel}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Operational Capabilities Overview (4 High-Visibility Modules) */}
-                  <CardContent className="p-4 bg-white space-y-4">
+                  <CardContent className="p-4.5 bg-white space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
                       {/* Module 1: 7-Pillar Readiness Audit */}
-                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
+                      <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-mono font-bold uppercase text-slate-500 flex items-center gap-1">
+                          <span className="text-xs font-mono font-bold uppercase text-slate-700 flex items-center gap-1">
                             <ShieldCheck className="w-3.5 h-3.5 text-[#02457A]" />
                             Readiness Audit
                           </span>
-                          <span className="text-[9px] font-mono bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded font-bold">
+                          <span className="text-[10px] font-mono bg-blue-100 text-blue-900 px-2 py-0.5 rounded font-bold">
                             7-Pillar
                           </span>
                         </div>
@@ -798,22 +798,22 @@ export const ExpeditionsPage: React.FC = () => {
                               </span>
                             )
                           ) : (
-                            <span className="text-xs font-mono text-slate-400">Loading audit...</span>
+                            <span className="text-xs font-mono text-slate-500">Loading audit...</span>
                           )}
                         </div>
-                        <p className="text-[10px] text-slate-500 font-mono">
+                        <p className="text-xs text-slate-600 font-mono">
                           {readiness ? `${readiness.passedChecks}/7 checks verified` : 'Executing 7 pillars'}
                         </p>
                       </div>
 
                       {/* Module 2: Route & Progress Tracking */}
-                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
+                      <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-mono font-bold uppercase text-slate-500 flex items-center gap-1">
+                          <span className="text-xs font-mono font-bold uppercase text-slate-700 flex items-center gap-1">
                             <Navigation className="w-3.5 h-3.5 text-[#02457A]" />
                             Progress &amp; Route
                           </span>
-                          <span className="text-[9px] font-mono bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded font-bold">
+                          <span className="text-[10px] font-mono bg-slate-200 text-slate-800 px-2 py-0.5 rounded font-bold">
                             Haversine
                           </span>
                         </div>
@@ -825,7 +825,7 @@ export const ExpeditionsPage: React.FC = () => {
                             {progress ? `${progress.progressPercent}%` : '0%'}
                           </span>
                         </div>
-                        <p className="text-[10px] text-slate-500 font-mono truncate">
+                        <p className="text-xs text-slate-600 font-mono truncate">
                           {progress
                             ? progress.totalDistanceKm > 0
                               ? `${progress.distanceTraveledKm.toLocaleString()} / ${progress.totalDistanceKm.toLocaleString()} km`
@@ -835,13 +835,13 @@ export const ExpeditionsPage: React.FC = () => {
                       </div>
 
                       {/* Module 3: Packing & Cargo Capacity */}
-                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
+                      <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-mono font-bold uppercase text-slate-500 flex items-center gap-1">
+                          <span className="text-xs font-mono font-bold uppercase text-slate-700 flex items-center gap-1">
                             <Scale className="w-3.5 h-3.5 text-[#02457A]" />
                             Packing &amp; Capacity
                           </span>
-                          <span className="text-[9px] font-mono bg-blue-100 text-blue-800 px-1.5 py-0.2 rounded font-bold">
+                          <span className="text-[10px] font-mono bg-blue-100 text-blue-900 px-2 py-0.5 rounded font-bold">
                             Payload
                           </span>
                         </div>
@@ -850,19 +850,19 @@ export const ExpeditionsPage: React.FC = () => {
                             {capacity ? `${capacity.total_planned_weight_kg.toFixed(1)} / ${capacity.maximum_capacity_kg.toFixed(0)} kg` : '0 / 2500 kg'}
                           </span>
                         </div>
-                        <p className="text-[10px] text-slate-500 font-mono">
+                        <p className="text-xs text-slate-600 font-mono">
                           {capacity ? `${capacity.capacity_utilization_pct}% carrier utilization` : 'Loading load manifest...'}
                         </p>
                       </div>
 
                       {/* Module 4: What-If Simulation */}
-                      <div className="p-3 bg-sky-50/80 border border-sky-200 rounded-lg space-y-1.5">
+                      <div className="p-3.5 bg-sky-50/80 border border-sky-200 rounded-lg space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-mono font-bold uppercase text-[#02457A] flex items-center gap-1">
+                          <span className="text-xs font-mono font-bold uppercase text-[#02457A] flex items-center gap-1">
                             <Cpu className="w-3.5 h-3.5 text-[#02457A]" />
                             What-If Simulator
                           </span>
-                          <span className="text-[9px] font-mono bg-sky-200 text-sky-900 px-1.5 py-0.2 rounded font-bold">
+                          <span className="text-[10px] font-mono bg-sky-200 text-sky-950 px-2 py-0.5 rounded font-bold">
                             Decision Support
                           </span>
                         </div>
@@ -870,7 +870,7 @@ export const ExpeditionsPage: React.FC = () => {
                           <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                           <span>Scenario Evaluator</span>
                         </div>
-                        <p className="text-[10px] text-slate-600 font-mono">
+                        <p className="text-xs text-slate-700 font-mono">
                           Simulate duration, payload &amp; stock
                         </p>
                       </div>
@@ -878,12 +878,12 @@ export const ExpeditionsPage: React.FC = () => {
 
                     {/* Attention Warning Strip (if any issues exist) */}
                     {attentionReasons.length > 0 && (
-                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg space-y-1 text-xs text-amber-900">
-                        <div className="flex items-center gap-1.5 font-bold text-[11px] font-mono text-amber-900">
-                          <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-lg space-y-1.5 text-xs text-amber-950 shadow-2xs">
+                        <div className="flex items-center gap-1.5 font-bold text-xs font-mono text-amber-950">
+                          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
                           <span>ATTENTION REQUIRED ({attentionReasons.length} Active Operational Issues):</span>
                         </div>
-                        <ul className="list-disc list-inside space-y-0.5 text-[11px] text-amber-800 font-medium pl-1">
+                        <ul className="list-disc list-inside space-y-1 text-xs text-amber-900 font-medium leading-relaxed pl-1">
                           {attentionReasons.map((reason, idx) => (
                             <li key={idx}>{reason}</li>
                           ))}
@@ -892,8 +892,8 @@ export const ExpeditionsPage: React.FC = () => {
                     )}
 
                     {/* Direct Capability Quick-Action Buttons */}
-                    <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-                      <div className="text-[11px] font-mono font-bold text-slate-500 uppercase">
+                    <div className="pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                      <div className="text-xs font-mono font-bold text-slate-600 uppercase">
                         Direct Capabilities:
                       </div>
 

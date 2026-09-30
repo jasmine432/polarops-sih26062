@@ -508,123 +508,127 @@ export const InventoryPage: React.FC = () => {
             }
           />
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Item ID</TableHead>
-                <TableHead>Item Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Station</TableHead>
-                <TableHead>Unit</TableHead>
-                <TableHead>Current Stock</TableHead>
-                <TableHead>Minimum Stock</TableHead>
-                <TableHead>Avg Daily Consumption</TableHead>
-                <TableHead>Days Remaining</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Last Updated</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredItems.map((item) => (
-                <TableRow
-                  key={item.id}
-                  onClick={() => navigate(`/inventory/${item.id}`)}
-                  className={`cursor-pointer transition-colors ${
-                    item.status === 'Critical'
-                      ? 'bg-rose-50/25 hover:bg-rose-50/50 border-l-2 border-l-rose-600'
-                      : item.status === 'Low Stock'
-                      ? 'bg-amber-50/15 hover:bg-amber-50/40 border-l-2 border-l-amber-500'
-                      : 'hover:bg-slate-50/80'
-                  }`}
-                >
-                  <TableCell mono className="font-semibold text-slate-900">
-                    {item.id}
-                  </TableCell>
-                  <TableCell className="font-medium text-slate-900 max-w-[220px]">
-                    <div className="font-semibold">{item.name}</div>
-                    <div className="text-[10px] text-slate-500 truncate">{item.storageLocation}</div>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-[11px] font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
-                      {item.category}
-                    </span>
-                  </TableCell>
-                  <TableCell className="font-semibold text-slate-800 text-xs">
-                    {item.station}
-                  </TableCell>
-                  <TableCell mono className="text-slate-600 text-xs">
-                    {item.unit}
-                  </TableCell>
-                  <TableCell mono className="font-bold text-slate-900 text-xs">
-                    {item.currentStock.toLocaleString()}
-                  </TableCell>
-                  <TableCell mono className="text-slate-500 text-xs">
-                    {item.minimumStock.toLocaleString()}
-                  </TableCell>
-                  <TableCell className="text-slate-600 text-[11px] font-mono">
-                    {item.dailyConsumptionDisplay}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`font-mono text-xs font-bold tabular-nums ${
-                          item.daysRemaining <= 15
-                            ? 'text-rose-700'
-                            : item.daysRemaining <= 30
-                            ? 'text-amber-800'
-                            : 'text-slate-800'
-                        }`}
-                      >
-                        {item.daysRemaining}d
-                      </span>
-                      <div className="w-12 h-1.5 bg-slate-200 rounded-full overflow-hidden shrink-0">
-                        <div
-                          className={`h-full rounded-full ${
-                            item.daysRemaining <= 15
-                              ? 'bg-rose-600'
-                              : item.daysRemaining <= 30
-                              ? 'bg-amber-500'
-                              : 'bg-emerald-600'
-                          }`}
-                          style={{ width: `${Math.min(100, (item.daysRemaining / 90) * 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusBadgeVariant(item.status)} size="sm" withDot>
-                      {item.status.toUpperCase()}
-                    </Badge>
-                  </TableCell>
-                  <TableCell mono className="text-slate-500 text-[11px]">
-                    {item.lastUpdated.split(' ')[0]}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-                      <Button
-                        variant="secondary"
-                        size="xs"
-                        onClick={() => setForecastModalItem(item)}
-                        iconLeft={<Sparkles className="w-3 h-3 text-indigo-600" />}
-                        title="View ML Forecast"
-                      >
-                        Forecast
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="xs"
-                        onClick={() => navigate(`/inventory/${item.id}`)}
-                        iconLeft={<Eye className="w-3 h-3" />}
-                      >
-                        Details
-                      </Button>
-                    </div>
-                  </TableCell>
+          <div className="w-full overflow-x-auto rounded-lg border border-slate-200 shadow-xs">
+            <Table className="min-w-[1240px]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[110px]">Item ID</TableHead>
+                  <TableHead className="min-w-[240px]">Item Name</TableHead>
+                  <TableHead className="min-w-[160px]">Category</TableHead>
+                  <TableHead className="min-w-[120px]">Station</TableHead>
+                  <TableHead className="min-w-[70px]">Unit</TableHead>
+                  <TableHead className="min-w-[110px]">Current Stock</TableHead>
+                  <TableHead className="min-w-[110px]">Minimum Stock</TableHead>
+                  <TableHead className="min-w-[120px]">Daily Consumption</TableHead>
+                  <TableHead className="min-w-[130px]">Days Remaining</TableHead>
+                  <TableHead className="min-w-[110px]">Status</TableHead>
+                  <TableHead className="min-w-[110px]">Last Updated</TableHead>
+                  <TableHead className="min-w-[140px] text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredItems.map((item) => (
+                  <TableRow
+                    key={item.id}
+                    onClick={() => navigate(`/inventory/${item.id}`)}
+                    className={`cursor-pointer transition-colors ${
+                      item.status === 'Critical'
+                        ? 'bg-rose-50/30 hover:bg-rose-50/60 border-l-2 border-l-rose-600'
+                        : item.status === 'Low Stock'
+                        ? 'bg-amber-50/20 hover:bg-amber-50/50 border-l-2 border-l-amber-500'
+                        : 'hover:bg-slate-50/90'
+                    }`}
+                  >
+                    <TableCell mono className="font-mono text-xs font-bold text-slate-900 whitespace-nowrap min-w-[110px] py-3.5">
+                      {item.id}
+                    </TableCell>
+                    <TableCell className="min-w-[240px] max-w-[320px] py-3.5">
+                      <div className="font-semibold text-slate-900 text-xs">{item.name}</div>
+                      <div className="text-xs text-slate-600 font-normal mt-0.5">{item.storageLocation}</div>
+                    </TableCell>
+                    <TableCell className="min-w-[160px] py-3.5">
+                      <span className="text-xs font-semibold text-slate-800 bg-slate-100 px-2.5 py-1 rounded-md inline-block">
+                        {item.category}
+                      </span>
+                    </TableCell>
+                    <TableCell className="font-semibold text-slate-800 text-xs min-w-[120px] py-3.5">
+                      {item.station}
+                    </TableCell>
+                    <TableCell mono className="text-slate-600 text-xs font-mono min-w-[70px] py-3.5">
+                      {item.unit}
+                    </TableCell>
+                    <TableCell mono className="font-bold text-slate-900 text-xs tabular-nums min-w-[110px] py-3.5">
+                      {item.currentStock.toLocaleString()}
+                    </TableCell>
+                    <TableCell mono className="text-slate-700 text-xs tabular-nums min-w-[110px] py-3.5">
+                      {item.minimumStock.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-slate-700 text-xs font-mono tabular-nums min-w-[120px] py-3.5">
+                      {item.dailyConsumptionDisplay}
+                    </TableCell>
+                    <TableCell className="min-w-[130px] py-3.5">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`font-mono text-xs font-bold tabular-nums ${
+                            item.daysRemaining <= 15
+                              ? 'text-rose-700'
+                              : item.daysRemaining <= 30
+                              ? 'text-amber-800'
+                              : 'text-slate-800'
+                          }`}
+                        >
+                          {item.daysRemaining}d
+                        </span>
+                        <div className="w-12 h-1.5 bg-slate-200 rounded-full overflow-hidden shrink-0">
+                          <div
+                            className={`h-full rounded-full ${
+                              item.daysRemaining <= 15
+                                ? 'bg-rose-600'
+                                : item.daysRemaining <= 30
+                                ? 'bg-amber-500'
+                                : 'bg-emerald-600'
+                            }`}
+                            style={{ width: `${Math.min(100, (item.daysRemaining / 90) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="min-w-[110px] py-3.5">
+                      <Badge variant={getStatusBadgeVariant(item.status)} size="sm" withDot>
+                        {item.status.toUpperCase()}
+                      </Badge>
+                    </TableCell>
+                    <TableCell mono className="text-slate-600 text-xs font-mono min-w-[110px] py-3.5">
+                      {item.lastUpdated.split(' ')[0]}
+                    </TableCell>
+                    <TableCell className="text-right min-w-[140px] py-3.5">
+                      <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          variant="secondary"
+                          size="xs"
+                          onClick={() => setForecastModalItem(item)}
+                          iconLeft={<Sparkles className="w-3 h-3 text-indigo-600" />}
+                          title="View ML Forecast"
+                          className="font-medium"
+                        >
+                          Forecast
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="xs"
+                          onClick={() => navigate(`/inventory/${item.id}`)}
+                          iconLeft={<Eye className="w-3 h-3" />}
+                          className="font-medium"
+                        >
+                          Details
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </div>
 
@@ -850,83 +854,96 @@ export const InventoryPage: React.FC = () => {
           }
         >
           <div className="space-y-4 text-xs font-sans">
-            <div className="p-3 bg-indigo-50/70 border border-indigo-200 rounded text-indigo-950 flex items-start gap-2">
+            <div className="p-3.5 bg-indigo-50/90 border border-indigo-200 rounded-lg text-indigo-950 flex items-start gap-3">
               <Sparkles className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
-              <div>
-                <div className="font-bold">ML Demand Prediction</div>
-                <p className="text-indigo-900 text-[11px] leading-relaxed">
+              <div className="space-y-1">
+                <div className="font-bold font-mono text-xs text-indigo-950">ML Demand Prediction</div>
+                <p className="text-indigo-900 text-xs leading-relaxed">
                   Statistical demand projection based on seasonal consumption models, scheduled flight traverses, and station personnel headcounts.
                 </p>
               </div>
             </div>
 
-            <div className="p-2.5 bg-amber-50 border border-amber-200 rounded text-[11px] text-amber-900">
-              <strong>Prototype operational inputs used.</strong>
+            <div className="p-3 bg-amber-50/90 border border-amber-300 rounded-lg text-xs text-amber-950 leading-relaxed">
+              <strong className="font-semibold text-amber-950">Prototype operational inputs used.</strong>
               {forecastModalItem.prototypeForecastInputs.scenario === 'cold-start-demo' &&
                 ' Synthetic zero-history demo; displayed monthly history is not sent as daily model input.'}
             </div>
 
             {forecastLoading && (
-              <div role="status" className="p-4 bg-slate-50 border border-slate-200 rounded text-slate-600">
-                Requesting inventory forecast...
+              <div role="status" className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 text-xs flex items-center gap-2">
+                <span className="font-medium">Requesting inventory forecast from backend...</span>
               </div>
             )}
 
             {forecastError && (
-              <div role="alert" className="p-4 bg-rose-50 border border-rose-200 rounded text-rose-800">
-                {forecastError}
+              <div role="alert" className="p-4 bg-rose-50 border border-rose-200 rounded-lg text-rose-900 text-xs">
+                <strong className="font-bold">Forecast Error:</strong> {forecastError}
               </div>
             )}
 
             {forecastResult && (
               <div className="space-y-4">
                 {!forecastResult.categoryInModelVocabulary && (
-                  <div className="p-2.5 bg-amber-50 border border-amber-200 rounded text-[11px] text-amber-900">
+                  <div className="p-3 bg-amber-50/90 border border-amber-300 rounded-lg text-xs text-amber-950 font-medium">
                     Category “{forecastModalItem.category}” is outside the model training vocabulary and was passed through unchanged.
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded">
-                    <span className="text-[11px] text-slate-500 uppercase font-medium">Predicted Requirement</span>
-                    <div className="text-xl font-bold font-mono text-slate-900 mt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                  <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
+                    <span className="text-xs text-slate-600 uppercase font-mono font-bold block">
+                      Predicted Requirement
+                    </span>
+                    <div className="text-2xl font-bold font-mono text-slate-900 mt-1">
                       {forecastResult.data.predicted_requirement.toLocaleString()} {forecastModalItem.unit}
                     </div>
+                    <span className="text-xs text-slate-500 font-mono mt-0.5 block">
+                      Live backend forecast
+                    </span>
                   </div>
 
-                  <div className="p-3 bg-slate-50 border border-slate-200 rounded">
-                    <span className="text-[11px] text-slate-500 uppercase font-medium">Current Stock On Hand</span>
-                    <div className="text-xl font-bold font-mono text-slate-900 mt-1">
+                  <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg">
+                    <span className="text-xs text-slate-600 uppercase font-mono font-bold block">
+                      Current Stock On Hand
+                    </span>
+                    <div className="text-2xl font-bold font-mono text-slate-900 mt-1">
                       {forecastResult.data.current_stock.toLocaleString()} {forecastModalItem.unit}
                     </div>
+                    <span className="text-xs text-slate-500 font-mono mt-0.5 block">
+                      Physical station stock
+                    </span>
                   </div>
 
-                  <div className="p-3 bg-[#0D1316] border border-[#263238] rounded-lg">
-                    <span className="text-[11px] block uppercase font-mono font-bold tracking-wider text-[#A7B2B8]">
+                  <div className="p-3.5 bg-[#0D1316] border border-[#263238] rounded-lg shadow-xs">
+                    <span className="text-xs block uppercase font-mono font-bold tracking-wider text-[#A7B2B8]">
                       RECOMMENDED ADDITIONAL QUANTITY
                     </span>
-                    <div className="text-xl font-bold font-mono mt-1 text-[#FFD21C]">
+                    <div className="text-2xl font-bold font-mono mt-1 text-[#FFD21C]">
                       {forecastResult.data.recommended_additional_qty.toLocaleString()} {forecastModalItem.unit}
                     </div>
+                    <span className="text-xs font-mono mt-0.5 block text-slate-400">
+                      Targeted for next freight dispatch
+                    </span>
                   </div>
                 </div>
 
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded space-y-2 text-[11px] text-slate-700 font-mono">
-                  <div><strong>Status:</strong> {forecastResult.data.status}</div>
-                  <div><strong>Prediction source:</strong> {forecastResult.data.prediction_source}</div>
-                  <div><strong>Model version:</strong> {forecastResult.data.model_version}</div>
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2 text-xs text-slate-800 font-mono">
+                  <div><strong className="text-slate-900 font-semibold">Status:</strong> {forecastResult.data.status}</div>
+                  <div><strong className="text-slate-900 font-semibold">Prediction source:</strong> {forecastResult.data.prediction_source}</div>
+                  <div><strong className="text-slate-900 font-semibold">Model version:</strong> {forecastResult.data.model_version}</div>
                   <div className={forecastResult.data.low_confidence ? 'font-bold text-amber-800' : ''}>
-                    <strong>Low confidence:</strong> {forecastResult.data.low_confidence ? 'Yes' : 'No'}
+                    <strong className="text-slate-900 font-semibold">Low confidence:</strong> {forecastResult.data.low_confidence ? 'Yes (Higher uncertainty margin)' : 'No (High confidence)'}
                   </div>
-                  <div><strong>Recommendation:</strong> {forecastResult.data.recommendation}</div>
+                  <div><strong className="text-slate-900 font-semibold">Recommendation:</strong> {forecastResult.data.recommendation}</div>
                 </div>
               </div>
             )}
 
-            <div className="p-2.5 bg-slate-100 border border-slate-200 rounded text-[11px] text-slate-600 flex items-start gap-2">
-              <Info className="w-3.5 h-3.5 text-slate-500 shrink-0 mt-0.5" />
+            <div className="p-3 bg-slate-100 border border-slate-200 rounded-lg text-xs text-slate-700 flex items-start gap-2.5 leading-relaxed">
+              <Info className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
               <div>
-                <strong>Non-Automated Safeguard:</strong> ML predictions do not automatically modify station stock ledgers. All replenishment allocations require Expedition Manager manual authorization.
+                <strong className="text-slate-900 font-semibold">Non-Automated Safeguard:</strong> ML predictions do not automatically modify station stock ledgers. All replenishment allocations require Expedition Manager manual authorization.
               </div>
             </div>
           </div>
