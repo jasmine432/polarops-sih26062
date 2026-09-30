@@ -7,12 +7,13 @@ ML_API_URL = os.environ.get("ML_API_URL", DEFAULT_ML_API_URL)
 
 
 async def predict_inventory(data: dict):
+    target_url = os.environ.get("ML_API_URL", ML_API_URL)
+    timeout_seconds = float(os.environ.get("ML_TIMEOUT_SECONDS", "30.0"))
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(timeout_seconds, connect=10.0)) as client:
             response = await client.post(
-                ML_API_URL,
+                target_url,
                 json=data,
-                timeout=10.0
             )
 
             response.raise_for_status()
