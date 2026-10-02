@@ -155,7 +155,7 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
   return (
     <div className="space-y-6">
       {/* 1. TOP HEADER & TELEMETRY SOURCE PROVENANCE BANNER */}
-      <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-xs">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
@@ -178,28 +178,28 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
                 {PHASE_LABELS[progressData.currentPhase] || progressData.status}
               </Badge>
               {isLive && (
-                <span className="flex items-center gap-1 text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300">
+                <span className="flex items-center gap-1 text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   LIVE TELEMETRY
                 </span>
               )}
               {isSimulated && (
-                <span className="flex items-center gap-1 text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-300">
-                  <Radio className="w-3 h-3 text-amber-700" />
+                <span className="flex items-center gap-1 text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                  <Radio className="w-3 h-3 text-amber-700 dark:text-amber-400" />
                   PROTOTYPE / SIMULATED TELEMETRY
                 </span>
               )}
               {isUnavailable && (
-                <span className="flex items-center gap-1 text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-300">
-                  <AlertTriangle className="w-3 h-3 text-slate-500" />
+                <span className="flex items-center gap-1 text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
+                  <AlertTriangle className="w-3 h-3 text-slate-500 dark:text-slate-400" />
                   LOCATION DATA UNAVAILABLE
                 </span>
               )}
             </div>
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
               Mission Route Progress & Maritime Telemetry
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Deterministic Haversine route tracking between {progressData.origin.name} and {progressData.destination.name}
             </p>
           </div>
@@ -230,26 +230,26 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
         <div
           className={`mt-3.5 p-2.5 rounded-lg border text-xs flex items-center justify-between ${
             isLive
-              ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900'
+              ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/60 text-emerald-900 dark:text-emerald-300'
               : isSimulated
-              ? 'bg-amber-50/70 border-amber-200 text-amber-900'
-              : 'bg-slate-50 border-slate-200 text-slate-700'
+              ? 'bg-amber-50/70 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-300'
+              : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
           }`}
         >
           <div className="flex items-center gap-2">
-            <Info className="w-4 h-4 shrink-0 text-slate-500" />
+            <Info className="w-4 h-4 shrink-0 text-slate-500 dark:text-slate-400" />
             <span>
               <strong>Telemetry Provenance:</strong> {progressData.telemetryLabel}. Distance calculations are executed via exact Earth-radius Haversine arc-segments (no fabricated coordinates or mock route totals).
             </span>
           </div>
-          <span className="font-mono text-[10px] text-slate-500 shrink-0 ml-2">
+          <span className="font-mono text-[10px] text-slate-500 dark:text-slate-400 shrink-0 ml-2">
             {progressData.lastKnownTimestamp ? `Fix: ${progressData.lastKnownTimestamp}` : 'Read-only Engine'}
           </span>
         </div>
 
         {updateSuccessMsg && (
-          <div className="mt-2 p-2 bg-emerald-100 border border-emerald-300 text-emerald-900 rounded text-xs font-semibold flex items-center gap-1.5">
-            <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+          <div className="mt-2 p-2 bg-emerald-100 dark:bg-emerald-950/50 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 rounded text-xs font-semibold flex items-center gap-1.5">
+            <CheckCircle2 className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
             <span>{updateSuccessMsg}</span>
           </div>
         )}
@@ -258,21 +258,21 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
       {/* 2. CORE NUMERICAL PROGRESS METRICS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Metric 1: Total Route Distance */}
-        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
-          <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase font-mono">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-xs">
+          <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono">
             <span>Total Route Distance</span>
-            <Compass className="w-3.5 h-3.5 text-[#02457A]" />
+            <Compass className="w-3.5 h-3.5 text-[#02457A] dark:text-[#38BDF8]" />
           </div>
-          <div className="mt-1 text-2xl font-bold font-mono text-slate-900">
+          <div className="mt-1 text-2xl font-bold font-mono text-slate-900 dark:text-white">
             {progressData.totalDistanceKm > 0 ? (
               <>
-                {progressData.totalDistanceKm.toLocaleString()} <span className="text-sm font-medium text-slate-500">km</span>
+                {progressData.totalDistanceKm.toLocaleString()} <span className="text-sm font-medium text-slate-500 dark:text-slate-400">km</span>
               </>
             ) : (
-              <span className="text-sm text-slate-500 font-sans font-medium">Route data unavailable</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400 font-sans font-medium">Route data unavailable</span>
             )}
           </div>
-          <div className="text-[11px] text-slate-500 mt-0.5 font-mono">
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
             {progressData.totalDistanceKm > 0
               ? `${(progressData.totalDistanceKm * 0.539957).toFixed(1)} nautical miles`
               : 'Deterministic Haversine computation'}
@@ -280,21 +280,21 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
         </div>
 
         {/* Metric 2: Distance Traveled */}
-        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
-          <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase font-mono">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-xs">
+          <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono">
             <span>Distance Traveled</span>
-            <Navigation className="w-3.5 h-3.5 text-emerald-600" />
+            <Navigation className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <div className="mt-1 text-2xl font-bold font-mono text-emerald-800">
+          <div className="mt-1 text-2xl font-bold font-mono text-emerald-800 dark:text-emerald-400">
             {progressData.totalDistanceKm > 0 ? (
               <>
-                {progressData.distanceTraveledKm.toLocaleString()} <span className="text-sm font-medium text-slate-500">km</span>
+                {progressData.distanceTraveledKm.toLocaleString()} <span className="text-sm font-medium text-slate-500 dark:text-slate-400">km</span>
               </>
             ) : (
-              <span className="text-sm text-slate-500 font-sans font-medium">0.0 km</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400 font-sans font-medium">0.0 km</span>
             )}
           </div>
-          <div className="text-[11px] text-slate-500 mt-0.5 font-mono">
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
             {progressData.totalDistanceKm > 0
               ? `${progressData.progressPercent.toFixed(1)}% route completed`
               : 'Staged at origin base'}
@@ -302,21 +302,21 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
         </div>
 
         {/* Metric 3: Remaining Distance */}
-        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
-          <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase font-mono">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-xs">
+          <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono">
             <span>Remaining Distance</span>
-            <Anchor className="w-3.5 h-3.5 text-amber-600" />
+            <Anchor className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
           </div>
-          <div className="mt-1 text-2xl font-bold font-mono text-slate-900">
+          <div className="mt-1 text-2xl font-bold font-mono text-slate-900 dark:text-white">
             {progressData.totalDistanceKm > 0 ? (
               <>
-                {progressData.remainingDistanceKm.toLocaleString()} <span className="text-sm font-medium text-slate-500">km</span>
+                {progressData.remainingDistanceKm.toLocaleString()} <span className="text-sm font-medium text-slate-500 dark:text-slate-400">km</span>
               </>
             ) : (
-              <span className="text-sm text-slate-500 font-sans font-medium">—</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400 font-sans font-medium">—</span>
             )}
           </div>
-          <div className="text-[11px] text-slate-500 mt-0.5 font-mono">
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
             {progressData.totalDistanceKm > 0
               ? `${(progressData.remainingDistanceKm * 0.539957).toFixed(1)} NM to destination`
               : 'Destination pending'}
@@ -324,15 +324,15 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
         </div>
 
         {/* Metric 4: Vessel Speed & ETA */}
-        <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-xs">
-          <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase font-mono">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-xs">
+          <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase font-mono">
             <span>Speed & ETA</span>
-            <Clock className="w-3.5 h-3.5 text-[#018ABE]" />
+            <Clock className="w-3.5 h-3.5 text-[#018ABE] dark:text-[#38BDF8]" />
           </div>
-          <div className="mt-1 text-xl font-bold font-mono text-slate-900 truncate">
+          <div className="mt-1 text-xl font-bold font-mono text-slate-900 dark:text-white truncate">
             {progressData.speedKnots ? `${progressData.speedKnots} kts` : 'Stationary / Port'}
           </div>
-          <div className="text-[11px] text-slate-600 mt-0.5 font-mono truncate" title={progressData.etaBreakdown || progressData.eta || 'N/A'}>
+          <div className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5 font-mono truncate" title={progressData.etaBreakdown || progressData.eta || 'N/A'}>
             {progressData.eta ? `ETA: ${progressData.eta}` : 'No active sea transit'}
           </div>
         </div>
@@ -343,10 +343,10 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-900 font-mono">Mission Transit Completion:</span>
-              <span className="font-mono text-sm font-bold text-[#02457A]">{progressData.progressPercent.toFixed(1)}%</span>
+              <span className="font-bold text-slate-900 dark:text-white font-mono">Mission Transit Completion:</span>
+              <span className="font-mono text-sm font-bold text-[#02457A] dark:text-[#38BDF8]">{progressData.progressPercent.toFixed(1)}%</span>
             </div>
-            <div className="flex items-center gap-4 text-slate-500 font-mono text-[11px]">
+            <div className="flex items-center gap-4 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
               <span>Traveled: {progressData.distanceTraveledKm} km</span>
               <span>•</span>
               <span>Remaining: {progressData.remainingDistanceKm} km</span>
@@ -354,28 +354,28 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
           </div>
 
           {/* Graphical Progress Track */}
-          <div className="w-full bg-slate-100 rounded-full h-3.5 overflow-hidden p-0.5 border border-slate-200">
+          <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3.5 overflow-hidden p-0.5 border border-slate-200 dark:border-slate-700">
             <div
               className="bg-gradient-to-r from-[#001B48] via-[#02457A] to-[#018ABE] h-full rounded-full transition-all duration-500 relative"
               style={{ width: `${Math.max(2, Math.min(100, progressData.progressPercent))}%` }}
             />
           </div>
 
-          <div className="flex items-center justify-between text-[11px] text-slate-600 pt-1">
+          <div className="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-300 pt-1">
             <div className="flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-[#02457A]" />
-              <span className="font-semibold text-slate-800">{progressData.origin.name}</span>
+              <MapPin className="w-3.5 h-3.5 text-[#02457A] dark:text-[#38BDF8]" />
+              <span className="font-semibold text-slate-800 dark:text-slate-200">{progressData.origin.name}</span>
               {progressData.origin.formattedCoordinates && (
-                <span className="font-mono text-slate-600">({progressData.origin.formattedCoordinates})</span>
+                <span className="font-mono text-slate-600 dark:text-slate-400">({progressData.origin.formattedCoordinates})</span>
               )}
             </div>
 
             <div className="flex items-center gap-1.5">
-              <span className="font-semibold text-slate-800">{progressData.destination.name}</span>
+              <span className="font-semibold text-slate-800 dark:text-slate-200">{progressData.destination.name}</span>
               {progressData.destination.formattedCoordinates && (
-                <span className="font-mono text-slate-600">({progressData.destination.formattedCoordinates})</span>
+                <span className="font-mono text-slate-600 dark:text-slate-400">({progressData.destination.formattedCoordinates})</span>
               )}
-              <Anchor className="w-3.5 h-3.5 text-slate-600" />
+              <Anchor className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" />
             </div>
           </div>
         </CardContent>
@@ -386,9 +386,9 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
         {/* Left 2 Cols: Waypoints Visual Sequence */}
         <div className="lg:col-span-2 space-y-4">
           <Card>
-            <CardHeader className="py-2.5 px-4 bg-slate-50/80 border-b border-slate-200 flex flex-row items-center justify-between">
-              <CardTitle className="text-xs text-slate-900 uppercase tracking-wider font-bold font-mono flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-[#02457A]" />
+            <CardHeader className="py-2.5 px-4 bg-slate-50/80 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 flex flex-row items-center justify-between">
+              <CardTitle className="text-xs text-slate-900 dark:text-white uppercase tracking-wider font-bold font-mono flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-[#02457A] dark:text-[#38BDF8]" />
                 <span>Polar Route Navigation Waypoints ({progressData.waypoints.length} Points)</span>
               </CardTitle>
               <Badge variant="neutral" size="sm" mono>
@@ -397,15 +397,15 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
             </CardHeader>
             <CardContent className="p-4">
               {progressData.waypoints.length === 0 ? (
-                <div className="text-center py-8 text-xs text-slate-500 space-y-2">
-                  <Navigation className="w-8 h-8 text-slate-300 mx-auto" />
-                  <div className="font-bold font-mono text-slate-700 uppercase">Route Data Unavailable</div>
-                  <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                <div className="text-center py-8 text-xs text-slate-500 dark:text-slate-400 space-y-2">
+                  <Navigation className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
+                  <div className="font-bold font-mono text-slate-700 dark:text-slate-300 uppercase">Route Data Unavailable</div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
                     No route waypoints or transit coordinates are currently registered in the database for campaign {progressData.expeditionId}.
                   </p>
                 </div>
               ) : (
-                <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+                <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-700">
                   {progressData.waypoints.map((wp, idx) => {
                     const isPassed = wp.passed
                     const isFirst = idx === 0
@@ -421,7 +421,7 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
                           className={`absolute -left-6 top-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border shrink-0 ${
                             isPassed
                               ? 'bg-emerald-600 text-white border-emerald-700'
-                              : 'bg-white text-slate-600 border-slate-300'
+                              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-600'
                           }`}
                         >
                           {isPassed ? <CheckCircle2 className="w-3 h-3" /> : idx + 1}
@@ -430,13 +430,13 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
                         <div
                           className={`flex-1 p-3 rounded-lg border transition-all ${
                             isPassed
-                              ? 'bg-emerald-50/40 border-emerald-200'
-                              : 'bg-slate-50/70 border-slate-200'
+                              ? 'bg-emerald-50/40 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/60'
+                              : 'bg-slate-50/70 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'
                           }`}
                         >
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-slate-900">
+                              <span className="font-bold text-slate-900 dark:text-white">
                                 {wp.name || (isFirst ? 'Origin Staging Port' : isLast ? 'Destination Station' : `Waypoint #${idx + 1}`)}
                               </span>
                               {isFirst && (
@@ -452,21 +452,21 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
                             </div>
                             <span
                               className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
-                                isPassed ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'
+                                isPassed ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200'
                               }`}
                             >
                               {isPassed ? 'PASSED / CLEARED' : 'PENDING TRANSIT'}
                             </span>
                           </div>
 
-                          <div className="mt-2 flex flex-wrap items-center gap-4 text-[11px] text-slate-600 font-mono">
+                          <div className="mt-2 flex flex-wrap items-center gap-4 text-[11px] text-slate-600 dark:text-slate-300 font-mono">
                             <div>
-                              <span className="text-slate-600 uppercase font-bold text-[10px]">Fix: </span>
+                              <span className="text-slate-600 dark:text-slate-400 uppercase font-bold text-[10px]">Fix: </span>
                               <strong>{coordStr}</strong>
                             </div>
                             {wp.estimatedArrival && (
                               <div>
-                                <span className="text-slate-600 uppercase font-bold text-[10px]">ETA: </span>
+                                <span className="text-slate-600 dark:text-slate-400 uppercase font-bold text-[10px]">ETA: </span>
                                 <span>{wp.estimatedArrival}</span>
                               </div>
                             )}
@@ -484,38 +484,38 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
         {/* Right Col: Vessel & Navigation Telemetry Dossier */}
         <div className="space-y-4">
           <Card>
-            <CardHeader className="py-2.5 px-4 bg-slate-50/80 border-b border-slate-200">
-              <CardTitle className="text-xs text-slate-900 uppercase tracking-wider font-bold font-mono flex items-center gap-1.5">
-                <Ship className="w-3.5 h-3.5 text-[#02457A]" />
+            <CardHeader className="py-2.5 px-4 bg-slate-50/80 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800">
+              <CardTitle className="text-xs text-slate-900 dark:text-white uppercase tracking-wider font-bold font-mono flex items-center gap-1.5">
+                <Ship className="w-3.5 h-3.5 text-[#02457A] dark:text-[#38BDF8]" />
                 <span>Assigned Carrier & Telemetry</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-3.5 text-xs">
               <div>
-                <span className="text-[10px] uppercase text-slate-500 font-mono font-bold block">Vessel Asset</span>
-                <strong className="text-slate-900 text-sm">{progressData.vesselName || 'No vessel designated'}</strong>
+                <span className="text-[10px] uppercase text-slate-500 dark:text-slate-400 font-mono font-bold block">Vessel Asset</span>
+                <strong className="text-slate-900 dark:text-white text-sm">{progressData.vesselName || 'No vessel designated'}</strong>
               </div>
 
-              <div className="pt-2 border-t border-slate-100 grid grid-cols-2 gap-3">
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-3">
                 <div>
-                  <span className="text-[10px] uppercase text-slate-500 font-mono font-bold block">True Heading</span>
-                  <span className="font-mono font-bold text-slate-800">{progressData.heading || 'N/A'}</span>
+                  <span className="text-[10px] uppercase text-slate-500 dark:text-slate-400 font-mono font-bold block">True Heading</span>
+                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{progressData.heading || 'N/A'}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] uppercase text-slate-500 font-mono font-bold block">Cruise Speed</span>
-                  <span className="font-mono font-bold text-slate-800">
+                  <span className="text-[10px] uppercase text-slate-500 dark:text-slate-400 font-mono font-bold block">Cruise Speed</span>
+                  <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
                     {progressData.speedKnots ? `${progressData.speedKnots} kts` : '0.0 kts'}
                   </span>
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-100">
-                <span className="text-[10px] uppercase text-slate-500 font-mono font-bold block">Current Position Fix</span>
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-[10px] uppercase text-slate-500 dark:text-slate-400 font-mono font-bold block">Current Position Fix</span>
                 {progressData.currentLocation ? (
-                  <div className="mt-1 p-2 bg-slate-50 border border-slate-200 rounded font-mono text-[11px] text-slate-800">
-                    <div className="font-bold text-slate-900">{progressData.currentLocation.name}</div>
+                  <div className="mt-1 p-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded font-mono text-[11px] text-slate-800 dark:text-slate-200">
+                    <div className="font-bold text-slate-900 dark:text-white">{progressData.currentLocation.name}</div>
                     {progressData.currentLocation.formattedCoordinates && (
-                      <div className="text-slate-600 mt-0.5">{progressData.currentLocation.formattedCoordinates}</div>
+                      <div className="text-slate-600 dark:text-slate-400 mt-0.5">{progressData.currentLocation.formattedCoordinates}</div>
                     )}
                   </div>
                 ) : (
@@ -524,18 +524,18 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
               </div>
 
               {progressData.etaBreakdown && (
-                <div className="pt-2 border-t border-slate-100">
-                  <span className="text-[10px] uppercase text-slate-500 font-mono font-bold block">Deterministic Transit Projection</span>
-                  <p className="text-[11px] text-slate-700 mt-0.5 leading-relaxed bg-blue-50/50 p-2 rounded border border-blue-100">
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <span className="text-[10px] uppercase text-slate-500 dark:text-slate-400 font-mono font-bold block">Deterministic Transit Projection</span>
+                  <p className="text-[11px] text-slate-700 dark:text-slate-300 mt-0.5 leading-relaxed bg-blue-50/50 dark:bg-blue-950/30 p-2 rounded border border-blue-100 dark:border-blue-900/60">
                     {progressData.etaBreakdown}
                   </p>
                 </div>
               )}
 
               {progressData.notes && progressData.notes.length > 0 && (
-                <div className="pt-2 border-t border-slate-100">
-                  <span className="text-[10px] uppercase text-slate-500 font-mono font-bold block mb-1">Operational Tracking Notes</span>
-                  <ul className="space-y-1 text-[11px] text-slate-600 list-disc list-inside">
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <span className="text-[10px] uppercase text-slate-500 dark:text-slate-400 font-mono font-bold block mb-1">Operational Tracking Notes</span>
+                  <ul className="space-y-1 text-[11px] text-slate-600 dark:text-slate-300 list-disc list-inside">
                     {progressData.notes.map((n, idx) => (
                       <li key={idx}>{n}</li>
                     ))}
@@ -550,11 +550,11 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
       {/* 5. MISSION PHASE UPDATE MODAL (ADMIN & PHC ONLY) */}
       {phaseModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-lg border border-slate-200 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div className="px-5 py-4 border-b border-slate-200 bg-slate-50/90 flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-800/90 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-slate-900 font-mono uppercase">Advance Mission Lifecycle Phase</h3>
-                <p className="text-[11px] text-slate-500">Expedition {progressData.expeditionId}</p>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white font-mono uppercase">Advance Mission Lifecycle Phase</h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">Expedition {progressData.expeditionId}</p>
               </div>
               <Badge variant="info" size="sm" mono>
                 RBAC: {userRole}
@@ -563,13 +563,13 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
 
             <form onSubmit={handlePhaseSubmit} className="p-5 space-y-4">
               <div>
-                <label className="block text-xs font-bold font-mono text-slate-700 uppercase mb-1.5">
+                <label className="block text-xs font-bold font-mono text-slate-700 dark:text-slate-300 uppercase mb-1.5">
                   Select New Operational Phase
                 </label>
                 <select
                   value={selectedPhase}
                   onChange={(e) => setSelectedPhase(e.target.value)}
-                  className="w-full text-xs font-medium border border-slate-300 rounded-md p-2 bg-white text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-[#02457A]"
+                  className="w-full text-xs font-medium border border-slate-300 dark:border-slate-700 rounded-md p-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-hidden focus:ring-1 focus:ring-[#02457A]"
                   disabled={isUpdatingPhase}
                 >
                   {PHASE_OPTIONS.map((opt) => (
@@ -581,19 +581,19 @@ export const ExpeditionProgressTracker: React.FC<ExpeditionProgressTrackerProps>
               </div>
 
               <div>
-                <label className="block text-xs font-bold font-mono text-slate-700 uppercase mb-1.5">
+                <label className="block text-xs font-bold font-mono text-slate-700 dark:text-slate-300 uppercase mb-1.5">
                   Logbook Notes & Operational Reason
                 </label>
                 <textarea
                   value={phaseNotes}
                   onChange={(e) => setPhaseNotes(e.target.value)}
                   placeholder="e.g. Convoy cleared Cape Town Outer Port; ice-breaker escorts underway."
-                  className="w-full text-xs border border-slate-300 rounded-md p-2 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-1 focus:ring-[#02457A] min-h-[80px]"
+                  className="w-full text-xs border border-slate-300 dark:border-slate-700 rounded-md p-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-hidden focus:ring-1 focus:ring-[#02457A] min-h-[80px]"
                   disabled={isUpdatingPhase}
                 />
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2">
                 <Button
                   type="button"
                   variant="secondary"

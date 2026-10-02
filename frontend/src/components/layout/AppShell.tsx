@@ -69,7 +69,7 @@ export const AppShell: React.FC = () => {
         </main>
 
         {/* Subtle Operational Footer Marker matching reference */}
-        <footer className="py-2.5 px-6 sm:px-8 border-t border-transparent dark:border-[#1B2529]/60 flex items-center justify-between text-[11px] text-slate-400 dark:text-[#6F7C82] font-mono select-none">
+        <footer className="py-2.5 px-6 sm:px-8 border-t border-transparent dark:border-[#1B2529]/60 flex items-center justify-between text-[11px] text-slate-400 dark:text-[#94A3B8] font-mono select-none">
           <div className="flex items-center gap-2">
             <span className="hidden dark:inline-block w-2.5 h-0.5 bg-[#FFD21C]" />
             <span>POLAR OPERATIONS PLATFORM</span>
@@ -91,24 +91,24 @@ export const AppShell: React.FC = () => {
       >
         <div className="space-y-4">
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 dark:text-[#A7B2B8] absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-slate-400 dark:text-[#CBD5E1] absolute left-3 top-2.5" />
             <input
               type="text"
               autoFocus
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Type a station name, container ID (e.g. TEU-9402), or personnel..."
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-[#0A0E10] border border-slate-300 dark:border-[#263238] rounded-md text-xs text-slate-900 dark:text-[#F5F7F8] placeholder:text-slate-400 dark:placeholder:text-[#6F7C82] focus:outline-none focus:ring-2 focus:ring-[#FFD21C]/30 focus:border-[#FFD21C] focus:bg-white dark:focus:bg-[#0A0E10] transition-colors"
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-[#0A0E10] border border-slate-300 dark:border-[#263238] rounded-md text-xs text-slate-900 dark:text-[#F8FAFC] placeholder:text-slate-400 dark:placeholder:text-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#FFD21C]/30 focus:border-[#FFD21C] focus:bg-white dark:focus:bg-[#0A0E10] transition-colors"
             />
           </div>
 
           <div className="space-y-1">
-            <div className="text-[10px] font-bold uppercase text-slate-400 dark:text-[#6F7C82] tracking-wider px-1 font-mono">
+            <div className="text-[10px] font-bold uppercase text-slate-400 dark:text-[#94A3B8] tracking-wider px-1 font-mono">
               Modules & Quick Jump
             </div>
             <div className="divide-y divide-slate-100 dark:divide-[#263238] max-h-60 overflow-y-auto">
               {filteredLinks.length === 0 ? (
-                <div className="py-6 text-center text-xs text-slate-400 dark:text-[#6F7C82]">
+                <div className="py-6 text-center text-xs text-slate-400 dark:text-[#94A3B8]">
                   No matching operational modules found.
                 </div>
               ) : (
@@ -126,13 +126,13 @@ export const AppShell: React.FC = () => {
                           <Icon className="w-4 h-4" />
                         </div>
                         <div>
-                          <div className="text-xs font-bold text-slate-900 dark:text-[#F5F7F8]">
+                          <div className="text-xs font-bold text-slate-900 dark:text-[#F8FAFC]">
                             {item.title}
                           </div>
-                          <div className="text-[11px] text-slate-500 dark:text-[#A7B2B8] font-normal">{item.desc}</div>
+                          <div className="text-[11px] text-slate-500 dark:text-[#CBD5E1] font-normal">{item.desc}</div>
                         </div>
                       </div>
-                      <ArrowRight className="w-3.5 h-3.5 text-slate-400 dark:text-[#6F7C82] group-hover:text-[#018ABE] dark:group-hover:text-[#FFD21C] shrink-0 transition-colors" />
+                      <ArrowRight className="w-3.5 h-3.5 text-slate-400 dark:text-[#94A3B8] group-hover:text-[#018ABE] dark:group-hover:text-[#FFD21C] shrink-0 transition-colors" />
                     </button>
                   )
                 })
@@ -140,7 +140,7 @@ export const AppShell: React.FC = () => {
             </div>
           </div>
 
-          <div className="pt-2 border-t border-slate-100 dark:border-[#263238] flex items-center justify-between text-[11px] text-slate-400 dark:text-[#6F7C82]">
+          <div className="pt-2 border-t border-slate-100 dark:border-[#263238] flex items-center justify-between text-[11px] text-slate-400 dark:text-[#94A3B8]">
             <span>Press ESC to close</span>
             <span className="font-mono">NCPOR Operational Search v1.2</span>
           </div>

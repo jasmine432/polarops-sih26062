@@ -154,7 +154,7 @@ export const Sidebar: React.FC = () => {
                   Ops
                 </span>
               </div>
-              <p className="text-[10px] text-[#D0EFEF]/80 dark:text-[#6F7C82] truncate leading-tight font-normal">
+              <p className="text-[10px] text-[#D0EFEF] dark:text-[#CBD5E1] truncate leading-tight font-normal">
                 Expedition Operations Platform
               </p>
             </div>
@@ -165,7 +165,7 @@ export const Sidebar: React.FC = () => {
         <button
           type="button"
           onClick={() => setMobileSidebarOpen(false)}
-          className="lg:hidden p-1.5 text-[#D0EFEF] dark:text-[#A7B2B8] hover:text-white rounded hover:bg-[#1F545D] dark:hover:bg-[#11191D] cursor-pointer"
+          className="lg:hidden p-1.5 text-[#D0EFEF] dark:text-[#CBD5E1] hover:text-white rounded hover:bg-[#1F545D] dark:hover:bg-[#11191D] cursor-pointer"
           aria-label="Close menu"
         >
           <X className="w-4 h-4" />
@@ -176,6 +176,11 @@ export const Sidebar: React.FC = () => {
       <nav className="flex-1 overflow-y-auto px-3 py-3.5 space-y-3">
         {navSections.map((section, idx) => (
           <div key={idx} className="space-y-1">
+            {!sidebarCollapsed && (
+              <div className="text-[10px] uppercase font-bold tracking-wider text-[#AEE3E0] dark:text-[#94A3B8] px-3 pt-1 pb-0.5 font-mono select-none">
+                {section.title}
+              </div>
+            )}
             <div className="space-y-1">
               {section.items.map((item) => {
                 const Icon = item.icon
@@ -191,15 +196,15 @@ export const Sidebar: React.FC = () => {
                       cn(
                         'flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-150 group relative',
                         active
-                          ? 'bg-[#447F98] dark:bg-[#11191D] text-white dark:text-[#F5F7F8] shadow-xs font-semibold dark:border-l-4 dark:border-l-[#FFD21C] dark:rounded-r-lg dark:rounded-l-none'
-                          : 'text-[#D0EFEF] dark:text-[#A7B2B8] hover:bg-[#447F98]/40 dark:hover:bg-[#11191D] hover:text-white dark:hover:text-[#F5F7F8]'
+                          ? 'bg-[#447F98] dark:bg-[#11191D] text-white dark:text-[#F8FAFC] shadow-xs font-semibold dark:border-l-4 dark:border-l-[#FFD21C] dark:rounded-r-lg dark:rounded-l-none'
+                          : 'text-[#D0EFEF] dark:text-[#CBD5E1] hover:bg-[#447F98]/40 dark:hover:bg-[#11191D] hover:text-white dark:hover:text-[#F8FAFC]'
                       )
                     }
                   >
                     <Icon
                       className={cn(
                         'w-4 h-4 shrink-0 transition-colors',
-                        isActive ? 'text-white dark:text-[#FFD21C]' : 'text-[#D0EFEF]/90 dark:text-[#A7B2B8] group-hover:text-white dark:group-hover:text-[#F5F7F8]'
+                        isActive ? 'text-white dark:text-[#FFD21C]' : 'text-[#D0EFEF] dark:text-[#CBD5E1] group-hover:text-white dark:group-hover:text-[#F8FAFC]'
                       )}
                     />
                     {!sidebarCollapsed && (
@@ -228,7 +233,7 @@ export const Sidebar: React.FC = () => {
 
             {/* Subtle polar radar circle with Antarctica continent outline */}
             <div className="w-28 h-28 relative opacity-85 dark:opacity-30">
-              <svg className="w-full h-full text-[#AEE3E0] dark:text-[#6F7C82]" viewBox="0 0 120 120" fill="none">
+              <svg className="w-full h-full text-[#AEE3E0] dark:text-[#94A3B8]" viewBox="0 0 120 120" fill="none">
                 {/* Concentric Polar Grid Rings */}
                 <circle cx="60" cy="60" r="55" stroke="#5DA9B0" className="dark:stroke-[#263238]" strokeWidth="0.75" strokeDasharray="3 3" opacity="0.6" />
                 <circle cx="60" cy="60" r="38" stroke="#447F98" className="dark:stroke-[#263238]" strokeWidth="0.75" opacity="0.5" />
@@ -239,10 +244,10 @@ export const Sidebar: React.FC = () => {
                 <line x1="5" y1="60" x2="115" y2="60" stroke="#5DA9B0" className="dark:stroke-[#263238]" strokeWidth="0.75" strokeDasharray="2 2" opacity="0.4" />
 
                 {/* Polar Coordinate Nodes */}
-                <circle cx="60" cy="5" r="2" fill="#AEE3E0" className="dark:fill-[#A7B2B8]" />
-                <circle cx="60" cy="115" r="2" fill="#AEE3E0" className="dark:fill-[#A7B2B8]" />
-                <circle cx="5" cy="60" r="2" fill="#AEE3E0" className="dark:fill-[#A7B2B8]" />
-                <circle cx="115" cy="60" r="2" fill="#AEE3E0" className="dark:fill-[#A7B2B8]" />
+                <circle cx="60" cy="5" r="2" fill="#AEE3E0" className="dark:fill-[#CBD5E1]" />
+                <circle cx="60" cy="115" r="2" fill="#AEE3E0" className="dark:fill-[#CBD5E1]" />
+                <circle cx="5" cy="60" r="2" fill="#AEE3E0" className="dark:fill-[#CBD5E1]" />
+                <circle cx="115" cy="60" r="2" fill="#AEE3E0" className="dark:fill-[#CBD5E1]" />
 
                 {/* Antarctica Continent Silhouette */}
                 <path
@@ -264,7 +269,7 @@ export const Sidebar: React.FC = () => {
                 <circle cx="78" cy="62" r="2" fill="#18A96B" className="dark:fill-[#16C784]" />
               </svg>
             </div>
-            <p className="text-xs uppercase tracking-wider text-[#D0EFEF] dark:text-[#A7B2B8] font-semibold leading-tight select-none">
+            <p className="text-xs uppercase tracking-wider text-[#D0EFEF] dark:text-[#CBD5E1] font-semibold leading-tight select-none">
               EXPLORING<br />A SAFER<br />TOMORROW.
             </p>
           </div>
@@ -274,12 +279,12 @@ export const Sidebar: React.FC = () => {
       {/* Collapse toggle button */}
       <div className="p-2 border-t border-[#1F545D] dark:border-[#263238] bg-[#1F545D]/60 dark:bg-[#070B0D] flex items-center justify-between">
         {!sidebarCollapsed && (
-          <span className="text-[10px] text-[#D0EFEF]/70 dark:text-[#6F7C82] px-2 font-mono">PolarOps v1.2.0</span>
+          <span className="text-[10px] text-[#D0EFEF] dark:text-[#94A3B8] px-2 font-mono">PolarOps v1.2.0</span>
         )}
         <button
           type="button"
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="p-1.5 text-[#D0EFEF] dark:text-[#A7B2B8] hover:text-white rounded hover:bg-[#447F98]/50 dark:hover:bg-[#11191D] transition-colors ml-auto cursor-pointer"
+          className="p-1.5 text-[#D0EFEF] dark:text-[#CBD5E1] hover:text-white rounded hover:bg-[#447F98]/50 dark:hover:bg-[#11191D] transition-colors ml-auto cursor-pointer"
           aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {sidebarCollapsed ? (

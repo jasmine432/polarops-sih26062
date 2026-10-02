@@ -189,13 +189,13 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
         {/* Left 2 Cols: 4 High-Visibility Scenario Controls */}
         <div className="lg:col-span-2 space-y-4">
           <Card className="border-slate-200 shadow-xs">
-            <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between bg-slate-50/60">
+            <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800 flex flex-row items-center justify-between bg-slate-50/60 dark:bg-slate-900/40">
               <div className="flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-[#02457A]" />
-                <CardTitle className="text-sm font-bold text-slate-900">
+                <Sliders className="w-4 h-4 text-[#02457A] dark:text-sky-400" />
+                <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-100">
                   Scenario Parameters
                 </CardTitle>
-                <span className="text-[11px] text-slate-500 font-normal">
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-normal">
                   (Adjust any parameter and click Run Simulation)
                 </span>
               </div>
@@ -204,7 +204,7 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                 size="xs"
                 onClick={handleReset}
                 disabled={isRunning}
-                className="text-xs text-slate-600 hover:text-slate-900 gap-1.5"
+                className="text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white gap-1.5"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 Reset Defaults
@@ -214,17 +214,17 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
               {/* Controls 1 & 2: Duration & Cargo Capacity */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Control 1: Mission Duration */}
-                <div className="p-3.5 bg-slate-50/80 border border-slate-200 rounded-lg space-y-2">
+                <div className="p-3.5 bg-slate-50/80 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                      <Clock className="w-4 h-4 text-[#02457A]" />
+                    <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-[#02457A] dark:text-sky-400" />
                       MISSION DURATION
                     </label>
-                    <span className="text-[10px] font-mono uppercase bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-bold">
+                    <span className="text-[10px] font-mono uppercase bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-1.5 py-0.5 rounded font-bold border border-transparent dark:border-slate-700">
                       Days (&gt;= 1)
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     Override scheduled mission duration to evaluate extended winter exposure.
                   </p>
                   <div className="flex items-center gap-2 pt-1">
@@ -237,24 +237,24 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                         setActivePreset('custom')
                         setDurationOverride(e.target.value)
                       }}
-                      className="w-full text-xs font-mono bg-white border border-slate-300 rounded-md px-3 py-2 text-slate-900 font-bold focus:outline-hidden focus:ring-2 focus:ring-[#02457A]"
+                      className="w-full text-xs font-mono bg-white dark:bg-[#0A0E10] border border-slate-300 dark:border-slate-700 rounded-md px-3 py-2 text-slate-900 dark:text-white font-bold focus:outline-hidden focus:ring-2 focus:ring-[#02457A] dark:focus:ring-sky-500"
                     />
-                    <span className="text-xs font-mono text-slate-500 font-bold">days</span>
+                    <span className="text-xs font-mono text-slate-500 dark:text-slate-400 font-bold">days</span>
                   </div>
                 </div>
 
                 {/* Control 2: Cargo Capacity */}
-                <div className="p-3.5 bg-slate-50/80 border border-slate-200 rounded-lg space-y-2">
+                <div className="p-3.5 bg-slate-50/80 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                      <Scale className="w-4 h-4 text-[#02457A]" />
+                    <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                      <Scale className="w-4 h-4 text-[#02457A] dark:text-sky-400" />
                       CARGO CAPACITY
                     </label>
-                    <span className="text-[10px] font-mono uppercase bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-bold">
+                    <span className="text-[10px] font-mono uppercase bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-1.5 py-0.5 rounded font-bold border border-transparent dark:border-slate-700">
                       Kilograms (kg)
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     Maximum allowable cargo payload capacity limit for carrier or airdrop.
                   </p>
                   <div className="flex items-center gap-2 pt-1">
@@ -268,26 +268,26 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                         setActivePreset('custom')
                         setCapacityOverride(e.target.value)
                       }}
-                      className="w-full text-xs font-mono bg-white border border-slate-300 rounded-md px-3 py-2 text-slate-900 font-bold focus:outline-hidden focus:ring-2 focus:ring-[#02457A]"
+                      className="w-full text-xs font-mono bg-white dark:bg-[#0A0E10] border border-slate-300 dark:border-slate-700 rounded-md px-3 py-2 text-slate-900 dark:text-white font-bold focus:outline-hidden focus:ring-2 focus:ring-[#02457A] dark:focus:ring-sky-500"
                     />
-                    <span className="text-xs font-mono text-slate-500 font-bold">kg</span>
+                    <span className="text-xs font-mono text-slate-500 dark:text-slate-400 font-bold">kg</span>
                   </div>
                 </div>
               </div>
 
               {/* Control 3: Resupply Delay Slider */}
-              <div className="p-3.5 bg-slate-50/80 border border-slate-200 rounded-lg space-y-2">
+              <div className="p-3.5 bg-slate-50/80 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg space-y-2">
                 <div className="flex items-center justify-between">
                   <div>
-                    <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                      <Truck className="w-4 h-4 text-[#02457A]" />
+                    <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                      <Truck className="w-4 h-4 text-[#02457A] dark:text-sky-400" />
                       RESUPPLY DELAY
                     </label>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                       Simulate delivery transit delay on approved and in-transit supply items.
                     </p>
                   </div>
-                  <span className="font-mono text-xs font-bold text-[#02457A] bg-blue-50 px-2.5 py-1 rounded border border-blue-200 shadow-2xs">
+                  <span className="font-mono text-xs font-bold text-[#02457A] dark:text-sky-300 bg-blue-50 dark:bg-sky-950/60 px-2.5 py-1 rounded border border-blue-200 dark:border-sky-800/40 shadow-2xs">
                     +{Math.max(0, delayedDays)} Days Delay
                   </span>
                 </div>
@@ -301,9 +301,9 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                     setActivePreset('custom')
                     setDelayedDays(parseInt(e.target.value, 10))
                   }}
-                  className="w-full accent-[#02457A] cursor-pointer mt-2"
+                  className="w-full accent-[#02457A] dark:accent-sky-400 cursor-pointer mt-2"
                 />
-                <div className="flex justify-between text-[10px] font-mono text-slate-400">
+                <div className="flex justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400">
                   <span>0 days (On Schedule)</span>
                   <span>+14 days (Sea Ice Delay)</span>
                   <span>+30 days</span>
@@ -312,18 +312,18 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
               </div>
 
               {/* Control 4: Starting Stock Reduction Slider */}
-              <div className="p-3.5 bg-slate-50/80 border border-slate-200 rounded-lg space-y-2">
+              <div className="p-3.5 bg-slate-50/80 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-lg space-y-2">
                 <div className="flex items-center justify-between">
                   <div>
-                    <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                      <TrendingDown className="w-4 h-4 text-amber-600" />
+                    <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                      <TrendingDown className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                       STARTING STOCK REDUCTION
                     </label>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                       Hypothetical percentage reduction applied to initial station inventory.
                     </p>
                   </div>
-                  <span className="font-mono text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded border border-amber-200 shadow-2xs">
+                  <span className="font-mono text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-1 rounded border border-amber-200 dark:border-amber-500/40 shadow-2xs">
                     {stockReductionPct <= 0 ? '0% (Nominal Stock)' : `-${formatSafePct(stockReductionPct)} Available`}
                   </span>
                 </div>
@@ -337,9 +337,9 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                     setActivePreset('custom')
                     setStockReductionPct(parseFloat(e.target.value))
                   }}
-                  className="w-full accent-amber-600 cursor-pointer mt-2"
+                  className="w-full accent-amber-600 dark:accent-amber-400 cursor-pointer mt-2"
                 />
-                <div className="flex justify-between text-[10px] font-mono text-slate-400">
+                <div className="flex justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400">
                   <span>0% (Full Stock)</span>
                   <span>25% Depleted</span>
                   <span>50% Depleted</span>
@@ -349,14 +349,14 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
 
               {/* Action Toolbar */}
               <div className="pt-2 flex items-center justify-between">
-                <span className="text-[11px] font-mono text-slate-500 flex items-center gap-1.5">
-                  <Zap className="w-3.5 h-3.5 text-amber-500" />
+                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                   Calculations execute 100% in-memory without PostgreSQL writes.
                 </span>
                 <Button
                   onClick={() => executeSimulation()}
                   disabled={isRunning}
-                  className="bg-[#02457A] hover:bg-[#001B48] text-white px-6 py-2.5 text-xs font-bold rounded-lg shadow-sm gap-2 cursor-pointer"
+                  className="bg-[#02457A] hover:bg-[#001B48] dark:bg-[#169FE5] dark:hover:bg-sky-400 text-white dark:text-[#050708] px-6 py-2.5 text-xs font-bold rounded-lg shadow-sm gap-2 cursor-pointer"
                 >
                   <Play className={`w-3.5 h-3.5 ${isRunning ? 'animate-spin' : ''}`} />
                   {isRunning ? 'Simulating...' : 'Run Simulation'}
@@ -369,9 +369,9 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
         {/* Right Col: Quick Stress Presets & Safety Protocol */}
         <div className="space-y-4">
           <Card className="border-slate-200 shadow-xs">
-            <CardHeader className="pb-2.5 border-b border-slate-100 bg-slate-50/60">
-              <CardTitle className="text-xs font-bold text-slate-900 flex items-center gap-1.5 uppercase font-mono">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <CardHeader className="pb-2.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40">
+              <CardTitle className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 uppercase font-mono">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                 Quick Stress Scenarios
               </CardTitle>
             </CardHeader>
@@ -416,21 +416,21 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                     onClick={p.action}
                     className={`w-full text-left p-2.5 rounded-lg border transition-all cursor-pointer group ${
                       isSelected
-                        ? 'border-[#02457A] bg-blue-50/80 shadow-xs ring-1 ring-[#02457A]'
-                        : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                        ? 'border-[#02457A] dark:border-sky-400 bg-blue-50/80 dark:bg-sky-950/60 shadow-xs ring-1 ring-[#02457A] dark:ring-sky-400'
+                        : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900/50'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className={`text-xs font-bold ${isSelected ? 'text-[#02457A]' : 'text-slate-800 group-hover:text-[#02457A]'}`}>
+                      <span className={`text-xs font-bold ${isSelected ? 'text-[#02457A] dark:text-sky-300' : 'text-slate-800 dark:text-slate-200 group-hover:text-[#02457A] dark:group-hover:text-sky-300'}`}>
                         {p.title}
                       </span>
                       {isSelected && (
-                        <span className="text-[10px] font-mono font-bold text-[#02457A] uppercase bg-blue-100 px-1.5 py-0.2 rounded">
+                        <span className="text-[10px] font-mono font-bold text-[#02457A] dark:text-sky-300 uppercase bg-blue-100 dark:bg-sky-900/60 px-1.5 py-0.2 rounded border border-transparent dark:border-sky-700/40">
                           Active
                         </span>
                       )}
                     </div>
-                    <div className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
                       {p.desc}
                     </div>
                   </button>
@@ -454,8 +454,8 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
 
       {/* 3. SIMULATION ERROR NOTIFICATION */}
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-900 flex items-start gap-3">
-          <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+        <div className="p-4 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-500/40 rounded-lg text-xs text-rose-900 dark:text-rose-200 flex items-start gap-3">
+          <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
           <div>
             <div className="font-bold">Simulation Computation Error</div>
             <div>{error}</div>
@@ -467,21 +467,21 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
       {simulationResult && (
         <div className="space-y-6">
           {/* Notice Banner */}
-          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-between text-xs text-amber-900 font-mono">
+          <div className="p-3 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-500/40 rounded-lg flex items-center justify-between text-xs text-amber-900 dark:text-amber-200 font-mono">
             <div className="flex items-center gap-2">
-              <Info className="w-4 h-4 text-amber-600 shrink-0" />
+              <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
               <span>
                 <strong>SIMULATION ONLY:</strong> No operational data was changed. No automated purchase orders or status transitions were performed.
               </span>
             </div>
-            <span className="font-bold text-amber-800">EPHEMERAL RUN</span>
+            <span className="font-bold text-amber-800 dark:text-amber-300">EPHEMERAL RUN</span>
           </div>
 
           {/* Prominent Metric Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Metric 1: Readiness Status */}
-            <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
-              <div className="text-[11px] font-mono uppercase text-slate-500 font-bold">
+            <div className="p-4 bg-white dark:bg-[#0D1316] border border-slate-200 dark:border-[#263238] rounded-xl shadow-xs">
+              <div className="text-[11px] font-mono uppercase text-slate-500 dark:text-slate-400 font-bold">
                 Simulated Readiness Status
               </div>
               <div className="mt-2 flex items-center gap-2">
@@ -495,78 +495,78 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                   </Badge>
                 )}
               </div>
-              <div className="text-[11px] text-slate-500 mt-2 font-mono">
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 font-mono">
                 {simulationResult.blockers.length === 0 ? 'Zero scenario blockers' : `${simulationResult.blockers.length} risk blocker(s) identified`}
               </div>
             </div>
 
             {/* Metric 2: Mission Duration */}
-            <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
-              <div className="text-[11px] font-mono uppercase text-slate-500 font-bold">
+            <div className="p-4 bg-white dark:bg-[#0D1316] border border-slate-200 dark:border-[#263238] rounded-xl shadow-xs">
+              <div className="text-[11px] font-mono uppercase text-slate-500 dark:text-slate-400 font-bold">
                 Mission Duration
               </div>
               <div className="mt-1 flex items-baseline gap-2">
-                <span className="text-2xl font-bold font-mono text-slate-900">
+                <span className="text-2xl font-bold font-mono text-slate-900 dark:text-white">
                   {simulationResult.simulated_state.duration_days}
                 </span>
-                <span className="text-xs text-slate-500 font-bold font-mono">days</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-bold font-mono">days</span>
               </div>
-              <div className="text-[11px] text-slate-500 mt-1 font-mono">
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-mono">
                 Database Baseline: {simulationResult.current_state.duration_days} days
               </div>
             </div>
 
             {/* Metric 3: Cargo Capacity & Utilization */}
-            <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
-              <div className="text-[11px] font-mono uppercase text-slate-500 font-bold">
+            <div className="p-4 bg-white dark:bg-[#0D1316] border border-slate-200 dark:border-[#263238] rounded-xl shadow-xs">
+              <div className="text-[11px] font-mono uppercase text-slate-500 dark:text-slate-400 font-bold">
                 Cargo Load &amp; Capacity
               </div>
               <div className="mt-1 flex items-baseline gap-2">
-                <span className="text-2xl font-bold font-mono text-slate-900">
+                <span className="text-2xl font-bold font-mono text-slate-900 dark:text-white">
                   {simulationResult.simulated_state.capacity_utilization_pct}%
                 </span>
-                <span className="text-xs text-slate-500 font-medium">utilization</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">utilization</span>
               </div>
-              <div className="text-[11px] text-slate-500 mt-1 font-mono">
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-mono">
                 {simulationResult.simulated_state.planned_load_kg.toLocaleString()} kg / {simulationResult.simulated_state.cargo_capacity_kg.toLocaleString()} kg limit
               </div>
             </div>
 
             {/* Metric 4: Supply & Delay Risks */}
-            <div className="p-4 bg-white border border-slate-200 rounded-xl shadow-xs">
-              <div className="text-[11px] font-mono uppercase text-slate-500 font-bold">
+            <div className="p-4 bg-white dark:bg-[#0D1316] border border-slate-200 dark:border-[#263238] rounded-xl shadow-xs">
+              <div className="text-[11px] font-mono uppercase text-slate-500 dark:text-slate-400 font-bold">
                 Supply Risks &amp; Delays
               </div>
               <div className="mt-1 flex items-center gap-3">
                 <div>
-                  <span className={`text-2xl font-bold font-mono ${simulationResult.simulated_state.inventory_risk_count > 0 ? 'text-amber-600' : 'text-slate-900'}`}>
+                  <span className={`text-2xl font-bold font-mono ${simulationResult.simulated_state.inventory_risk_count > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-900 dark:text-white'}`}>
                     {simulationResult.simulated_state.inventory_risk_count}
                   </span>
-                  <span className="text-[10px] text-slate-500 block font-mono font-bold">Shortages</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono font-bold">Shortages</span>
                 </div>
-                <div className="border-l border-slate-200 pl-3">
-                  <span className={`text-2xl font-bold font-mono ${simulationResult.simulated_state.delayed_resupply_count > 0 ? 'text-rose-600' : 'text-slate-900'}`}>
+                <div className="border-l border-slate-200 dark:border-slate-800 pl-3">
+                  <span className={`text-2xl font-bold font-mono ${simulationResult.simulated_state.delayed_resupply_count > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'}`}>
                     {simulationResult.simulated_state.delayed_resupply_count}
                   </span>
-                  <span className="text-[10px] text-slate-500 block font-mono font-bold">Delayed</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block font-mono font-bold">Delayed</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Impact Summary Strip */}
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
-            <div className="flex items-center gap-2 mb-2 font-bold text-xs text-slate-900 uppercase tracking-wider font-mono">
-              <Info className="w-4 h-4 text-[#02457A]" />
+          <div className="p-4 bg-slate-50 dark:bg-[#11191D] border border-slate-200 dark:border-[#263238] rounded-xl">
+            <div className="flex items-center gap-2 mb-2 font-bold text-xs text-slate-900 dark:text-slate-100 uppercase tracking-wider font-mono">
+              <Info className="w-4 h-4 text-[#02457A] dark:text-sky-400" />
               Hypothetical Scenario Impact Summary
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
               {simulationResult.impact_summary.map((summary, idx) => (
                 <div
                   key={idx}
-                  className="text-xs bg-white border border-slate-200 rounded-lg p-2.5 text-slate-800 font-mono flex items-center gap-2 shadow-2xs"
+                  className="text-xs bg-white dark:bg-[#0D1316] border border-slate-200 dark:border-[#263238] rounded-lg p-2.5 text-slate-800 dark:text-slate-200 font-mono flex items-center gap-2 shadow-2xs"
                 >
-                  <span className="w-2 h-2 rounded-full bg-[#02457A] shrink-0" />
+                  <span className="w-2 h-2 rounded-full bg-[#02457A] dark:bg-sky-400 shrink-0" />
                   <span>{summary}</span>
                 </div>
               ))}
@@ -575,12 +575,12 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
 
           {/* Simulation Blockers (if any) */}
           {simulationResult.blockers.length > 0 && (
-            <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl space-y-2">
-              <div className="flex items-center gap-2 text-xs font-bold text-rose-900 uppercase font-mono">
-                <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
+            <div className="p-4 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-500/40 rounded-xl space-y-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-rose-900 dark:text-rose-200 uppercase font-mono">
+                <ShieldAlert className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
                 <span>Simulation Blockers Detected ({simulationResult.blockers.length})</span>
               </div>
-              <ul className="space-y-1 pl-6 list-disc text-xs text-rose-800 font-medium">
+              <ul className="space-y-1 pl-6 list-disc text-xs text-rose-800 dark:text-rose-300 font-medium">
                 {simulationResult.blockers.map((b, idx) => (
                   <li key={idx}>{b}</li>
                 ))}
@@ -591,58 +591,58 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
           {/* Side by Side Comparison: Current State vs Simulated Outcome */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card className="border-slate-200 shadow-xs">
-              <CardHeader className="pb-2.5 border-b border-slate-100 bg-slate-50">
+              <CardHeader className="pb-2.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-bold text-slate-800 uppercase font-mono">
+                  <CardTitle className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase font-mono">
                     CURRENT OPERATIONAL STATE
                   </CardTitle>
-                  <span className="text-[10px] font-mono uppercase bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-bold">
+                  <span className="text-[10px] font-mono uppercase bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-2 py-0.5 rounded font-bold border border-transparent dark:border-slate-700">
                     DATABASE BASELINE
                   </span>
                 </div>
               </CardHeader>
               <CardContent className="pt-3 space-y-2.5 text-xs font-mono">
-                <div className="flex justify-between py-1.5 border-b border-slate-100">
-                  <span className="text-slate-500">Mission Window Duration</span>
-                  <span className="font-bold text-slate-800">{simulationResult.current_state.duration_days} days</span>
+                <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
+                  <span className="text-slate-500 dark:text-slate-400">Mission Window Duration</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{simulationResult.current_state.duration_days} days</span>
                 </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-100">
-                  <span className="text-slate-500">Planned Cargo Weight</span>
-                  <span className="font-bold text-slate-800">{simulationResult.current_state.planned_load_kg.toLocaleString()} kg</span>
+                <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
+                  <span className="text-slate-500 dark:text-slate-400">Planned Cargo Weight</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{simulationResult.current_state.planned_load_kg.toLocaleString()} kg</span>
                 </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-100">
-                  <span className="text-slate-500">Max Carrier Capacity</span>
-                  <span className="font-bold text-slate-800">{simulationResult.current_state.cargo_capacity_kg.toLocaleString()} kg</span>
+                <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
+                  <span className="text-slate-500 dark:text-slate-400">Max Carrier Capacity</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{simulationResult.current_state.cargo_capacity_kg.toLocaleString()} kg</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-sky-200 shadow-xs bg-sky-50/10">
-              <CardHeader className="pb-2.5 border-b border-sky-100 bg-sky-50/60">
+            <Card className="border-sky-200 dark:border-sky-800/60 shadow-xs bg-sky-50/10 dark:bg-sky-950/20">
+              <CardHeader className="pb-2.5 border-b border-sky-100 dark:border-sky-800/60 bg-sky-50/60 dark:bg-sky-950/40">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-bold text-[#02457A] uppercase font-mono">
+                  <CardTitle className="text-xs font-bold text-[#02457A] dark:text-sky-300 uppercase font-mono">
                     SIMULATED OUTCOME
                   </CardTitle>
-                  <span className="text-[10px] font-mono uppercase bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-bold border border-sky-200">
+                  <span className="text-[10px] font-mono uppercase bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-300 px-2 py-0.5 rounded font-bold border border-sky-200 dark:border-sky-700/40">
                     EPHEMERAL RESULT
                   </span>
                 </div>
               </CardHeader>
               <CardContent className="pt-3 space-y-2.5 text-xs font-mono">
-                <div className="flex justify-between py-1.5 border-b border-slate-100">
-                  <span className="text-slate-500">Simulated Duration</span>
-                  <span className="font-bold text-slate-900">{simulationResult.simulated_state.duration_days} days</span>
+                <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
+                  <span className="text-slate-500 dark:text-slate-400">Simulated Duration</span>
+                  <span className="font-bold text-slate-900 dark:text-white">{simulationResult.simulated_state.duration_days} days</span>
                 </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-100">
-                  <span className="text-slate-500">Simulated Capacity Limit</span>
-                  <span className="font-bold text-slate-900">{simulationResult.simulated_state.cargo_capacity_kg.toLocaleString()} kg</span>
+                <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
+                  <span className="text-slate-500 dark:text-slate-400">Simulated Capacity Limit</span>
+                  <span className="font-bold text-slate-900 dark:text-white">{simulationResult.simulated_state.cargo_capacity_kg.toLocaleString()} kg</span>
                 </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-100">
-                  <span className="text-slate-500">Remaining Free Payload</span>
-                  <span className="font-bold text-emerald-700">{simulationResult.simulated_state.remaining_capacity_kg.toLocaleString()} kg</span>
+                <div className="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
+                  <span className="text-slate-500 dark:text-slate-400">Remaining Free Payload</span>
+                  <span className="font-bold text-emerald-700 dark:text-emerald-400">{simulationResult.simulated_state.remaining_capacity_kg.toLocaleString()} kg</span>
                 </div>
                 {simulationResult.simulated_state.over_capacity_kg > 0 && (
-                  <div className="flex justify-between py-1.5 border-b border-rose-100 text-rose-700 font-bold bg-rose-50/60 px-2 rounded">
+                  <div className="flex justify-between py-1.5 border-b border-rose-100 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 font-bold bg-rose-50/60 dark:bg-rose-950/40 px-2 rounded">
                     <span>Capacity Overage</span>
                     <span>+{simulationResult.simulated_state.over_capacity_kg.toLocaleString()} kg (OVERLOAD)</span>
                   </div>
@@ -655,20 +655,20 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
           <div className="space-y-4">
             {/* Inventory Simulation Table */}
             <Card className="border-slate-200 shadow-xs">
-              <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between bg-slate-50/60">
+              <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800 flex flex-row items-center justify-between bg-slate-50/60 dark:bg-slate-900/40">
                 <div className="flex items-center gap-2">
-                  <Boxes className="w-4 h-4 text-[#02457A]" />
-                  <CardTitle className="text-xs font-bold text-slate-900 uppercase font-mono">
+                  <Boxes className="w-4 h-4 text-[#02457A] dark:text-sky-400" />
+                  <CardTitle className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase font-mono">
                     Station Inventory Stockpile Simulation ({simulationResult.inventory.length} items evaluated)
                   </CardTitle>
                 </div>
-                <span className="text-[11px] font-mono text-slate-600 font-bold">
+                <span className="text-[11px] font-mono text-slate-600 dark:text-slate-300 font-bold">
                   Stock Reduction Applied: {simulationResult.scenario.initial_stock_reduction_pct <= 0 ? '0% (Nominal)' : `-${formatSafePct(simulationResult.scenario.initial_stock_reduction_pct)}`}
                 </span>
               </CardHeader>
               <CardContent className="pt-0 p-0 overflow-x-auto">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-slate-100 border-b border-slate-200 text-slate-700 font-mono text-[11px] font-bold">
+                  <thead className="bg-slate-100 dark:bg-[#101619] border-b border-slate-200 dark:border-[#263238] text-slate-700 dark:text-slate-200 font-mono text-[11px] font-bold">
                     <tr>
                       <th className="px-4 py-3">Item Name</th>
                       <th className="px-4 py-3">Category</th>
@@ -679,10 +679,10 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                       <th className="px-4 py-3 text-center">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 font-mono">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
                     {simulationResult.inventory.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="px-4 py-6 text-center text-slate-500 font-sans">
+                        <td colSpan={7} className="px-4 py-6 text-center text-slate-500 dark:text-slate-400 font-sans">
                           No station inventory records found.
                         </td>
                       </tr>
@@ -690,31 +690,31 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                       simulationResult.inventory.map((inv) => (
                         <tr
                           key={inv.inventory_id}
-                          className={inv.shortage ? 'bg-rose-50/70 hover:bg-rose-50' : 'hover:bg-slate-50'}
+                          className={inv.shortage ? 'bg-rose-50/70 dark:bg-rose-950/30 hover:bg-rose-50 dark:hover:bg-rose-950/50' : 'hover:bg-slate-50 dark:hover:bg-slate-900/50'}
                         >
-                          <td className="px-4 py-3 font-sans font-bold text-slate-900">
+                          <td className="px-4 py-3 font-sans font-bold text-slate-900 dark:text-white">
                             {inv.item_name}
                           </td>
-                          <td className="px-4 py-3 text-slate-700">{inv.category}</td>
-                          <td className="px-4 py-3 text-slate-600 text-[11px]">{inv.location}</td>
-                          <td className="px-4 py-3 text-right text-slate-800 font-semibold">
+                          <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{inv.category}</td>
+                          <td className="px-4 py-3 text-slate-600 dark:text-slate-400 text-[11px]">{inv.location}</td>
+                          <td className="px-4 py-3 text-right text-slate-800 dark:text-slate-200 font-semibold">
                             {inv.current_stock} {inv.unit}
                           </td>
-                          <td className={`px-4 py-3 text-right font-bold ${inv.shortage ? 'text-rose-700' : 'text-slate-900'}`}>
+                          <td className={`px-4 py-3 text-right font-bold ${inv.shortage ? 'text-rose-700 dark:text-rose-300' : 'text-slate-900 dark:text-white'}`}>
                             {inv.simulated_stock} {inv.unit}
                           </td>
-                          <td className="px-4 py-3 text-right text-slate-600 font-semibold">
+                          <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-400 font-semibold">
                             {inv.minimum_stock} {inv.unit}
                           </td>
                           <td className="px-4 py-3 text-center">
                             {inv.shortage ? (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-rose-100 text-rose-900 border border-rose-200">
-                                <XCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200 border border-rose-200 dark:border-rose-500/40">
+                                <XCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
                                 SHORTAGE RISK
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-500/40">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                                 SAFE
                               </span>
                             )}
@@ -730,17 +730,17 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
             {/* Delayed Resupply Items (if any affected) */}
             {simulationResult.delayed_resupply.length > 0 && (
               <Card className="border-slate-200 shadow-xs">
-                <CardHeader className="pb-3 border-b border-slate-100 flex flex-row items-center justify-between bg-slate-50/60">
+                <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800 flex flex-row items-center justify-between bg-slate-50/60 dark:bg-slate-900/40">
                   <div className="flex items-center gap-2">
-                    <Truck className="w-4 h-4 text-amber-600" />
-                    <CardTitle className="text-xs font-bold text-slate-900 uppercase font-mono">
+                    <Truck className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    <CardTitle className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase font-mono">
                       Hypothetically Delayed Resupply Deliveries (+{simulationResult.scenario.delayed_resupply_days} Days)
                     </CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0 p-0 overflow-x-auto">
                   <table className="w-full text-xs text-left">
-                    <thead className="bg-slate-100 border-b border-slate-200 text-slate-700 font-mono text-[11px] font-bold">
+                    <thead className="bg-slate-100 dark:bg-[#101619] border-b border-slate-200 dark:border-[#263238] text-slate-700 dark:text-slate-200 font-mono text-[11px] font-bold">
                       <tr>
                         <th className="px-4 py-3">Item Name</th>
                         <th className="px-4 py-3">Status</th>
@@ -749,24 +749,24 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                         <th className="px-4 py-3 text-right">Simulated Added Delay</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 font-mono">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
                       {simulationResult.delayed_resupply.map((item) => (
-                        <tr key={item.resupply_item_id} className="hover:bg-slate-50">
-                          <td className="px-4 py-3 font-sans font-bold text-slate-900">
+                        <tr key={item.resupply_item_id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50">
+                          <td className="px-4 py-3 font-sans font-bold text-slate-900 dark:text-white">
                             {item.item_name}
                           </td>
                           <td className="px-4 py-3">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-200">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 dark:bg-sky-950/60 text-blue-900 dark:text-sky-300 border border-blue-200 dark:border-sky-800/40">
                               {item.status}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-right text-slate-900 font-bold">
+                          <td className="px-4 py-3 text-right text-slate-900 dark:text-white font-bold">
                             {item.resupply_quantity}
                           </td>
-                          <td className="px-4 py-3 text-slate-700">
+                          <td className="px-4 py-3 text-slate-700 dark:text-slate-300">
                             {item.original_eta || 'Unscheduled'}
                           </td>
-                          <td className="px-4 py-3 text-right font-bold text-amber-800">
+                          <td className="px-4 py-3 text-right font-bold text-amber-800 dark:text-amber-300">
                             +{item.simulated_delay_days} days
                           </td>
                         </tr>
