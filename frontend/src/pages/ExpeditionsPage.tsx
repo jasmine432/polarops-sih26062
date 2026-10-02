@@ -327,41 +327,41 @@ export const ExpeditionsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* 1. MISSION CONTROL PAGE HEADER */}
-      <div className="bg-[#001B48] border border-[#02457A] rounded-xl p-5 text-white shadow-md">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <div className="p-3 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-400/30 shrink-0">
-              <Compass className="w-7 h-7 text-sky-400 animate-pulse" />
+      <div className="bg-[#001B48] border border-[#02457A] rounded-xl p-3.5 sm:p-5 text-white shadow-md">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 sm:gap-4">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="p-2 sm:p-3 rounded-xl bg-sky-500/20 text-sky-400 border border-sky-400/30 shrink-0">
+              <Compass className="w-5 h-5 sm:w-7 sm:h-7 text-sky-400 animate-pulse" />
             </div>
             <div className="space-y-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-mono text-xs font-bold text-sky-300 tracking-wider uppercase bg-sky-950/70 px-2 py-0.5 rounded border border-sky-800/60">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <span className="font-mono text-[10px] sm:text-xs font-bold text-sky-300 tracking-wider uppercase bg-sky-950/70 px-1.5 sm:px-2 py-0.5 rounded border border-sky-800/60">
                   POLAR OPERATIONS COMMAND
                 </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 uppercase">
+                <span className="px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-bold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 uppercase">
                   NCPOR / MoES Mandate
                 </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30 uppercase">
+                <span className="px-1.5 sm:px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30 uppercase">
                   What-If Simulation Active
                 </span>
               </div>
-              <h1 className="text-xl font-bold text-white tracking-tight">
+              <h1 className="text-base sm:text-lg lg:text-xl font-bold text-white tracking-tight leading-snug font-sans">
                 Expedition Mission Control &amp; Campaign Register
               </h1>
-              <p className="text-xs text-sky-100/80 max-w-3xl leading-relaxed">
+              <p className="text-[11px] sm:text-xs text-sky-100/90 max-w-3xl leading-relaxed font-sans">
                 Centralized operational command for Indian Antarctic &amp; Arctic scientific expeditions. Real-time integration across <strong>7-Pillar Readiness</strong>, <strong>Route &amp; Progress Tracking</strong>, <strong>Cargo Capacity Allocation</strong>, <strong>ML Resupply Demand</strong>, and <strong>What-If Scenario Simulation</strong>.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-2.5 shrink-0 w-full sm:w-auto">
             <Button
               variant="outline"
               size="sm"
               onClick={loadExpeditionsData}
               isLoading={isLoading}
               iconLeft={<RefreshCw className="w-3.5 h-3.5" />}
-              className="bg-slate-900/60 text-sky-200 border-sky-600/50 hover:bg-slate-800 hover:text-white text-xs"
+              className="flex-1 sm:flex-initial justify-center bg-slate-900/60 text-sky-200 border-sky-600/50 hover:bg-slate-800 hover:text-white text-xs py-1.5 min-h-[32px]"
               title="Refresh expeditions and live operational telemetry from database"
             >
               Sync Telemetry
@@ -374,7 +374,7 @@ export const ExpeditionsPage: React.FC = () => {
                 setIsModalOpen(true)
               }}
               iconLeft={<Plus className="w-3.5 h-3.5" />}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs cursor-pointer"
+              className="flex-1 sm:flex-initial justify-center bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs cursor-pointer py-1.5 min-h-[32px]"
             >
               Register Campaign
             </Button>
@@ -382,8 +382,8 @@ export const ExpeditionsPage: React.FC = () => {
         </div>
 
         {/* 11 Integrated Capabilities Badge Bar */}
-        <div className="mt-4 pt-3.5 border-t border-sky-900/60 flex items-center gap-2 overflow-x-auto text-[11px] font-mono text-sky-200/90 scrollbar-none">
-          <span className="font-bold text-white uppercase shrink-0 text-[10px] bg-sky-900/80 px-2 py-0.5 rounded">
+        <div className="mt-3 pt-2.5 sm:mt-4 sm:pt-3.5 border-t border-sky-900/60 flex items-center gap-1.5 sm:gap-2 overflow-x-auto text-[10px] sm:text-[11px] font-mono text-sky-200/90 scrollbar-none">
+          <span className="font-bold text-white uppercase shrink-0 text-[9px] sm:text-[10px] bg-sky-900/80 px-1.5 sm:px-2 py-0.5 rounded">
             Integrated Capabilities:
           </span>
           {[
@@ -401,7 +401,7 @@ export const ExpeditionsPage: React.FC = () => {
           ].map((cap, idx) => (
             <span
               key={idx}
-              className="px-2 py-0.5 rounded bg-sky-950/60 border border-sky-800/40 text-sky-300 font-medium whitespace-nowrap text-[10px]"
+              className="px-1.5 sm:px-2 py-0.5 rounded bg-sky-950/60 border border-sky-800/40 text-sky-300 font-medium whitespace-nowrap text-[9px] sm:text-[10px]"
             >
               ✓ {cap}
             </span>
@@ -412,90 +412,90 @@ export const ExpeditionsPage: React.FC = () => {
       {/* 2. REAL BACKEND DERIVED MISSION METRICS STRIP */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
         {/* Total Expeditions */}
-        <div className="p-3.5 bg-white border border-slate-200 rounded-xl shadow-xs">
-          <div className="flex items-center justify-between text-[11px] font-mono uppercase text-slate-500 font-bold">
+        <div className="p-3.5 bg-white dark:bg-[#11191D] border border-slate-200 dark:border-[#263238] rounded-xl shadow-xs">
+          <div className="flex items-center justify-between text-[11px] font-mono uppercase text-slate-500 dark:text-slate-400 font-bold">
             <span>Total Missions</span>
-            <Compass className="w-3.5 h-3.5 text-[#02457A]" />
+            <Compass className="w-3.5 h-3.5 text-[#02457A] dark:text-[#38BDF8]" />
           </div>
-          <div className="text-2xl font-bold font-mono text-slate-900 mt-1">
+          <div className="text-2xl font-bold font-mono text-slate-900 dark:text-white mt-1">
             {missionMetrics.totalExpeditions}
           </div>
-          <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
             Registered Campaigns
           </div>
         </div>
 
         {/* Active Campaigns */}
-        <div className="p-3.5 bg-white border border-slate-200 rounded-xl shadow-xs">
-          <div className="flex items-center justify-between text-[11px] font-mono uppercase text-slate-500 font-bold">
+        <div className="p-3.5 bg-white dark:bg-[#11191D] border border-slate-200 dark:border-[#263238] rounded-xl shadow-xs">
+          <div className="flex items-center justify-between text-[11px] font-mono uppercase text-slate-500 dark:text-slate-400 font-bold">
             <span>Active Missions</span>
-            <Radio className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
+            <Radio className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 animate-pulse" />
           </div>
-          <div className="text-2xl font-bold font-mono text-emerald-700 mt-1">
+          <div className="text-2xl font-bold font-mono text-emerald-700 dark:text-emerald-400 mt-1">
             {missionMetrics.activeExpeditions}
           </div>
-          <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
             {missionMetrics.planningExpeditions} in Planning
           </div>
         </div>
 
         {/* Deployed Personnel */}
-        <div className="p-3.5 bg-white border border-slate-200 rounded-xl shadow-xs">
-          <div className="flex items-center justify-between text-[11px] font-mono uppercase text-slate-500 font-bold">
+        <div className="p-3.5 bg-white dark:bg-[#11191D] border border-slate-200 dark:border-[#263238] rounded-xl shadow-xs">
+          <div className="flex items-center justify-between text-[11px] font-mono uppercase text-slate-500 dark:text-slate-400 font-bold">
             <span>Personnel</span>
-            <Users className="w-3.5 h-3.5 text-[#02457A]" />
+            <Users className="w-3.5 h-3.5 text-[#02457A] dark:text-[#38BDF8]" />
           </div>
-          <div className="text-2xl font-bold font-mono text-slate-900 mt-1">
+          <div className="text-2xl font-bold font-mono text-slate-900 dark:text-white mt-1">
             {missionMetrics.totalPersonnel}
           </div>
-          <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
             Deployed Members
           </div>
         </div>
 
         {/* 7-Pillar Readiness Status */}
-        <div className="p-3.5 bg-white border border-slate-200 rounded-xl shadow-xs">
-          <div className="flex items-center justify-between text-[11px] font-mono uppercase text-slate-500 font-bold">
+        <div className="p-3.5 bg-white dark:bg-[#11191D] border border-slate-200 dark:border-[#263238] rounded-xl shadow-xs">
+          <div className="flex items-center justify-between text-[11px] font-mono uppercase text-slate-500 dark:text-slate-400 font-bold">
             <span>Readiness Status</span>
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <div className="text-2xl font-bold font-mono text-slate-900 mt-1 flex items-baseline gap-1.5">
-            <span className="text-emerald-700">{missionMetrics.readinessPassed}</span>
+          <div className="text-2xl font-bold font-mono text-slate-900 dark:text-white mt-1 flex items-baseline gap-1.5">
+            <span className="text-emerald-700 dark:text-emerald-400">{missionMetrics.readinessPassed}</span>
             <span className="text-xs text-slate-400">/</span>
-            <span className={missionMetrics.readinessBlocked > 0 ? 'text-rose-600' : 'text-slate-500'}>
+            <span className={missionMetrics.readinessBlocked > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-500 dark:text-slate-400'}>
               {missionMetrics.readinessBlocked} Hold
             </span>
           </div>
-          <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
             7-Pillar Audit Clearance
           </div>
         </div>
 
         {/* Cargo Load Margin */}
-        <div className="p-3.5 bg-white border border-slate-200 rounded-xl shadow-xs">
-          <div className="flex items-center justify-between text-[11px] font-mono uppercase text-slate-500 font-bold">
+        <div className="p-3.5 bg-white dark:bg-[#11191D] border border-slate-200 dark:border-[#263238] rounded-xl shadow-xs">
+          <div className="flex items-center justify-between text-[11px] font-mono uppercase text-slate-500 dark:text-slate-400 font-bold">
             <span>Planned Payload</span>
-            <Scale className="w-3.5 h-3.5 text-[#02457A]" />
+            <Scale className="w-3.5 h-3.5 text-[#02457A] dark:text-[#38BDF8]" />
           </div>
-          <div className="text-2xl font-bold font-mono text-slate-900 mt-1">
+          <div className="text-2xl font-bold font-mono text-slate-900 dark:text-white mt-1">
             {missionMetrics.totalPlannedCargoKg > 0 ? `${(missionMetrics.totalPlannedCargoKg / 1000).toFixed(1)}k` : '0'}
-            <span className="text-xs text-slate-500 font-normal ml-0.5">kg</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-normal ml-0.5">kg</span>
           </div>
-          <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
             {missionMetrics.totalCapacityKg > 0 ? `${(missionMetrics.totalCapacityKg / 1000).toFixed(1)}k kg capacity` : 'Carrier Allocated'}
           </div>
         </div>
 
         {/* Attention Required Count */}
-        <div className="p-3.5 bg-white border border-slate-200 rounded-xl shadow-xs">
-          <div className="flex items-center justify-between text-[11px] font-mono uppercase text-slate-500 font-bold">
+        <div className="p-3.5 bg-white dark:bg-[#11191D] border border-slate-200 dark:border-[#263238] rounded-xl shadow-xs">
+          <div className="flex items-center justify-between text-[11px] font-mono uppercase text-slate-500 dark:text-slate-400 font-bold">
             <span>Attention Required</span>
-            <ShieldAlert className={`w-3.5 h-3.5 ${missionMetrics.missionsRequiringAttention > 0 ? 'text-amber-600 animate-bounce' : 'text-slate-400'}`} />
+            <ShieldAlert className={`w-3.5 h-3.5 ${missionMetrics.missionsRequiringAttention > 0 ? 'text-amber-600 dark:text-amber-400 animate-bounce' : 'text-slate-400'}`} />
           </div>
-          <div className={`text-2xl font-bold font-mono mt-1 ${missionMetrics.missionsRequiringAttention > 0 ? 'text-amber-700' : 'text-slate-900'}`}>
+          <div className={`text-2xl font-bold font-mono mt-1 ${missionMetrics.missionsRequiringAttention > 0 ? 'text-amber-700 dark:text-amber-400' : 'text-slate-900 dark:text-white'}`}>
             {missionMetrics.missionsRequiringAttention}
           </div>
-          <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
             Missions with Alerts/Blockers
           </div>
         </div>
@@ -503,12 +503,12 @@ export const ExpeditionsPage: React.FC = () => {
 
       {/* ERROR BANNER IF DATABASE CONNECTION FAILS */}
       {error && !isLoading && (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-center justify-between text-xs text-rose-950 shadow-xs">
+        <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-xl flex items-center justify-between text-xs text-rose-950 dark:text-rose-200 shadow-xs">
           <div className="flex items-center gap-2.5">
-            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+            <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
             <div>
-              <span className="font-bold text-rose-900">Database Connection Error:</span>{' '}
-              <span className="text-rose-800">{error}</span>
+              <span className="font-bold text-rose-900 dark:text-rose-300">Database Connection Error:</span>{' '}
+              <span className="text-rose-800 dark:text-rose-200">{error}</span>
             </div>
           </div>
           <Button
@@ -523,23 +523,23 @@ export const ExpeditionsPage: React.FC = () => {
       )}
 
       {/* 3. SEARCH, FILTERS & VIEW MODE CONTROLS */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-xs space-y-3">
+      <div className="bg-white dark:bg-[#0D1316] border border-slate-200 dark:border-[#263238] rounded-xl p-4 shadow-xs space-y-3">
         <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
           {/* Search input */}
           <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <input
               type="text"
               placeholder="Search expeditions by ID, name, lead scientist, or station..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-[#018ABE]/30 focus:border-[#02457A] focus:bg-white placeholder:text-slate-400 transition-colors"
+              className="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-[#11191D] border border-slate-300 dark:border-[#263238] rounded-lg text-xs text-slate-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-[#018ABE]/30 focus:border-[#02457A] focus:bg-white dark:focus:bg-[#152026] placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -549,12 +549,12 @@ export const ExpeditionsPage: React.FC = () => {
           {/* Filter Dropdowns & View Toggle */}
           <div className="flex flex-wrap items-center gap-2">
             {/* Status Filter */}
-            <div className="flex items-center gap-1.5 text-xs text-slate-600">
-              <span className="text-[11px] font-bold text-slate-500 font-mono">Status:</span>
+            <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 font-mono">Status:</span>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 font-medium focus:outline-hidden focus:ring-2 focus:ring-[#018ABE]/30 focus:border-[#02457A] cursor-pointer"
+                className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#11191D] border border-slate-300 dark:border-[#263238] rounded-lg text-xs text-slate-800 dark:text-slate-200 font-medium focus:outline-hidden focus:ring-2 focus:ring-[#018ABE]/30 focus:border-[#02457A] cursor-pointer"
               >
                 <option value="All">All Statuses</option>
                 <option value="Active">Active</option>
@@ -565,12 +565,12 @@ export const ExpeditionsPage: React.FC = () => {
             </div>
 
             {/* Station Filter */}
-            <div className="flex items-center gap-1.5 text-xs text-slate-600">
-              <span className="text-[11px] font-bold text-slate-500 font-mono">Station:</span>
+            <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 font-mono">Station:</span>
               <select
                 value={stationFilter}
                 onChange={(e) => setStationFilter(e.target.value)}
-                className="px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 font-medium focus:outline-hidden focus:ring-2 focus:ring-[#018ABE]/30 focus:border-[#02457A] cursor-pointer"
+                className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#11191D] border border-slate-300 dark:border-[#263238] rounded-lg text-xs text-slate-800 dark:text-slate-200 font-medium focus:outline-hidden focus:ring-2 focus:ring-[#018ABE]/30 focus:border-[#02457A] cursor-pointer"
               >
                 <option value="All">All Stations</option>
                 <option value="Maitri">Maitri Base</option>
@@ -582,12 +582,12 @@ export const ExpeditionsPage: React.FC = () => {
             </div>
 
             {/* Date Range Filter */}
-            <div className="flex items-center gap-1.5 text-xs text-slate-600">
-              <span className="text-[11px] font-bold text-slate-500 font-mono">Season:</span>
+            <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 font-mono">Season:</span>
               <select
                 value={dateRangeFilter}
                 onChange={(e) => setDateRangeFilter(e.target.value)}
-                className="px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 font-medium focus:outline-hidden focus:ring-2 focus:ring-[#018ABE]/30 focus:border-[#02457A] cursor-pointer"
+                className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#11191D] border border-slate-300 dark:border-[#263238] rounded-lg text-xs text-slate-800 dark:text-slate-200 font-medium focus:outline-hidden focus:ring-2 focus:ring-[#018ABE]/30 focus:border-[#02457A] cursor-pointer"
               >
                 <option value="All">All Seasons</option>
                 <option value="2026-2027">2026-2027 Campaigns</option>
@@ -602,16 +602,15 @@ export const ExpeditionsPage: React.FC = () => {
             )}
 
             {/* View Mode Toggle Buttons */}
-            <div className="flex items-center border border-slate-200 rounded-lg p-0.5 bg-slate-100 ml-1">
-              <button
+            <div className="flex items-center border border-slate-200 dark:border-[#263238] rounded-lg p-0.5 bg-slate-100 dark:bg-[#152026] ml-1">              <button
                 type="button"
                 onClick={() => setViewMode('grid')}
                 className={`p-1.5 rounded-md text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
                   viewMode === 'grid'
-                    ? 'bg-white text-[#02457A] shadow-xs'
-                    : 'text-slate-500 hover:text-slate-800'
+                    ? 'bg-white text-[#02457A] dark:bg-[#11191D] dark:text-[#FFD21C] shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100'
                 }`}
-                title="Mission Control Cards View"
+                title="Mission Control Card View"
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Cards</span>
@@ -621,8 +620,8 @@ export const ExpeditionsPage: React.FC = () => {
                 onClick={() => setViewMode('table')}
                 className={`p-1.5 rounded-md text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
                   viewMode === 'table'
-                    ? 'bg-white text-[#02457A] shadow-xs'
-                    : 'text-slate-500 hover:text-slate-800'
+                    ? 'bg-white text-[#02457A] dark:bg-[#11191D] dark:text-[#FFD21C] shadow-xs'
+                    : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100'
                 }`}
                 title="Tabular Register View"
               >
@@ -636,23 +635,23 @@ export const ExpeditionsPage: React.FC = () => {
 
       {/* 4. EXPEDITIONS DISPLAY (MISSION CONTROL CARDS vs TABLE) */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between text-xs text-slate-500 px-1">
-          <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px] font-mono flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-[#02457A]" />
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 px-1">
+          <span className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wider text-[11px] font-mono flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-[#02457A] dark:text-[#FFD21C]" />
             Active Expedition Dossiers
           </span>
-          <span className="font-mono">
+          <span className="font-mono text-slate-500 dark:text-slate-400">
             {isLoading ? 'Querying PostgreSQL database...' : `Showing ${filteredExpeditions.length} of ${expeditions.length} Campaigns`}
           </span>
         </div>
 
         {isLoading ? (
           <div className="bg-white border border-slate-200 rounded-xl p-12 text-center space-y-3 shadow-xs">
-            <Loader2 className="w-8 h-8 text-[#02457A] animate-spin mx-auto" />
-            <div className="text-xs font-bold text-slate-800 font-mono uppercase">
+            <Loader2 className="w-8 h-8 text-[#02457A] dark:text-sky-400 animate-spin mx-auto" />
+            <div className="text-xs font-bold text-slate-800 dark:text-slate-100 font-mono uppercase">
               Connecting to PostgreSQL Operational Database...
             </div>
-            <p className="text-[11px] text-slate-500 font-sans">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-sans">
               Fetching expedition dossiers, readiness audits, route tracking fixes, and carrier payload summaries.
             </p>
           </div>
@@ -703,13 +702,13 @@ export const ExpeditionsPage: React.FC = () => {
               return (
                 <Card
                   key={exp.id}
-                  className="border-slate-200 shadow-sm hover:border-[#02457A]/50 transition-all overflow-hidden rounded-xl"
+                  className="border-slate-200 shadow-sm hover:border-[#02457A]/50 dark:hover:border-sky-500/50 transition-all overflow-hidden rounded-xl"
                 >
                   {/* Card Header Strip */}
-                  <div className="bg-slate-900 border-b border-slate-800 p-4.5 text-white">
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
+                  <div className="bg-slate-900 border-b border-slate-800 p-3.5 sm:p-4.5 text-white">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-3.5">
                       <div className="space-y-1.5">
-                        <div className="flex items-center gap-2.5 flex-wrap">
+                        <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
                           <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 tracking-wider">
                             {exp.id}
                           </span>
@@ -720,7 +719,7 @@ export const ExpeditionsPage: React.FC = () => {
                             Mandate: <strong className="text-white font-semibold">{exp.mandate}</strong>
                           </span>
                         </div>
-                        <h2 className="text-base font-bold text-white tracking-tight">
+                        <h2 className="text-sm sm:text-base font-bold text-white tracking-tight">
                           {exp.name}
                         </h2>
                         <p className="text-xs text-slate-300 font-sans">
@@ -728,9 +727,9 @@ export const ExpeditionsPage: React.FC = () => {
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-3 shrink-0">
-                        <div className="bg-slate-800/95 border border-slate-700 rounded-lg px-3.5 py-2 text-right font-mono">
-                          <div className="text-xs uppercase font-bold text-slate-300 font-mono">Campaign Window</div>
+                      <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 sm:gap-3 shrink-0">
+                        <div className="bg-slate-800/95 border border-slate-700 rounded-lg px-3 py-1.5 sm:px-3.5 sm:py-2 text-left sm:text-right font-mono flex-1 sm:flex-initial">
+                          <div className="text-[10px] sm:text-xs uppercase font-bold text-slate-300 font-mono">Campaign Window</div>
                           <div className="text-xs font-bold font-mono text-sky-300 mt-0.5">
                             {exp.startDate} → {exp.endDate}
                           </div>
@@ -748,84 +747,84 @@ export const ExpeditionsPage: React.FC = () => {
                     </div>
 
                     {/* Officer & Logistics Strip */}
-                    <div className="mt-4 pt-3.5 border-t border-slate-800/90 grid grid-cols-2 sm:grid-cols-4 gap-3.5 text-xs font-sans">
+                    <div className="mt-3.5 pt-3 sm:mt-4 sm:pt-3.5 border-t border-slate-800/90 grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5 text-xs font-sans">
                       <div>
-                        <span className="text-xs text-slate-300 block font-mono uppercase font-semibold mb-0.5">Expedition Lead</span>
-                        <span className="font-bold text-white text-xs">{exp.lead}</span>
+                        <span className="text-[11px] sm:text-xs text-slate-300 block font-mono uppercase font-semibold mb-0.5">Expedition Lead</span>
+                        <span className="font-bold text-white text-xs truncate block">{exp.lead}</span>
                       </div>
                       <div>
-                        <span className="text-xs text-slate-300 block font-mono uppercase font-semibold mb-0.5">Assigned Stations</span>
-                        <span className="font-bold text-white text-xs">{exp.station}</span>
+                        <span className="text-[11px] sm:text-xs text-slate-300 block font-mono uppercase font-semibold mb-0.5">Assigned Stations</span>
+                        <span className="font-bold text-white text-xs truncate block">{exp.station}</span>
                       </div>
                       <div>
-                        <span className="text-xs text-slate-300 block font-mono uppercase font-semibold mb-0.5">Personnel Roster</span>
+                        <span className="text-[11px] sm:text-xs text-slate-300 block font-mono uppercase font-semibold mb-0.5">Personnel Roster</span>
                         <span className="font-mono font-bold text-sky-300 text-xs">
                           {summary?.personnelCount !== undefined ? `${summary.personnelCount} Members` : 'Querying roster...'}
                         </span>
                       </div>
                       <div>
-                        <span className="text-xs text-slate-300 block font-mono uppercase font-semibold mb-0.5">Vessel Support</span>
+                        <span className="text-[11px] sm:text-xs text-slate-300 block font-mono uppercase font-semibold mb-0.5">Vessel Support</span>
                         <span className="font-bold text-white text-xs truncate block">{exp.primaryVessel}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Operational Capabilities Overview (4 High-Visibility Modules) */}
-                  <CardContent className="p-4.5 bg-white space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                  <CardContent className="p-3.5 sm:p-4.5 bg-white dark:bg-[#0D1316] space-y-3 sm:space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
                       {/* Module 1: 7-Pillar Readiness Audit */}
-                      <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
+                      <div className="p-3 sm:p-3.5 bg-slate-50 dark:bg-[#11191D] border border-slate-200 dark:border-[#263238] rounded-lg space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-mono font-bold uppercase text-slate-700 flex items-center gap-1">
-                            <ShieldCheck className="w-3.5 h-3.5 text-[#02457A]" />
+                          <span className="text-xs font-mono font-bold uppercase text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                            <ShieldCheck className="w-3.5 h-3.5 text-[#02457A] dark:text-sky-400" />
                             Readiness Audit
                           </span>
-                          <span className="text-[10px] font-mono bg-blue-100 text-blue-900 px-2 py-0.5 rounded font-bold">
+                          <span className="text-[10px] font-mono bg-blue-100 dark:bg-sky-950/60 text-blue-900 dark:text-sky-300 px-2 py-0.5 rounded font-bold border border-transparent dark:border-sky-800/40">
                             7-Pillar
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 pt-0.5">
                           {readiness ? (
                             readiness.overallStatus === 'READY' ? (
-                              <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                              <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/40">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                                 READY (CLEARED)
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 text-xs font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded">
-                                <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                              <span className="inline-flex items-center gap-1 text-xs font-bold text-rose-800 dark:text-rose-300 bg-rose-100 dark:bg-rose-950/60 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-800/40">
+                                <AlertTriangle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
                                 NOT READY ({readiness.failedChecks} BLOCKERS)
                               </span>
                             )
                           ) : (
-                            <span className="text-xs font-mono text-slate-500">Loading audit...</span>
+                            <span className="text-xs font-mono text-slate-500 dark:text-slate-400">Loading audit...</span>
                           )}
                         </div>
-                        <p className="text-xs text-slate-600 font-mono">
+                        <p className="text-xs text-slate-700 dark:text-slate-300 font-mono">
                           {readiness ? `${readiness.passedChecks}/7 checks verified` : 'Executing 7 pillars'}
                         </p>
                       </div>
 
                       {/* Module 2: Route & Progress Tracking */}
-                      <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
+                      <div className="p-3 sm:p-3.5 bg-slate-50 dark:bg-[#11191D] border border-slate-200 dark:border-[#263238] rounded-lg space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-mono font-bold uppercase text-slate-700 flex items-center gap-1">
-                            <Navigation className="w-3.5 h-3.5 text-[#02457A]" />
+                          <span className="text-xs font-mono font-bold uppercase text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                            <Navigation className="w-3.5 h-3.5 text-[#02457A] dark:text-sky-400" />
                             Progress &amp; Route
                           </span>
-                          <span className="text-[10px] font-mono bg-slate-200 text-slate-800 px-2 py-0.5 rounded font-bold">
+                          <span className="text-[10px] font-mono bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded font-bold border border-transparent dark:border-slate-700">
                             Haversine
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 pt-0.5">
-                          <span className="text-xs font-bold font-mono text-slate-900 bg-slate-200/80 px-2 py-0.5 rounded">
+                          <span className="text-xs font-bold font-mono text-slate-900 dark:text-white bg-slate-200/80 dark:bg-slate-800 px-2 py-0.5 rounded">
                             {progress ? progress.currentPhase : 'IN_TRANSIT'}
                           </span>
-                          <span className="text-xs font-mono font-bold text-[#02457A]">
+                          <span className="text-xs font-mono font-bold text-[#02457A] dark:text-sky-400">
                             {progress ? `${progress.progressPercent}%` : '0%'}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-600 font-mono truncate">
+                        <p className="text-xs text-slate-700 dark:text-slate-300 font-mono truncate">
                           {progress
                             ? progress.totalDistanceKm > 0
                               ? `${progress.distanceTraveledKm.toLocaleString()} / ${progress.totalDistanceKm.toLocaleString()} km`
@@ -835,42 +834,42 @@ export const ExpeditionsPage: React.FC = () => {
                       </div>
 
                       {/* Module 3: Packing & Cargo Capacity */}
-                      <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5">
+                      <div className="p-3 sm:p-3.5 bg-slate-50 dark:bg-[#11191D] border border-slate-200 dark:border-[#263238] rounded-lg space-y-1.5">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-mono font-bold uppercase text-slate-700 flex items-center gap-1">
-                            <Scale className="w-3.5 h-3.5 text-[#02457A]" />
+                          <span className="text-xs font-mono font-bold uppercase text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                            <Scale className="w-3.5 h-3.5 text-[#02457A] dark:text-sky-400" />
                             Packing &amp; Capacity
                           </span>
-                          <span className="text-[10px] font-mono bg-blue-100 text-blue-900 px-2 py-0.5 rounded font-bold">
+                          <span className="text-[10px] font-mono bg-blue-100 dark:bg-sky-950/60 text-blue-900 dark:text-sky-300 px-2 py-0.5 rounded font-bold border border-transparent dark:border-sky-800/40">
                             Payload
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 pt-0.5">
-                          <span className="text-xs font-bold font-mono text-slate-900">
+                          <span className="text-xs font-bold font-mono text-slate-900 dark:text-white">
                             {capacity ? `${capacity.total_planned_weight_kg.toFixed(1)} / ${capacity.maximum_capacity_kg.toFixed(0)} kg` : '0 / 2500 kg'}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-600 font-mono">
+                        <p className="text-xs text-slate-700 dark:text-slate-300 font-mono">
                           {capacity ? `${capacity.capacity_utilization_pct}% carrier utilization` : 'Loading load manifest...'}
                         </p>
                       </div>
 
                       {/* Module 4: What-If Simulation */}
-                      <div className="p-3.5 bg-sky-50/80 border border-sky-200 rounded-lg space-y-1.5">
+                      <div className="p-3 sm:p-3.5 bg-sky-50/90 dark:bg-[#0B253D] border border-sky-300/80 dark:border-sky-500/40 rounded-lg space-y-1.5 shadow-2xs">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-mono font-bold uppercase text-[#02457A] flex items-center gap-1">
-                            <Cpu className="w-3.5 h-3.5 text-[#02457A]" />
+                          <span className="text-xs font-mono font-bold uppercase text-[#001B48] dark:text-sky-200 flex items-center gap-1">
+                            <Cpu className="w-3.5 h-3.5 text-[#02457A] dark:text-sky-400" />
                             What-If Simulator
                           </span>
-                          <span className="text-[10px] font-mono bg-sky-200 text-sky-950 px-2 py-0.5 rounded font-bold">
+                          <span className="text-[10px] font-mono bg-sky-200/90 dark:bg-sky-900/80 text-[#001B48] dark:text-sky-200 px-2 py-0.5 rounded font-bold border border-sky-300/50 dark:border-sky-700/50">
                             Decision Support
                           </span>
                         </div>
-                        <div className="text-xs font-bold text-[#02457A] pt-0.5 flex items-center gap-1">
-                          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                        <div className="text-xs font-bold text-[#02457A] dark:text-sky-300 pt-0.5 flex items-center gap-1">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                           <span>Scenario Evaluator</span>
                         </div>
-                        <p className="text-xs text-slate-700 font-mono">
+                        <p className="text-xs text-slate-900 dark:text-slate-100 font-sans font-medium">
                           Simulate duration, payload &amp; stock
                         </p>
                       </div>
@@ -878,12 +877,12 @@ export const ExpeditionsPage: React.FC = () => {
 
                     {/* Attention Warning Strip (if any issues exist) */}
                     {attentionReasons.length > 0 && (
-                      <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-lg space-y-1.5 text-xs text-amber-950 shadow-2xs">
-                        <div className="flex items-center gap-1.5 font-bold text-xs font-mono text-amber-950">
-                          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <div className="p-3 sm:p-3.5 bg-amber-50/90 dark:bg-[#2D2006] border border-amber-300/90 dark:border-amber-500/50 rounded-lg space-y-1.5 text-xs shadow-2xs">
+                        <div className="flex items-center gap-1.5 font-bold text-xs font-mono text-[#451A03] dark:text-[#FCD34D]">
+                          <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
                           <span>ATTENTION REQUIRED ({attentionReasons.length} Active Operational Issues):</span>
                         </div>
-                        <ul className="list-disc list-inside space-y-1 text-xs text-amber-900 font-medium leading-relaxed pl-1">
+                        <ul className="list-disc list-inside space-y-1 text-xs text-[#78350F] dark:text-[#FEF08A] font-semibold leading-relaxed pl-1">
                           {attentionReasons.map((reason, idx) => (
                             <li key={idx}>{reason}</li>
                           ))}
@@ -892,8 +891,8 @@ export const ExpeditionsPage: React.FC = () => {
                     )}
 
                     {/* Direct Capability Quick-Action Buttons */}
-                    <div className="pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-                      <div className="text-xs font-mono font-bold text-slate-600 uppercase">
+                    <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                      <div className="text-xs font-mono font-bold text-slate-600 dark:text-slate-400 uppercase">
                         Direct Capabilities:
                       </div>
 
@@ -902,10 +901,10 @@ export const ExpeditionsPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => navigate(`/expeditions/${exp.id}?tab=progress`)}
-                          className="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors flex items-center gap-1 cursor-pointer"
+                          className="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors flex items-center gap-1 cursor-pointer border border-transparent dark:border-slate-700"
                           title="Open Route Tracking & Telemetry"
                         >
-                          <Navigation className="w-3 h-3 text-[#02457A]" />
+                          <Navigation className="w-3 h-3 text-[#02457A] dark:text-sky-400" />
                           Progress &amp; Route
                         </button>
 
@@ -913,10 +912,10 @@ export const ExpeditionsPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => navigate(`/expeditions/${exp.id}?tab=readiness`)}
-                          className="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors flex items-center gap-1 cursor-pointer"
+                          className="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors flex items-center gap-1 cursor-pointer border border-transparent dark:border-slate-700"
                           title="Open 7-Pillar Readiness Audit"
                         >
-                          <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                          <ShieldCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                           Readiness Audit
                         </button>
 
@@ -924,10 +923,10 @@ export const ExpeditionsPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => navigate(`/expeditions/${exp.id}?tab=simulation`)}
-                          className="px-3 py-1 rounded-md text-xs font-bold bg-sky-100 hover:bg-sky-200 text-[#02457A] border border-sky-300 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                          className="px-3 py-1 rounded-md text-xs font-bold bg-sky-100 hover:bg-sky-200 dark:bg-sky-900/50 dark:hover:bg-sky-900/80 text-[#02457A] dark:text-sky-300 border border-sky-300 dark:border-sky-600/50 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
                           title="Open What-If Mission Scenario Evaluator"
                         >
-                          <Cpu className="w-3.5 h-3.5 text-[#02457A]" />
+                          <Cpu className="w-3.5 h-3.5 text-[#02457A] dark:text-sky-400" />
                           What-If Simulator
                         </button>
 
@@ -935,10 +934,10 @@ export const ExpeditionsPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => navigate(`/expeditions/${exp.id}?tab=packing`)}
-                          className="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors flex items-center gap-1 cursor-pointer"
+                          className="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors flex items-center gap-1 cursor-pointer border border-transparent dark:border-slate-700"
                           title="Open Individual Packing & Cargo Load Planner"
                         >
-                          <Scale className="w-3 h-3 text-slate-600" />
+                          <Scale className="w-3 h-3 text-slate-600 dark:text-slate-400" />
                           Packing &amp; Load
                         </button>
 
@@ -946,10 +945,10 @@ export const ExpeditionsPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => navigate(`/expeditions/${exp.id}?tab=personnel`)}
-                          className="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors flex items-center gap-1 cursor-pointer"
+                          className="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors flex items-center gap-1 cursor-pointer border border-transparent dark:border-slate-700"
                           title="Open Expedition Personnel Roster"
                         >
-                          <Users className="w-3 h-3 text-slate-600" />
+                          <Users className="w-3 h-3 text-slate-600 dark:text-slate-400" />
                           Personnel ({summary?.personnelCount !== undefined ? summary.personnelCount : '—'})
                         </button>
 
@@ -957,10 +956,10 @@ export const ExpeditionsPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => navigate(`/expeditions/${exp.id}?tab=cargo`)}
-                          className="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors flex items-center gap-1 cursor-pointer"
+                          className="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors flex items-center gap-1 cursor-pointer border border-transparent dark:border-slate-700"
                           title="Open Cargo Items Manifest"
                         >
-                          <Package className="w-3 h-3 text-slate-600" />
+                          <Package className="w-3 h-3 text-slate-600 dark:text-slate-400" />
                           Cargo ({summary?.cargoCount !== undefined ? summary.cargoCount : '—'})
                         </button>
 
@@ -968,10 +967,10 @@ export const ExpeditionsPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => navigate(`/expeditions/${exp.id}?tab=inventory`)}
-                          className="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors flex items-center gap-1 cursor-pointer"
+                          className="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition-colors flex items-center gap-1 cursor-pointer border border-transparent dark:border-slate-700"
                           title="Open Station Inventory Requirements"
                         >
-                          <Boxes className="w-3 h-3 text-slate-600" />
+                          <Boxes className="w-3 h-3 text-slate-600 dark:text-slate-400" />
                           Inventory ({summary?.resupplyItems ? summary.resupplyItems.length : 0})
                         </button>
 
@@ -979,7 +978,7 @@ export const ExpeditionsPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => navigate(`/expeditions/${exp.id}?tab=overview`)}
-                          className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#02457A] text-white hover:bg-sky-800 transition-colors flex items-center gap-1 cursor-pointer ml-1"
+                          className="px-2.5 py-1 rounded-md text-xs font-bold bg-[#02457A] dark:bg-[#169FE5] text-white dark:text-[#050708] hover:bg-sky-800 dark:hover:bg-sky-400 transition-colors flex items-center gap-1 cursor-pointer ml-1 shadow-xs"
                           title="Open Complete Expedition Dossier"
                         >
                           <Eye className="w-3 h-3" />
@@ -1018,22 +1017,22 @@ export const ExpeditionsPage: React.FC = () => {
                   <TableRow
                     key={exp.id}
                     onClick={() => navigate(`/expeditions/${exp.id}`)}
-                    className="cursor-pointer hover:bg-slate-50/80 transition-colors"
+                    className="cursor-pointer hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors"
                   >
-                    <TableCell mono className="font-bold text-slate-900">
+                    <TableCell mono className="font-bold text-slate-900 dark:text-white">
                       {exp.id}
                     </TableCell>
-                    <TableCell className="font-medium text-slate-900">
-                      <div className="font-bold text-slate-900">{exp.name}</div>
-                      <div className="text-[10px] text-slate-500 font-normal mt-0.5">
-                        Lead: <span className="text-slate-700 font-medium">{exp.lead}</span>
+                    <TableCell className="font-medium text-slate-900 dark:text-white">
+                      <div className="font-bold text-slate-900 dark:text-white">{exp.name}</div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 font-normal mt-0.5">
+                        Lead: <span className="text-slate-700 dark:text-slate-300 font-medium">{exp.lead}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-slate-800 font-semibold text-xs">{exp.station}</TableCell>
-                    <TableCell mono className="text-slate-700 text-xs whitespace-nowrap">
+                    <TableCell className="text-slate-800 dark:text-slate-200 font-semibold text-xs">{exp.station}</TableCell>
+                    <TableCell mono className="text-slate-700 dark:text-slate-300 text-xs whitespace-nowrap">
                       {exp.startDate} → {exp.endDate}
                     </TableCell>
-                    <TableCell mono className="text-slate-900 font-bold">
+                    <TableCell mono className="text-slate-900 dark:text-white font-bold">
                       {summary?.personnelCount !== undefined ? `${summary.personnelCount} staff` : '—'}
                     </TableCell>
                     <TableCell>
@@ -1042,7 +1041,7 @@ export const ExpeditionsPage: React.FC = () => {
                           {summary.readiness.overallStatus}
                         </Badge>
                       ) : (
-                        <span className="text-[10px] font-mono text-slate-400">Evaluating...</span>
+                        <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">Evaluating...</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -1068,7 +1067,7 @@ export const ExpeditionsPage: React.FC = () => {
                           variant="ghost"
                           size="xs"
                           onClick={() => navigate(`/expeditions/${exp.id}?tab=simulation`)}
-                          className="text-[#02457A] hover:bg-sky-50 font-bold"
+                          className="text-[#02457A] dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950/50 font-bold"
                           title="What-If Simulator"
                         >
                           <Cpu className="w-3.5 h-3.5" />
@@ -1077,7 +1076,7 @@ export const ExpeditionsPage: React.FC = () => {
                           variant="ghost"
                           size="xs"
                           onClick={() => navigate(`/expeditions/${exp.id}?tab=readiness`)}
-                          className="text-emerald-700 hover:bg-emerald-50 font-bold"
+                          className="text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 font-bold"
                           title="Readiness Audit"
                         >
                           <ShieldCheck className="w-3.5 h-3.5" />
@@ -1086,7 +1085,7 @@ export const ExpeditionsPage: React.FC = () => {
                           variant="ghost"
                           size="xs"
                           onClick={() => navigate(`/expeditions/${exp.id}?tab=overview`)}
-                          className="text-slate-700 hover:bg-slate-100"
+                          className="text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                         >
                           <Eye className="w-3.5 h-3.5" />
                         </Button>
